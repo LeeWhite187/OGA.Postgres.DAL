@@ -105,7 +105,9 @@ namespace OGA.Postgres.DAL
             cd.IsPk = false;
             cd.Collate = "";
             cd.CanBeNull = canbenull;
-            cd.ColType = "timestamp without time zone";
+            // In PostgreSQL, "timestamp with time zone" is used to represent a UTC datetime.
+            // See this: https://oga.atlassian.net/wiki/spaces/~311198967/pages/edit-v2/207388673?draftShareId=65eb5bab-6dc3-414c-85b7-a35d88265cc4&inEditorTemplatesPanel=auto_closed
+            cd.ColType = "timestamp with time zone";
 
             this.columnlist.Add(cd);
 
