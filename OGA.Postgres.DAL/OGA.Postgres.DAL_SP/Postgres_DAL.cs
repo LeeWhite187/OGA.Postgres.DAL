@@ -695,6 +695,90 @@ namespace OGA.Postgres
         }
 
         /// <summary>
+        /// Provides a means to perform a PostgreSQL COPY IN (using BeginBinaryImporter).
+        /// Set the copyargs string to your preamble: COPY tablename (field1, field2, field3) FROM STDIN (FORMAT BINARY)
+        /// Populate rows with the writer in the callback.
+        /// </summary>
+        /// <param name="copyargs"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public int PerformBulkBinaryImport(string copyargs, Action<NpgsqlBinaryImporter> callback)
+        {
+            NpgsqlBinaryImporter? writer = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:-:{nameof(PerformBulkBinaryImport)} - " +
+                    "Already disposed.");
+
+                return -1;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
+                    $"{_classname}:-:{nameof(PerformBulkBinaryImport)} - " +
+                    "Attempting to perform PostGreSQL Copy Import.");
+
+                // We need a database connection for this query.
+                // See if we have an existing one...
+                var resconn = this.Connect(false);
+                if(resconn != 1)
+                {
+                    // Failed to open database connection.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(PerformBulkBinaryImport)} - " +
+                        "Already disposed.");
+
+                    return -1;
+                }
+                // If here, we have a connection we can use.
+
+                try
+                {
+                    // Call the caller's lambda...
+
+                    // Create the copy writer...
+                    writer = this._dbConnection.BeginBinaryImport(copyargs);
+
+                    // Fill in the caller's table data...
+                    callback(writer);
+
+                    // Call complete, to send it to the database...
+                    writer.Complete();
+
+                    // Return success to the caller.
+                    return 1;
+                }
+                catch (Exception e)
+                {
+                    // Something went wrong while attempting to execute the stored procedure.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                        $"{_classname}:-:{nameof(PerformBulkBinaryImport)} - " +
+                        "An exception was caught while executing copy import");
+
+                    return -4;
+                }
+            }
+            finally
+            {
+                try
+                {
+                    writer?.Dispose();
+                }
+                catch(Exception) { }
+
+                if(!this._explicit_ConnectionOpen_Called)
+                    this.Disconnect();
+            }
+        }
+
+        /// <summary>
         /// Call to perform a sql query that returns a table.
         /// Returns 1 for success. Negatives for error.
         /// </summary>
