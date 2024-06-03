@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <!-- NoWarn below suppresses NETSDK1138 project-wide -->
+    <!-- This suppresses the IDE warning that NET5.0 is out of support. -->
+    <NoWarn>$(NoWarn);NETSDK1138</NoWarn>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.1</AssemblyVersion>
+    <FileVersion>1.0.1.1</FileVersion>
+    <PackageId>OGA.Postgres.DAL</PackageId>
+    <Product>OGA Postgres SQL Data Access Library</Product>
+    <Description>Data Access Library (DAL) for PostGreSQL.</Description>
+    <Company>OGA</Company>
+    <Authors>Lee White</Authors>
+    <AssemblyName>OGA.Postgres.DAL</AssemblyName>
+    <RootNamespace>OGA.Postgres.DAL</RootNamespace>
+    <Configurations>DebugWin;ReleaseWin;DebugLinux;ReleaseLinux</Configurations>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.EndsWith('Win'))">
+    <DefineConstants>$(DefineConstants);Windows;NET5</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.EndsWith('Linux'))">
+    <DefineConstants>$(DefineConstants);Linux;NET5</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.EndsWith('OSX'))">
+    <DefineConstants>$(DefineConstants);OSX;NET5</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="..\OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="OGA.Common.Lib.NetCore" Version="3.5.0" />
+    <PackageReference Include="OGA.SharedKernel" Version="3.5.4" />
+  </ItemGroup>
+
+</Project>

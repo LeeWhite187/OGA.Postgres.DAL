@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c921bbd2-a699-443a-a0bd-68c6644423f8</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>OGA.Postgres.DAL_SP</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Enumerations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\DBRole_Assignments.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\TableColumnDef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Postgres_DAL.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Postgres_Tools.cs" />
+    <Compile Include="..\OGA.Postgres.DAL_SP\Model\TableDefinition.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)postgresql-backup.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)postgresql-restore.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

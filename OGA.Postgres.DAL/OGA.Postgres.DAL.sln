@@ -1,0 +1,135 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OGA.Postgres.DAL_SP", "OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.shproj", "{C921BBD2-A699-443A-A0BD-68C6644423F8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET5", "OGA.Postgres.DAL_NET5\OGA.Postgres.DAL_NET5.csproj", "{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET6", "OGA.Postgres.DAL_NET6\OGA.Postgres.DAL_NET6.csproj", "{9F0BC747-2AC2-467A-B739-A9E938FA1701}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET5_Tests", "OGA.Postgres.DAL_NET5_Tests\OGA.Postgres.DAL_NET5_Tests.csproj", "{5ABB964D-9C9C-42ED-AB6B-9F098328F050}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET6_Tests", "OGA.Postgres.DAL_NET6_Tests\OGA.Postgres.DAL_NET6_Tests.csproj", "{728645D5-BAAF-48F9-80AC-1D371358B62C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET7", "OGA.Postgres.DAL_NET7\OGA.Postgres.DAL_NET7.csproj", "{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OGA.Postgres.DAL_NET7_Tests", "OGA.Postgres.DAL_NET7_Tests\OGA.Postgres.DAL_NET7_Tests.csproj", "{81648408-DAF9-4CB9-B527-34504A79596F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "library", "library", "{02F6334E-BF81-4828-9C53-002505C1296F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0DE943A6-A525-458D-BA4A-2A8943FCFDCF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OGA.Postgres.DAL_SP_Tests", "OGA.Postgres.DAL_SP_Tests\OGA.Postgres.DAL_SP_Tests.shproj", "{C7ADB7B5-C950-49EE-975B-5985AF86ACFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugLinux|Any CPU = DebugLinux|Any CPU
+		DebugWin|Any CPU = DebugWin|Any CPU
+		Release|Any CPU = Release|Any CPU
+		ReleaseLinux|Any CPU = ReleaseLinux|Any CPU
+		ReleaseWin|Any CPU = ReleaseWin|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.Debug|Any CPU.ActiveCfg = DebugLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.Debug|Any CPU.Build.0 = DebugLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.DebugLinux|Any CPU.ActiveCfg = DebugLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.DebugLinux|Any CPU.Build.0 = DebugLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.DebugWin|Any CPU.ActiveCfg = DebugWin|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.DebugWin|Any CPU.Build.0 = DebugWin|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.ReleaseWin|Any CPU.ActiveCfg = ReleaseWin|Any CPU
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3}.ReleaseWin|Any CPU.Build.0 = ReleaseWin|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.Debug|Any CPU.ActiveCfg = DebugLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.Debug|Any CPU.Build.0 = DebugLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.DebugLinux|Any CPU.ActiveCfg = DebugLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.DebugLinux|Any CPU.Build.0 = DebugLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.DebugWin|Any CPU.ActiveCfg = DebugWin|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.DebugWin|Any CPU.Build.0 = DebugWin|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.ReleaseWin|Any CPU.ActiveCfg = ReleaseWin|Any CPU
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701}.ReleaseWin|Any CPU.Build.0 = ReleaseWin|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.DebugLinux|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.DebugLinux|Any CPU.Build.0 = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.DebugWin|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.DebugWin|Any CPU.Build.0 = Debug|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.ReleaseWin|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050}.ReleaseWin|Any CPU.Build.0 = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.DebugLinux|Any CPU.ActiveCfg = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.DebugLinux|Any CPU.Build.0 = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.DebugWin|Any CPU.ActiveCfg = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.DebugWin|Any CPU.Build.0 = Debug|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.ReleaseWin|Any CPU.ActiveCfg = Release|Any CPU
+		{728645D5-BAAF-48F9-80AC-1D371358B62C}.ReleaseWin|Any CPU.Build.0 = Release|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.Debug|Any CPU.ActiveCfg = DebugWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.Debug|Any CPU.Build.0 = DebugWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.DebugLinux|Any CPU.ActiveCfg = DebugLinux|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.DebugLinux|Any CPU.Build.0 = DebugLinux|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.DebugWin|Any CPU.ActiveCfg = DebugWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.DebugWin|Any CPU.Build.0 = DebugWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.Release|Any CPU.ActiveCfg = ReleaseWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.Release|Any CPU.Build.0 = ReleaseWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.ReleaseWin|Any CPU.ActiveCfg = ReleaseWin|Any CPU
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7}.ReleaseWin|Any CPU.Build.0 = ReleaseWin|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.DebugLinux|Any CPU.ActiveCfg = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.DebugLinux|Any CPU.Build.0 = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.DebugWin|Any CPU.ActiveCfg = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.DebugWin|Any CPU.Build.0 = Debug|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.ReleaseWin|Any CPU.ActiveCfg = Release|Any CPU
+		{81648408-DAF9-4CB9-B527-34504A79596F}.ReleaseWin|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C921BBD2-A699-443A-A0BD-68C6644423F8} = {02F6334E-BF81-4828-9C53-002505C1296F}
+		{1D7011C7-9A39-4E15-9849-3FD87E89EDF3} = {02F6334E-BF81-4828-9C53-002505C1296F}
+		{9F0BC747-2AC2-467A-B739-A9E938FA1701} = {02F6334E-BF81-4828-9C53-002505C1296F}
+		{5ABB964D-9C9C-42ED-AB6B-9F098328F050} = {0DE943A6-A525-458D-BA4A-2A8943FCFDCF}
+		{728645D5-BAAF-48F9-80AC-1D371358B62C} = {0DE943A6-A525-458D-BA4A-2A8943FCFDCF}
+		{C67BC0BC-C2D9-4D5F-8673-16F7312365D7} = {02F6334E-BF81-4828-9C53-002505C1296F}
+		{81648408-DAF9-4CB9-B527-34504A79596F} = {0DE943A6-A525-458D-BA4A-2A8943FCFDCF}
+		{C7ADB7B5-C950-49EE-975B-5985AF86ACFA} = {0DE943A6-A525-458D-BA4A-2A8943FCFDCF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F440C8E4-DDBE-4E3B-B03A-641466A85940}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.projitems*{1d7011c7-9a39-4e15-9849-3fd87e89edf3}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP_Tests\OGA.Postgres.DAL_SP_Tests.projitems*{5abb964d-9c9c-42ed-ab6b-9f098328f050}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP_Tests\OGA.Postgres.DAL_SP_Tests.projitems*{728645d5-baaf-48f9-80ac-1d371358b62c}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP_Tests\OGA.Postgres.DAL_SP_Tests.projitems*{81648408-daf9-4cb9-b527-34504a79596f}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.projitems*{9f0bc747-2ac2-467a-b739-a9e938fa1701}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.projitems*{c67bc0bc-c2d9-4d5f-8673-16f7312365d7}*SharedItemsImports = 5
+		OGA.Postgres.DAL_SP_Tests\OGA.Postgres.DAL_SP_Tests.projitems*{c7adb7b5-c950-49ee-975b-5985af86acfa}*SharedItemsImports = 13
+		OGA.Postgres.DAL_SP\OGA.Postgres.DAL_SP.projitems*{c921bbd2-a699-443a-a0bd-68c6644423f8}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal
