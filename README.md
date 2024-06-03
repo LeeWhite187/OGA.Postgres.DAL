@@ -35,3 +35,4 @@ This library is currently built using Visual Studio 2022 17.2.
 
 ## License
 Please see the [License](LICENSE).
+
