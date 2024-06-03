@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using OGA.Postgres;
-using OGA.Postgres.DAL_SP;
+using OGA.Postgres.DAL;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

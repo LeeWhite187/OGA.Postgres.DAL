@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
 using NanoidDotNet;
-using OGA.Postgres.DAL_SP;
+using OGA.Postgres.DAL;
 using System.Threading.Tasks;
 
 namespace OGA.Postgres_Tests

@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Enumerations.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\DBRole_Assignments.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TableColumnDef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_DAL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_Tools.cs" />

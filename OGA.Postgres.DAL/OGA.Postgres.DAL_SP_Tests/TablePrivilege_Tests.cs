@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
 using NanoidDotNet;
-using OGA.Postgres.DAL_SP;
+using OGA.Postgres.DAL;
 using System.Threading.Tasks;
 
 namespace OGA.Postgres_Tests
@@ -108,7 +108,7 @@ namespace OGA.Postgres_Tests
             string tablename = "tbl_Icons";
             var tch = new TableDefinition(tablename, "postgres");
 
-            var res1 = tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+            var res1 = tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
             if (res1 != 1)
                 Assert.Fail("Wrong Value");
 
@@ -116,11 +116,11 @@ namespace OGA.Postgres_Tests
             if (res2 != 1)
                 Assert.Fail("Wrong Value");
 
-            var res3 = tch.Add_Numeric_Column("Height", Postgres.DAL_SP.Model.eNumericColTypes.integer, true);
+            var res3 = tch.Add_Numeric_Column("Height", Postgres.DAL.Model.eNumericColTypes.integer, true);
             if (res3 != 1)
                 Assert.Fail("Wrong Value");
 
-            var res4 = tch.Add_Numeric_Column("Width", Postgres.DAL_SP.Model.eNumericColTypes.integer, true);
+            var res4 = tch.Add_Numeric_Column("Width", Postgres.DAL.Model.eNumericColTypes.integer, true);
             if (res4 != 1)
                 Assert.Fail("Wrong Value");
 
@@ -174,7 +174,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -293,7 +293,7 @@ namespace OGA.Postgres_Tests
                     // Skip creating the table...
                     //// Create the table definition...
                     //var tch = new TableDefinition(tblname, pt.Username);
-                    //tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    //tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     //tch.Add_String_Column("IconName", 50, false);
 
                     //// Make the call to create the table...
@@ -392,7 +392,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -486,7 +486,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -586,7 +586,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -717,7 +717,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -852,7 +852,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -970,7 +970,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1104,7 +1104,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1222,7 +1222,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1356,7 +1356,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1474,7 +1474,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1608,7 +1608,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1726,7 +1726,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1860,7 +1860,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -1978,7 +1978,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -2112,7 +2112,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -2230,7 +2230,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -2364,7 +2364,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
@@ -2482,7 +2482,7 @@ namespace OGA.Postgres_Tests
 
                     // Create the table definition...
                     var tch = new TableDefinition(tblname, pt.Username);
-                    tch.Add_Pk_Column("Id", Postgres.DAL_SP.Model.ePkColTypes.integer);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...

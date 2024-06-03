@@ -1,11 +1,11 @@
-﻿using OGA.Postgres.DAL_SP.Model;
+﻿using OGA.Postgres.DAL.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP
+namespace OGA.Postgres.DAL
 {
     public class TableDefinition
     {
