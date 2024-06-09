@@ -697,7 +697,9 @@ namespace OGA.Postgres
         /// <summary>
         /// Provides a means to perform a PostgreSQL COPY IN (using BeginBinaryImporter).
         /// Set the copyargs string to your preamble: COPY tablename (field1, field2, field3) FROM STDIN (FORMAT BINARY)
+        /// NOTE: Usage of the BeginBinaryImport call lets us avoid a need to escape/sanitize strings, as each one is converted to binary, instead of raw SQL.
         /// Populate rows with the writer in the callback.
+        /// See this article for usage: https://oga.atlassian.net/wiki/spaces/~311198967/pages/211091547/PostgreSQL+Bulk+Insert
         /// </summary>
         /// <param name="copyargs"></param>
         /// <param name="callback"></param>

@@ -1,11 +1,16 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 using OGA.Postgres;
 using OGA.Postgres.DAL;
+using OGA.Postgres.DAL_SP.Model;
+using OpenTelemetry;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -90,7 +95,7 @@ namespace OGA.Postgres
         #endregion
 
 
-        #region Public Methods
+        #region Connectivity Methods
 
         /// <summary>
         /// Provides a quick ability to test credentials to a PostgreSQL database, without creating a persistent connection.
@@ -106,6 +111,706 @@ namespace OGA.Postgres
 
             return dal.Test_Connection();
         }
+
+        #endregion
+
+
+        #region Engine Management
+
+        /// <summary>
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="folderpath"></param>
+        /// <returns></returns>
+        public int Get_DataDirectory(out string folderpath)
+        {
+            folderpath = "";
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                    $"Attempting to get data foldet path...");
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query for the file locations...
+                string sql = $"SELECT name AS parmname, setting, category " +
+                             $"FROM pg_settings " +
+                             $"WHERE category = 'File Locations' " +
+                             $"AND name = 'data_directory';";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get file locations.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                        "Failed to get file locations.");
+
+                    return -2;
+                }
+                // We have a datatable of file locations.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Data directory not found.
+                    return 0;
+                }
+                // Database was found.
+
+                // Get the data directory...
+                folderpath = ((string?)dt.Rows[0]["setting"]) ?? "";
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                    "Exception occurred while querying for file locations.");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="folderpath"></param>
+        /// <returns></returns>
+        public int Get_Database_FolderPath(string databaseName, out string folderpath)
+        {
+            folderpath = "";
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                    $"Attempting to get data foldet path...");
+
+                // Verify both givens exist...
+                if(string.IsNullOrEmpty(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Get the base data folder path...
+                var respath = this.Get_DataDirectory(out var datafolderpath);
+                if(respath != 1)
+                {
+                    // Failed to get data directory.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"Failed to get data directory.");
+
+                    return -2;
+
+                }
+
+                // Compose the sql query for the database oid...
+                string sql = $"SELECT oid " +
+                             $"from pg_database " +
+                             $"where datname = '{databaseName}';";
+
+                // Get the oid of the database...
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get file locations.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        "Failed to get database oid.");
+
+                    return -2;
+                }
+                // We have a list of oids.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Database oid not found.
+                    return 0;
+                }
+                // Database oid was found.
+
+                // Get the database oid...
+                var oid = ((System.UInt32)dt.Rows[0]["oid"]);
+
+                // Compose the database folder path...
+                folderpath = System.IO.Path.Combine(datafolderpath, "base", oid.ToString());
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                    "Exception occurred while querying for database folder path.");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        #endregion
+
+
+        #region Database Management
+
+        /// <summary>
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public int Is_Database_Present(string database)
+        {
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                    $"Attempting to get database names...");
+
+                if(string.IsNullOrEmpty(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query for the database list...
+                string sql = $"SELECT datname " +
+                             $"FROM pg_database " +
+                             $"WHERE datistemplate = 'false' " +
+                             $"AND datname = '{database}';";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get database list.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        "Failed to get database list.");
+
+                    return -2;
+                }
+                // We have a datatable of database list.
+
+                // See if it contains anything.
+                if (dt.Rows.Count < 1)
+                {
+                    // Database not found.
+                    return 0;
+                }
+                // Database was found.
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                    "Exception occurred while querying for database list.");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+        /// <summary>
+        /// Creates a database with the given name.
+        /// Returns 1 for success. Negatives for errors.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public int Create_Database(string database)
+        {
+            string sql = "";
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Create_Database)} - " +
+                    $"Attempting to create database...");
+
+                if(string.IsNullOrEmpty(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+                // Database name is set.
+
+                // See if the database doesn't already exist.
+                if (this.Is_Database_Present(database) == 1)
+                {
+                    // The database already exists.
+                    // We cannot create it again.
+                    return -2;
+                }
+
+                // Formulate the sql command...
+                sql = $"CREATE DATABASE \"{database}\" " +
+                      $"WITH OWNER = \"postgres\" " +
+                      $"ENCODING = 'UTF8' " +
+                      $"CONNECTION LIMIT = -1;";
+
+                // Execute it on the postgres instance.
+                int res123 = _dal.Execute_NonQuery(sql);
+                if (res123 != -1)
+                {
+                    // Error occurred while adding the database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        "Error occurred while adding the database.");
+
+                    return -4;
+                }
+
+                // Check if the database is now present on the server.
+                if (this.Is_Database_Present(database) != 1)
+                {
+                    // The database was not created successfully.
+                    return -5;
+                }
+                // If here, the database was added.
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Create_Database)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+        }
+        /// <summary>
+        /// Drops the given database from the SQL Server instance.
+        /// Returns 1 for success. Negatives for errors.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="force"></param>
+        /// <returns></returns>
+        public int Drop_Database(string database, bool force = false)
+        {
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Drop_Database)} - " +
+                    $"Attempting to drop database...");
+
+                if(string.IsNullOrEmpty(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+                // Database name is set.
+
+                // See if the database exists...
+                int res = this.Is_Database_Present(database);
+                if (res == 0)
+                {
+                    // The database doesn't exist.
+                    return 0;
+                }
+                else if (res < 0)
+                {
+                    // Failed to connect.
+                    return -2;
+                }
+                // The database exists.
+                // We will attempt to drop it.
+
+                // Compose the sql to drop the database...
+                string sql = $"DROP DATABASE IF EXISTS {database}";
+                if(force)
+                    sql = sql + $" WITH (FORCE);";
+                else
+                    sql = sql + $";";
+
+                // Execute it on the sql server instance...
+                int resdrop = _dal.Execute_NonQuery(sql);
+                if (resdrop != -1)
+                {
+                    // Error occurred while dropping the database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        "Error occurred while dropping the database.");
+
+                    return -4;
+                }
+
+                // Check if the database is still present on the server.
+                if (this.Is_Database_Present(database) == 1)
+                {
+                    // The database was not deleted successfully.
+                    return -5;
+                }
+                // If here, the database was deleted.
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Drop_Database)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+        }
+
+        /// <summary>
+        /// Performs a backup of the given database to the given filepath.
+        /// Returns 1 for success. Negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public int Backup_Database(string databaseName, string filePath)
+        {
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    $"Attempting to backup database to file...\r\n:" +
+                    $"Database = {databaseName ?? ""};\r\n" +
+                    $"BackupFile = {filePath ?? ""};");
+
+                // Verify both givens exist...
+                if(string.IsNullOrEmpty(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+                if(string.IsNullOrEmpty(filePath))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        $"Empty filepath.");
+
+                    return -1;
+                }
+
+                // Verify the database exists...
+                int res2 = this.Is_Database_Present(databaseName);
+                if (res2 != 1)
+                {
+                    // Database doesn't exist.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        "Database not found.");
+
+                    return -1;
+                }
+
+
+                // ADD LOGIC TO RUN THE pg_dump command from the command line...
+                // See this for the bat file usage: https://github.com/joemoceri/database-toolkit/tree/main
+                return -9999;
+
+                var process = new Process();
+                var startInfo = new ProcessStartInfo();
+                startInfo.FileName = Path.Combine("PostgreSQL", "postgresql-backup.bat");
+                var port = 5432;
+
+                // use pg_dump, specifying the host, port, user, database to back up, and the output path.
+                // the host, port, user, and database must be an exact match with what's inside your pgpass.conf (Windows)
+                startInfo.Arguments = $@"{Hostname} {port.ToString()} {this.Username} {databaseName} ""{filePath}""";
+                startInfo.CreateNoWindow = true;
+                startInfo.UseShellExecute = false;
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                process.Close();
+
+
+                // Database was backed up.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    "Backup finished.");
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    _dal.Disconnect();
+                }
+                catch (Exception e) { }
+            }
+        }
+        /// <summary>
+        /// Restores a database backup, given by filepath, to a target database.
+        /// Returns 1 for success. Negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public int Restore_Database(string databaseName, string filePath)
+        {
+            string sql = "";
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Restore_Database)} - " +
+                    $"Attempting to restore database from file...\r\n:" +
+                    $"Database = {databaseName ?? ""};\r\n" +
+                    $"BackupFile = {filePath ?? ""};");
+
+                // Verify both givens exist...
+                if(string.IsNullOrEmpty(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+                if(string.IsNullOrEmpty(filePath))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"Empty filepath.");
+
+                    return -1;
+                }
+
+                // Verify the database doesn't exist...
+                int res2 = this.Is_Database_Present(databaseName);
+                if (res2 == 1)
+                {
+                    // Database doesn't exist.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        "Database exists.");
+
+                    return -1;
+                }
+                else if(res2 < 0)
+                {
+                    // Failed to query for database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        "Failed to query for database.");
+
+                    return -1;
+                }
+
+                // ADD LOGIC TO RUN THE pg_restore command from the command line...
+                // See this for the bat file usage: https://github.com/joemoceri/database-toolkit/tree/main
+                return -9999;
+
+                var process = new Process();
+                var startInfo = new ProcessStartInfo();
+                startInfo.FileName = Path.Combine("PostgreSQL", "postgresql-restore.bat");
+                var port = 5432;
+
+                // use pg_restore, specifying the host, port, user, database to restore, and the output path.
+                // the host, port, user, and database must be an exact match with what's inside your pgpass.conf (Windows)
+                startInfo.Arguments = $@"{Hostname} {port.ToString()} {Username} {databaseName} ""{filePath}""";
+                startInfo.CreateNoWindow = true;
+                startInfo.UseShellExecute = false;
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
+                process.Close();
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Restore_Database)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    _dal.Disconnect();
+                }
+                catch (Exception e) { }
+            }
+        }
+
+        #endregion
+
+
+        #region User Management
 
         /// <summary>
         /// Public call to create a database user.
@@ -280,7 +985,6 @@ namespace OGA.Postgres
                 catch (Exception) { }
             }
         }
-
 
         /// <summary>
         /// Returns 1 if found, 0 if not, negatives for errors.
@@ -1241,1079 +1945,6 @@ namespace OGA.Postgres
         }
 
         /// <summary>
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="database"></param>
-        /// <returns></returns>
-        public int Is_Database_Present(string database)
-        {
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
-                    $"Attempting to get database names...");
-
-                if(string.IsNullOrEmpty(database))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-
-                // Compose the sql query for the database list...
-                string sql = $"SELECT datname " +
-                             $"FROM pg_database " +
-                             $"WHERE datistemplate = 'false' " +
-                             $"AND datname = '{database}';";
-
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get database list.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
-                        "Failed to get database list.");
-
-                    return -2;
-                }
-                // We have a datatable of database list.
-
-                // See if it contains anything.
-                if (dt.Rows.Count < 1)
-                {
-                    // Database not found.
-                    return 0;
-                }
-                // Database was found.
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
-                    "Exception occurred while querying for database list.");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-        /// <summary>
-        /// Creates a database with the given name.
-        /// Returns 1 for success. Negatives for errors.
-        /// </summary>
-        /// <param name="database"></param>
-        /// <returns></returns>
-        public int Create_Database(string database)
-        {
-            string sql = "";
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Create_Database)} - " +
-                    $"Attempting to create database...");
-
-                if(string.IsNullOrEmpty(database))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-                // Database name is set.
-
-                // See if the database doesn't already exist.
-                if (this.Is_Database_Present(database) == 1)
-                {
-                    // The database already exists.
-                    // We cannot create it again.
-                    return -2;
-                }
-
-                // Formulate the sql command...
-                sql = $"CREATE DATABASE \"{database}\" " +
-                      $"WITH OWNER = \"postgres\" " +
-                      $"ENCODING = 'UTF8' " +
-                      $"CONNECTION LIMIT = -1;";
-
-                // Execute it on the postgres instance.
-                int res123 = _dal.Execute_NonQuery(sql);
-                if (res123 != -1)
-                {
-                    // Error occurred while adding the database.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
-                        "Error occurred while adding the database.");
-
-                    return -4;
-                }
-
-                // Check if the database is now present on the server.
-                if (this.Is_Database_Present(database) != 1)
-                {
-                    // The database was not created successfully.
-                    return -5;
-                }
-                // If here, the database was added.
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Create_Database)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-        }
-        /// <summary>
-        /// Drops the given database from the SQL Server instance.
-        /// Returns 1 for success. Negatives for errors.
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="force"></param>
-        /// <returns></returns>
-        public int Drop_Database(string database, bool force = false)
-        {
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Drop_Database)} - " +
-                    $"Attempting to drop database...");
-
-                if(string.IsNullOrEmpty(database))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-                // Database name is set.
-
-                // See if the database exists...
-                int res = this.Is_Database_Present(database);
-                if (res == 0)
-                {
-                    // The database doesn't exist.
-                    return 0;
-                }
-                else if (res < 0)
-                {
-                    // Failed to connect.
-                    return -2;
-                }
-                // The database exists.
-                // We will attempt to drop it.
-
-                // Compose the sql to drop the database...
-                string sql = $"DROP DATABASE IF EXISTS {database}";
-                if(force)
-                    sql = sql + $" WITH (FORCE);";
-                else
-                    sql = sql + $";";
-
-                // Execute it on the sql server instance...
-                int resdrop = _dal.Execute_NonQuery(sql);
-                if (resdrop != -1)
-                {
-                    // Error occurred while dropping the database.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
-                        "Error occurred while dropping the database.");
-
-                    return -4;
-                }
-
-                // Check if the database is still present on the server.
-                if (this.Is_Database_Present(database) == 1)
-                {
-                    // The database was not deleted successfully.
-                    return -5;
-                }
-                // If here, the database was deleted.
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Drop_Database)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-        }
-
-
-        /// <summary>
-        /// Performs a backup of the given database to the given filepath.
-        /// Returns 1 for success. Negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public int Backup_Database(string databaseName, string filePath)
-        {
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
-                    $"Attempting to backup database to file...\r\n:" +
-                    $"Database = {databaseName ?? ""};\r\n" +
-                    $"BackupFile = {filePath ?? ""};");
-
-                // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-                if(string.IsNullOrEmpty(filePath))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
-                        $"Empty filepath.");
-
-                    return -1;
-                }
-
-                // Verify the database exists...
-                int res2 = this.Is_Database_Present(databaseName);
-                if (res2 != 1)
-                {
-                    // Database doesn't exist.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
-                        "Database not found.");
-
-                    return -1;
-                }
-
-
-                // ADD LOGIC TO RUN THE pg_dump command from the command line...
-                // See this for the bat file usage: https://github.com/joemoceri/database-toolkit/tree/main
-                return -9999;
-
-                var process = new Process();
-                var startInfo = new ProcessStartInfo();
-                startInfo.FileName = Path.Combine("PostgreSQL", "postgresql-backup.bat");
-                var port = 5432;
-
-                // use pg_dump, specifying the host, port, user, database to back up, and the output path.
-                // the host, port, user, and database must be an exact match with what's inside your pgpass.conf (Windows)
-                startInfo.Arguments = $@"{Hostname} {port.ToString()} {this.Username} {databaseName} ""{filePath}""";
-                startInfo.CreateNoWindow = true;
-                startInfo.UseShellExecute = false;
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                process.Close();
-
-
-                // Database was backed up.
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
-                    "Backup finished.");
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    _dal.Disconnect();
-                }
-                catch (Exception e) { }
-            }
-        }
-        /// <summary>
-        /// Restores a database backup, given by filepath, to a target database.
-        /// Returns 1 for success. Negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public int Restore_Database(string databaseName, string filePath)
-        {
-            string sql = "";
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Restore_Database)} - " +
-                    $"Attempting to restore database from file...\r\n:" +
-                    $"Database = {databaseName ?? ""};\r\n" +
-                    $"BackupFile = {filePath ?? ""};");
-
-                // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-                if(string.IsNullOrEmpty(filePath))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
-                        $"Empty filepath.");
-
-                    return -1;
-                }
-
-                // Verify the database doesn't exist...
-                int res2 = this.Is_Database_Present(databaseName);
-                if (res2 == 1)
-                {
-                    // Database doesn't exist.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
-                        "Database exists.");
-
-                    return -1;
-                }
-                else if(res2 < 0)
-                {
-                    // Failed to query for database.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
-                        "Failed to query for database.");
-
-                    return -1;
-                }
-
-                // ADD LOGIC TO RUN THE pg_restore command from the command line...
-                // See this for the bat file usage: https://github.com/joemoceri/database-toolkit/tree/main
-                return -9999;
-
-                var process = new Process();
-                var startInfo = new ProcessStartInfo();
-                startInfo.FileName = Path.Combine("PostgreSQL", "postgresql-restore.bat");
-                var port = 5432;
-
-                // use pg_restore, specifying the host, port, user, database to restore, and the output path.
-                // the host, port, user, and database must be an exact match with what's inside your pgpass.conf (Windows)
-                startInfo.Arguments = $@"{Hostname} {port.ToString()} {Username} {databaseName} ""{filePath}""";
-                startInfo.CreateNoWindow = true;
-                startInfo.UseShellExecute = false;
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit();
-                process.Close();
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Restore_Database)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    _dal.Disconnect();
-                }
-                catch (Exception e) { }
-            }
-        }
-
-        /// <summary>
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="folderpath"></param>
-        /// <returns></returns>
-        public int Get_DataDirectory(out string folderpath)
-        {
-            folderpath = "";
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
-                    $"Attempting to get data foldet path...");
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-
-                // Compose the sql query for the file locations...
-                string sql = $"SELECT name AS parmname, setting, category " +
-                             $"FROM pg_settings " +
-                             $"WHERE category = 'File Locations' " +
-                             $"AND name = 'data_directory';";
-
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get file locations.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
-                        "Failed to get file locations.");
-
-                    return -2;
-                }
-                // We have a datatable of file locations.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Data directory not found.
-                    return 0;
-                }
-                // Database was found.
-
-                // Get the data directory...
-                folderpath = ((string?)dt.Rows[0]["setting"]) ?? "";
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
-                    "Exception occurred while querying for file locations.");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="folderpath"></param>
-        /// <returns></returns>
-        public int Get_Database_FolderPath(string databaseName, out string folderpath)
-        {
-            folderpath = "";
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                    $"Attempting to get data foldet path...");
-
-                // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                        $"Empty database name.");
-
-                    return -1;
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-
-                // Get the base data folder path...
-                var respath = this.Get_DataDirectory(out var datafolderpath);
-                if(respath != 1)
-                {
-                    // Failed to get data directory.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                        $"Failed to get data directory.");
-
-                    return -2;
-
-                }
-
-                // Compose the sql query for the database oid...
-                string sql = $"SELECT oid " +
-                             $"from pg_database " +
-                             $"where datname = '{databaseName}';";
-
-                // Get the oid of the database...
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get file locations.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                        "Failed to get database oid.");
-
-                    return -2;
-                }
-                // We have a list of oids.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Database oid not found.
-                    return 0;
-                }
-                // Database oid was found.
-
-                // Get the database oid...
-                var oid = ((System.UInt32)dt.Rows[0]["oid"]);
-
-                // Compose the database folder path...
-                folderpath = System.IO.Path.Combine(datafolderpath, "base", oid.ToString());
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                    "Exception occurred while querying for database folder path.");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the list of tables for the given database.
-        /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="tablelist"></param>
-        /// <returns></returns>
-        public int Get_TableList_forDatabase(string databaseName, out List<string> tablelist)
-        {
-            System.Data.DataTable dt = null;
-            tablelist = new List<string>();
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = databaseName;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
-                    $"Attempting to get table names for database {databaseName ?? ""}...");
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT table_name " +
-                             $"FROM information_schema.tables " +
-                             $"WHERE table_schema not in ('pg_catalog', 'information_schema') " +
-                             $"AND table_catalog = '{databaseName}';";
-
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get table names from the database.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
-                        "Failed to get table names from the database.");
-
-                    return -2;
-                }
-                // We have a datatable of table names.
-
-                // See if it contains anything.
-                if (dt.Rows.Count == 0)
-                {
-                    // No tables in the database.
-                    // Or, the database doesn't exist.
-
-                    return 1;
-                }
-                // If here, we have tables for the database.
-
-                // See if we have a match to the given tablename.
-                foreach (System.Data.DataRow r in dt.Rows)
-                {
-                    string sss = r[0] + "";
-                    tablelist.Add(sss);
-                }
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Gets the table size of the given table in the current database.
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="tablename"></param>
-        /// <returns></returns>
-        public (int res, long size) Get_TableSize(string tablename)
-        {
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                    $"Attempting to get table size for table, {tablename ?? ""}...");
-
-                if(string.IsNullOrEmpty(tablename))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                        "Empty tablename.");
-
-                    return (-1, 0);
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                        $"Failed to connect to server.");
-
-                    return (-1, 0);
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT pg_total_relation_size((SELECT oid FROM pg_class WHERE relname = '{tablename}'));";
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get table size.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                        $"Failed to get table size for table, {tablename ?? ""}.");
-
-                    return (-2, 0);
-                }
-                // We have a table size.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Table not found.
-
-                    return (0, 0);
-                }
-                // If here, we have the table entry.
-
-                long sss = ((long)dt.Rows[0][0]);
-                return (1, sss);
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                    "Exception occurred");
-
-                return (-20, 0);
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Gets the disk space used by the given database.
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <returns></returns>
-        public (int res, long size) Get_DatabaseSize(string databaseName)
-        {
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = databaseName;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                    $"Attempting to get disk size for database, {databaseName ?? ""}...");
-
-                if(string.IsNullOrEmpty(databaseName))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        "Empty database.");
-
-                    return (-1, 0);
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        $"Failed to connect to server.");
-
-                    return (-1, 0);
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT pg_database_size('{databaseName}');";
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get database size.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        $"Failed to get disk size for database, {databaseName ?? ""}.");
-
-                    return (-2, 0);
-                }
-                // We have a database size.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Database not found.
-
-                    return (0, 0);
-                }
-                // If here, we have the database entry.
-
-                long sss = ((long)dt.Rows[0][0]);
-                return (1, sss);
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                    "Exception occurred");
-
-                return (-20, 0);
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Gets the row count for each table in the database the user connects to.
-        /// </summary>
-        /// <param name="rowdata"></param>
-        /// <returns></returns>
-        public int Get_RowCount_for_Tables(out List<KeyValuePair<string, long>> rowdata)
-        {
-            System.Data.DataTable dt = null;
-            rowdata = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = Database;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                    $"Attempting to get table row counts for database {Database}...");
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                        $"Failed to connect to server.");
-
-                    return -1;
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT table_name, (SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = table_name) AS row_count " +
-                             $"FROM information_schema.tables " +
-                             $"WHERE table_schema = 'public';";
-
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get row counts from the database.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                        "Failed to get row counts from the database.");
-
-                    return -2;
-                }
-                // We have a datatable of row counts.
-
-                // See if it contains anything.
-                if (dt.Rows.Count == 0)
-                {
-                    // No tables in the database.
-                    // Return an error.
-
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                        $"Did not get any row counts for database {Database}. Database name might be wrong.");
-
-                    return -3;
-                }
-                // If here, we have row counts for the database.
-
-                // Turn them into a list.
-                rowdata = new List<KeyValuePair<string, long>>();
-                foreach (System.Data.DataRow r in dt.Rows)
-                {
-                    // Get the table name.
-                    string tablename = r["table_name"].ToString() + "";
-                    long tablesize = 0;
-
-                    // Get the table size.
-                    try
-                    {
-                        string tempval = r["row_count"].ToString() + "";
-                        tablesize = Convert.ToInt64(tempval);
-                    }
-                    catch (Exception e)
-                    {
-                        // An exception occurred while parsing in table row size data.
-                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                            $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                            $"An exception occurred while parsing in table row size data for database {Database}.");
-
-                        return -4;
-                    }
-                    KeyValuePair<string, long> vv = new KeyValuePair<string, long>(tablename, tablesize);
-                    rowdata.Add(vv);
-                }
-                // If here, we have iterated all rows, and can return to the caller.
-
-                return 1;
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
-                    "Exception occurred");
-
-                return -20;
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
         /// Grants all privileges to a given user account for a given database.
         /// Returns 1 if found, 0 if not found, negatives for errors.
         /// </summary>
@@ -2863,6 +2494,398 @@ namespace OGA.Postgres
             }
         }
 
+        #endregion
+
+
+        #region Table Management
+
+        /// <summary>
+        /// Retrieves the list of tables for the given database.
+        /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="tablelist"></param>
+        /// <returns></returns>
+        public int Get_TableList_forDatabase(string databaseName, out List<string> tablelist)
+        {
+            System.Data.DataTable dt = null;
+            tablelist = new List<string>();
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = databaseName;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                    $"Attempting to get table names for database {databaseName ?? ""}...");
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT table_name " +
+                             $"FROM information_schema.tables " +
+                             $"WHERE table_schema not in ('pg_catalog', 'information_schema') " +
+                             $"AND table_catalog = '{databaseName}';";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get table names from the database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                        "Failed to get table names from the database.");
+
+                    return -2;
+                }
+                // We have a datatable of table names.
+
+                // See if it contains anything.
+                if (dt.Rows.Count == 0)
+                {
+                    // No tables in the database.
+                    // Or, the database doesn't exist.
+
+                    return 1;
+                }
+                // If here, we have tables for the database.
+
+                // See if we have a match to the given tablename.
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string sss = r[0] + "";
+                    tablelist.Add(sss);
+                }
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Gets the table size of the given table in the current database.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public (int res, long size) Get_TableSize(string tablename)
+        {
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                    $"Attempting to get table size for table, {tablename ?? ""}...");
+
+                if(string.IsNullOrEmpty(tablename))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        "Empty tablename.");
+
+                    return (-1, 0);
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        $"Failed to connect to server.");
+
+                    return (-1, 0);
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT pg_total_relation_size((SELECT oid FROM pg_class WHERE relname = '{tablename}'));";
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get table size.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        $"Failed to get table size for table, {tablename ?? ""}.");
+
+                    return (-2, 0);
+                }
+                // We have a table size.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Table not found.
+
+                    return (0, 0);
+                }
+                // If here, we have the table entry.
+
+                long sss = ((long)dt.Rows[0][0]);
+                return (1, sss);
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                    "Exception occurred");
+
+                return (-20, 0);
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Gets the disk space used by the given database.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <returns></returns>
+        public (int res, long size) Get_DatabaseSize(string databaseName)
+        {
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = databaseName;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    $"Attempting to get disk size for database, {databaseName ?? ""}...");
+
+                if(string.IsNullOrEmpty(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        "Empty database.");
+
+                    return (-1, 0);
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"Failed to connect to server.");
+
+                    return (-1, 0);
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT pg_database_size('{databaseName}');";
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get database size.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"Failed to get disk size for database, {databaseName ?? ""}.");
+
+                    return (-2, 0);
+                }
+                // We have a database size.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Database not found.
+
+                    return (0, 0);
+                }
+                // If here, we have the database entry.
+
+                long sss = ((long)dt.Rows[0][0]);
+                return (1, sss);
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    "Exception occurred");
+
+                return (-20, 0);
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Gets the row count for each table in the database the user connects to.
+        /// </summary>
+        /// <param name="rowdata"></param>
+        /// <returns></returns>
+        public int Get_RowCount_for_Tables(out List<KeyValuePair<string, long>> rowdata)
+        {
+            System.Data.DataTable dt = null;
+            rowdata = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                    $"Attempting to get table row counts for database {Database}...");
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT table_name, (SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = table_name) AS row_count " +
+                             $"FROM information_schema.tables " +
+                             $"WHERE table_schema = 'public';";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get row counts from the database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        "Failed to get row counts from the database.");
+
+                    return -2;
+                }
+                // We have a datatable of row counts.
+
+                // See if it contains anything.
+                if (dt.Rows.Count == 0)
+                {
+                    // No tables in the database.
+                    // Return an error.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        $"Did not get any row counts for database {Database}. Database name might be wrong.");
+
+                    return -3;
+                }
+                // If here, we have row counts for the database.
+
+                // Turn them into a list.
+                rowdata = new List<KeyValuePair<string, long>>();
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    // Get the table name.
+                    string tablename = r["table_name"].ToString() + "";
+                    long tablesize = 0;
+
+                    // Get the table size.
+                    try
+                    {
+                        string tempval = r["row_count"].ToString() + "";
+                        tablesize = Convert.ToInt64(tempval);
+                    }
+                    catch (Exception e)
+                    {
+                        // An exception occurred while parsing in table row size data.
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                            $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                            $"An exception occurred while parsing in table row size data for database {Database}.");
+
+                        return -4;
+                    }
+                    KeyValuePair<string, long> vv = new KeyValuePair<string, long>(tablename, tablesize);
+                    rowdata.Add(vv);
+                }
+                // If here, we have iterated all rows, and can return to the caller.
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
         /// <summary>
         /// Checks if the given table exists in the connected database.
         /// Returns 1 if exists, 0 if not. Negatives for errors.
@@ -3247,6 +3270,154 @@ namespace OGA.Postgres
                 catch (Exception) { }
             }
         }
+
+        /// <summary>
+        /// Retrieves the list of columns and types for the given table.
+        /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="columnlist"></param>
+        /// <returns></returns>
+        public int Get_ColumnInfo_forTable(string tableName, out List<ColumnInfo> columnlist)
+        {
+            System.Data.DataTable dt = null;
+            columnlist = new List<ColumnInfo>();
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                    $"Attempting to get column info for table {tableName ?? ""}...");
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT table_catalog, \"table_name\", \"column_name\", ordinal_position, is_nullable, data_type, character_maximum_length, is_identity " +
+                                $"FROM information_schema.columns " +
+                                $"WHERE table_schema = 'public' " +
+                                $"AND table_name = '{tableName}' " +
+                                $"ORDER BY ordinal_position;";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get column names from the table.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        "Failed to get column info from the table.");
+
+                    return -2;
+                }
+                // We have a datatable of column info.
+
+                // See if it contains anything.
+                if (dt.Rows.Count == 0)
+                {
+                    // No column in the table.
+                    // Or, the table doesn't exist.
+
+                    return 1;
+                }
+                // If here, we have columns for the table.
+
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    var ct = new ColumnInfo();
+                    ct.name = r["column_name"] + "";
+                    ct.dataType = r["data_type"] + "";
+
+                    try
+                    {
+                        int displayorder = Convert.ToInt32(r["ordinal_position"]);
+                        ct.ordinal = displayorder;
+                    }
+                    catch (Exception e)
+                    {
+                        ct.ordinal = -1;
+                    }
+
+                    try
+                    {
+                        int maxlength = Convert.ToInt32(r["character_maximum_length"]);
+                        ct.maxlength = maxlength;
+                    }
+                    catch (Exception e)
+                    {
+                        ct.maxlength = null;
+                    }
+
+                    try
+                    {
+                        string val = ((string)r["is_nullable"]) ?? "";
+                        if(val == "NO")
+                            ct.isNullable = false;
+                        else if(val == "YES")
+                            ct.isNullable = true;
+                        else
+                            ct.isNullable = false;
+                    }
+                    catch (Exception e)
+                    {
+                        ct.isNullable = false;
+                    }
+
+                    try
+                    {
+                        string val = ((string)r["is_identity"]) ?? "";
+                        if(val == "NO")
+                            ct.isIdentity = false;
+                        else if(val == "YES")
+                            ct.isIdentity = true;
+                        else
+                            ct.isIdentity = false;
+                    }
+                    catch (Exception e)
+                    {
+                        ct.isIdentity = false;
+                    }
+
+                    columnlist.Add(ct);
+                }
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
 
         ///// <summary>
         ///// Adds a user to a particular database.

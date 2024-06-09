@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Enumerations.cs" />
+    <Compile Include="..\OGA.Postgres.DAL_SP\Model\ColumnInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TableColumnDef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_DAL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_Tools.cs" />

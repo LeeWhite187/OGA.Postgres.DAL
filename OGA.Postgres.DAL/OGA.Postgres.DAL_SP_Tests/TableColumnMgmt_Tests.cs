@@ -10,6 +10,7 @@ using OGA.Common.Config.structs;
 using NanoidDotNet;
 using OGA.Postgres.DAL;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OGA.Postgres_Tests
 {
@@ -17,6 +18,7 @@ namespace OGA.Postgres_Tests
         This set of tests exercise the method, Get_ColumnList_forTable().
 
         //  Test_1_1_1  Verify that we can query column names for a table.
+        //  Test_1_1_2  Verify that we can query column info for a table.
 
      
      */
@@ -193,6 +195,178 @@ namespace OGA.Postgres_Tests
                 if(!collist.Contains(col3))
                     Assert.Fail("Wrong Value");
                 if(!collist.Contains(col4))
+                    Assert.Fail("Wrong Value");
+
+
+                // To drop the database, we must switch back to the postgres database...
+                {
+                    // Swap our connection to the created database...
+                    pt.Dispose();
+                    await Task.Delay(500);
+                    pt = new Postgres_Tools();
+                    pt.Hostname = dbcreds.Host;
+                    pt.Database = dbcreds.Database;
+                    pt.Username = dbcreds.User;
+                    pt.Password = dbcreds.Password;
+
+                    // Verify we can access the postgres databaes...
+                    var res2 = pt.TestConnection();
+                    if(res2 != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+                // Delete the database...
+                var res7 = pt.Drop_Database(dbname, true);
+                if(res7 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database is no longer present...
+                var res8 = pt.Is_Database_Present(dbname);
+                if(res8 != 0)
+                    Assert.Fail("Wrong Value");
+            }
+            finally
+            {
+                pt?.Dispose();
+            }
+        }
+
+        //  Test_1_1_2  Verify that we can query column info for a table.
+        [TestMethod]
+        public async Task Test_1_1_2()
+        {
+            Postgres_Tools pt = null;
+
+            try
+            {
+                pt = new Postgres_Tools();
+                pt.Hostname = dbcreds.Host;
+                pt.Database = dbcreds.Database;
+                pt.Username = dbcreds.User;
+                pt.Password = dbcreds.Password;
+
+                // Create a test database with a table we can test with...
+                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string col1 = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string col2 = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string col3 = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string col4 = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                {
+                    // Create a test database...
+                    var res1 = pt.Create_Database(dbname);
+                    if(res1 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Swap our connection to the created database...
+                    pt.Dispose();
+                    await Task.Delay(500);
+                    pt = new Postgres_Tools();
+                    pt.Hostname = dbcreds.Host;
+                    pt.Database = dbname;
+                    pt.Username = dbcreds.User;
+                    pt.Password = dbcreds.Password;
+
+                    // Verify we can access the new database...
+                    var res2 = pt.TestConnection();
+                    if(res2 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Create the table definition...
+                    var tch = new TableDefinition(tblname, pt.Username);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
+                    tch.Add_Guid_Column(col1, false);
+                    tch.Add_UTCDateTime_Column(col2, true);
+                    tch.Add_Numeric_Column(col3, Postgres.DAL.Model.eNumericColTypes.bigint, true);
+                    tch.Add_String_Column(col4, 50, true);
+
+                    // Make the call to create the table...
+                    var res3 = pt.Create_Table(tch);
+                    if(res3 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Confirm the table was created...
+                    var res3a = pt.DoesTableExist(tblname);
+                    if(res3a != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+
+                // Query for column info of the table...
+                var res4 = pt.Get_ColumnInfo_forTable(tblname, out var coldata);
+                if(res4 != 1 || coldata == null || coldata.Count == 0)
+                    Assert.Fail("Wrong Value");
+
+
+                // Verify the list has the correct column data...
+                var c1 = coldata.FirstOrDefault(m => m.name == "Id");
+                if(c1 == null)
+                    Assert.Fail("Wrong Value");
+                if(c1.isIdentity != false)
+                    Assert.Fail("Wrong Value");
+                if(c1.dataType != "integer")
+                    Assert.Fail("Wrong Value");
+                if(c1.isNullable != false)
+                    Assert.Fail("Wrong Value");
+                if(c1.maxlength != null)
+                    Assert.Fail("Wrong Value");
+                if(c1.ordinal != 1)
+                    Assert.Fail("Wrong Value");
+
+                var c2 = coldata.FirstOrDefault(m => m.name == col1);
+                if(c2 == null)
+                    Assert.Fail("Wrong Value");
+                if(c2.isIdentity != false)
+                    Assert.Fail("Wrong Value");
+                if(c2.dataType != "uuid")
+                    Assert.Fail("Wrong Value");
+                if(c2.isNullable != false)
+                    Assert.Fail("Wrong Value");
+                if(c2.maxlength != null)
+                    Assert.Fail("Wrong Value");
+                if(c2.ordinal != 2)
+                    Assert.Fail("Wrong Value");
+
+                var c3 = coldata.FirstOrDefault(m => m.name == col2);
+                if(c3 == null)
+                    Assert.Fail("Wrong Value");
+                if(c3.isIdentity != false)
+                    Assert.Fail("Wrong Value");
+                if(c3.dataType != "timestamp with time zone")
+                    Assert.Fail("Wrong Value");
+                if(c3.isNullable != true)
+                    Assert.Fail("Wrong Value");
+                if(c3.maxlength != null)
+                    Assert.Fail("Wrong Value");
+                if(c3.ordinal != 3)
+                    Assert.Fail("Wrong Value");
+
+                var c4 = coldata.FirstOrDefault(m => m.name == col3);
+                if(c4 == null)
+                    Assert.Fail("Wrong Value");
+                if(c4.isIdentity != false)
+                    Assert.Fail("Wrong Value");
+                if(c4.dataType != "bigint")
+                    Assert.Fail("Wrong Value");
+                if(c4.isNullable != true)
+                    Assert.Fail("Wrong Value");
+                if(c4.maxlength != null)
+                    Assert.Fail("Wrong Value");
+                if(c4.ordinal != 4)
+                    Assert.Fail("Wrong Value");
+
+                var c5 = coldata.FirstOrDefault(m => m.name == col4);
+                if(c5 == null)
+                    Assert.Fail("Wrong Value");
+                if(c5.isIdentity != false)
+                    Assert.Fail("Wrong Value");
+                if(c5.dataType != "character varying")
+                    Assert.Fail("Wrong Value");
+                if(c5.isNullable != true)
+                    Assert.Fail("Wrong Value");
+                if(c5.maxlength != 50)
+                    Assert.Fail("Wrong Value");
+                if(c5.ordinal != 5)
                     Assert.Fail("Wrong Value");
 
 
