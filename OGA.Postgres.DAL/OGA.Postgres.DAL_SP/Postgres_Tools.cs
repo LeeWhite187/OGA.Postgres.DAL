@@ -1028,6 +1028,95 @@ namespace OGA.Postgres
             }
         }
 
+        /// <summary>
+        /// Gets the disk space used by the given database.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <returns></returns>
+        public (int res, long size) Get_DatabaseSize(string databaseName)
+        {
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = databaseName;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    $"Attempting to get disk size for database, {databaseName ?? ""}...");
+
+                if(string.IsNullOrEmpty(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        "Empty database.");
+
+                    return (-1, 0);
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"Failed to connect to server.");
+
+                    return (-1, 0);
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT pg_database_size('{databaseName}');";
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get database size.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"Failed to get disk size for database, {databaseName ?? ""}.");
+
+                    return (-2, 0);
+                }
+                // We have a database size.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Database not found.
+
+                    return (0, 0);
+                }
+                // If here, we have the database entry.
+
+                long sss = ((long)dt.Rows[0][0]);
+                return (1, sss);
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    "Exception occurred");
+
+                return (-20, 0);
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
         #endregion
 
 
@@ -2894,95 +2983,6 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:-:{nameof(Get_TableSize)} - " +
-                    "Exception occurred");
-
-                return (-20, 0);
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
-        /// Gets the disk space used by the given database.
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <returns></returns>
-        public (int res, long size) Get_DatabaseSize(string databaseName)
-        {
-            System.Data.DataTable dt = null;
-
-            if (_dal == null)
-            {
-                _dal = new Postgres_DAL();
-                _dal.Hostname = Hostname;
-                _dal.Database = databaseName;
-                _dal.Username = Username;
-                _dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                    $"Attempting to get disk size for database, {databaseName ?? ""}...");
-
-                if(string.IsNullOrEmpty(databaseName))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        "Empty database.");
-
-                    return (-1, 0);
-                }
-
-                // Connect to the database...
-                var resconn = this._dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        $"Failed to connect to server.");
-
-                    return (-1, 0);
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT pg_database_size('{databaseName}');";
-                if (_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get database size.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
-                        $"Failed to get disk size for database, {databaseName ?? ""}.");
-
-                    return (-2, 0);
-                }
-                // We have a database size.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Database not found.
-
-                    return (0, 0);
-                }
-                // If here, we have the database entry.
-
-                long sss = ((long)dt.Rows[0][0]);
-                return (1, sss);
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
                     "Exception occurred");
 
                 return (-20, 0);

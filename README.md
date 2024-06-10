@@ -4,6 +4,66 @@ Data Access Layer for PostGres SQL
 ## Description
 This library provides a Data Access Layer (DAL) and a class of tools for managing PostGres SQL databases, tables, and users.
 
+* Postgres_DAL
+Wraps the ceremony of using NpgSQL, to perform the following types of actions:
+- Tabular and Scalar Queries
+- Non Queries - for sql commands, such as: database creations, role grants, table drops, etc...
+- Bulk Binary Importing - syntactical sugar for the NpgsqlBinaryImporter, which provides multi-row inserts without the need for string sanitization
+- Stored Procedures with RC return, with our without Terminal Select
+
+* Postgres_Tools
+This class includes lots of methods for host, database, and user management.
+- Host Management:
+    - Get_DataDirectory() - identifies the filesystem path where databases are stored
+    - Get_Database_FolderPath() - locates the specific folder path for a database
+
+- Database Management:
+    - Create_Database()
+    - Is_Database_Present()
+    - Drop_Database()
+    - GetDatabaseOwner()
+    - ChangeDatabaseOwner()
+    - Backup_Database() - Not yet implemented.
+    - Restore_Database() - Not yet implemented.
+    - Get_DatabaseSize()
+
+- User Management:
+    - GetUserList()
+    - Does_Login_Exist()
+    - CreateUser()
+    - ChangeUserPassword()
+    - DeleteUser()
+
+- Permissions Management:
+    - GrantSuperUser()
+    - IsSuperUser()
+    - DenySuperUser()
+
+    - GrantDBCreate()
+    - HasDBCreate()
+    - DenyDBCreate()
+
+    - GrantCreateRole()
+    - HasCreateRole()
+    - DenyCreateRole()
+
+    - GrantAllforUserOnDatabase()
+    - GrantAllforUserOnTable()
+    - GetTablePrivilegesforUser()
+    - SetTablePrivilegesforUser()
+
+- Table Management:
+    - Create_Table()
+    - DoesTableExist()
+    - Drop_Table()
+    - Get_TableList_forDatabase()
+    - Get_PrimaryKeyConstraints_forTable() - key_column, constraint_name, position_ordinal
+    - Get_ColumnList_forTable() - list of column names in a table.
+    - Get_ColumnInfo_forTable() - columnname, datatype, length, isnullable, etc...
+    - Get_TableSize()
+    - Get_RowCount_for_Tables()
+
+
 ## Installation
 OGA.Postgres.DAL is available via NuGet:
 * NuGet Official Releases: [![NuGet](https://img.shields.io/nuget/vpre/OGA.Postgres.DAL.svg?label=NuGet)](https://www.nuget.org/packages/OGA.Postgres.DAL)
