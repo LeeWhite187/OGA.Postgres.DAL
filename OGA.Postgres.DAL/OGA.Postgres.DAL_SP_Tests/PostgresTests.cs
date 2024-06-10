@@ -388,7 +388,7 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Delete the database...
-                var res8 = pt.Drop_Database(dbname);
+                var res8 = pt.Drop_Database(dbname, true);
                 if(res8 != 1)
                     Assert.Fail("Wrong Value");
 
