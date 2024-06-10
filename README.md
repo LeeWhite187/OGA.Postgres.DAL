@@ -5,11 +5,14 @@ Data Access Layer for PostGres SQL
 This library provides a Data Access Layer (DAL) and a class of tools for managing PostGres SQL databases, tables, and users.
 
 * Postgres_DAL
-Wraps the ceremony of using NpgSQL, to perform the following types of actions:
-- Tabular and Scalar Queries
-- Non Queries - for sql commands, such as: database creations, role grants, table drops, etc...
-- Bulk Binary Importing - syntactical sugar for the NpgsqlBinaryImporter, which provides multi-row inserts without the need for string sanitization
-- Stored Procedures with RC return, with our without Terminal Select
+  Wraps the ceremony of using NpgSQL, to perform the following types of actions:
+    - Tabular and Scalar Queries
+    - Non Queries
+      for sql commands, such as: database creations, role grants, table drops, etc...
+    - Bulk Binary Importing
+      Syntactical sugar for the NpgsqlBinaryImporter, which provides multi-row inserts without the need for string sanitization
+    - Stored Procedures calls
+      With RC return, and with/without Terminal Select
 
 * Postgres_Tools
   This class includes lots of methods for host, database, and user management.
