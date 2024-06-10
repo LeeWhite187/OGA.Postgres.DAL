@@ -56,6 +56,7 @@ namespace OGA.Postgres_Tests
         //  Test_1_6_3  Verify that we can verify a database layout against a live database.
         //  Test_1_6_4  Verify that we can create a database layout from a live database.
         //  Test_1_6_5  Verify that we can use a generated database layout, to create an identical live database.
+
      */
 
     [TestCategory(Test_Types.Unit_Tests)]
@@ -3280,10 +3281,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Layout Mismatch");
 
 
-                // Use the generated layout to create an identical database...
-                var layout2 = res2.layout;
-                // Give the second datbase a different name...
+                // Serialize the layout, to simulate saving it to disk...
+                var jsonlayout = Newtonsoft.Json.JsonConvert.SerializeObject(res2.layout, Newtonsoft.Json.Formatting.Indented);
+
+
+                // Deserialize the layout, to simulate loading it from disk...
+                var layout2 = Newtonsoft.Json.JsonConvert.DeserializeObject<DbLayout_Database>(jsonlayout);
+
+                // Give the "retrieved" database a different name, so we can create a database on the same test host...
                 layout2.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+
+                // Use the "retrieved" layout to create an identical database...
                 var res4 = dlt.Create_Database_fromLayout(layout2);
                 if(res4.res != 1 || res4.errs == null || res4.errs.Count != 0)
                     Assert.Fail("Failed to create second database");
@@ -3334,6 +3342,7 @@ namespace OGA.Postgres_Tests
 
         #endregion
         
+
         #region Private Methods
 
         private void GetTestDatabaseUserCreds()

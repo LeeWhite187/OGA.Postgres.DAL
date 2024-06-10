@@ -12,19 +12,19 @@ namespace OGA.Postgres
         /// The user/role is a superuser.
         /// This role attribute allows any functionality.
         /// </summary>
-        superuser,
+        superuser = 1,
         /// <summary>
         /// Role attribute that allows a role/user to create roles.
         /// </summary>
-        createrole,
+        createrole = 2,
         /// <summary>
         /// Role attribute that allows a role/user to create databases.
         /// </summary>
-        createdb,
+        createdb = 3,
         /// <summary>
         /// Role attribute that allows a role/user to login to the postgres server.
         /// </summary>
-        login,
+        login = 4,
     }
 
     /// <summary>
@@ -83,14 +83,14 @@ namespace OGA.Postgres
         /// Allows new schemas and publications to be created within the database.
         /// And, allows trusted extensions to be isntalled within the database.
         /// </summary>
-        CREATE,
+        CREATE = 1,
         /// <summary>
         /// Allows the grantee to connect to the database.
         /// </summary>
-        CONNECT,
+        CONNECT = 2,
         /// <summary>
         /// Allows the grantee to create temp tables while using the database.
         /// </summary>
-        TEMPORARY
+        TEMPORARY = 3,
     }
 }

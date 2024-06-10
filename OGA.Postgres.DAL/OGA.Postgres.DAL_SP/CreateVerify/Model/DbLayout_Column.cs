@@ -1,7 +1,9 @@
-﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
+﻿using Newtonsoft.Json.Converters;
+using OGA.Postgres.DAL_SP.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace OGA.Postgres.DAL_SP.Model
@@ -19,6 +21,7 @@ namespace OGA.Postgres.DAL_SP.Model
         /// <summary>
         /// Specifies the datatype need for the column.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public eColDataTypes dataType { get; set; }
 
         /// <summary>

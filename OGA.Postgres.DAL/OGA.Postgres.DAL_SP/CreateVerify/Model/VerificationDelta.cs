@@ -18,34 +18,4 @@ namespace OGA.Postgres.DAL_SP.CreateVerify.Model
         public string ErrText { get; set; }
 
     }
-
-    public enum eErrorType
-    {
-        /// <summary>
-        /// Failed to query/update database server.
-        /// </summary>
-        DatabaseAccessError,
-        ValidationError,
-        /// <summary>
-        /// Object Not Found in Live Database object.
-        /// </summary>
-        NotFound,
-        /// <summary>
-        /// Object different in Live Database.
-        /// </summary>
-        Different,
-        /// <summary>
-        /// Object is extra in Live Database.
-        /// </summary>
-        Extra
-    }
-
-    public enum eObjType
-    {
-        Server,
-        Layout,
-        Column,
-        Table,
-        Database
-    }
 }

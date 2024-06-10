@@ -43,15 +43,15 @@ namespace OGA.Postgres.DAL.Model
         /// <summary>
         /// UUID primary key
         /// </summary>
-        uuid,
+        uuid = 1,
         /// <summary>
         /// 32-bit integer primary key
         /// </summary>
-        integer,
+        integer = 2,
         /// <summary>
         /// 64-bit integer primary key
         /// </summary>
-        bigint
+        bigint = 3,
     }
 
     public enum eNumericColTypes
@@ -59,22 +59,22 @@ namespace OGA.Postgres.DAL.Model
         /// <summary>
         /// Covers .NET Int32 type
         /// </summary>
-        integer,
+        integer = 1,
         /// <summary>
         /// Covers .NET Int64 type
         /// </summary>
-        bigint,
+        bigint = 2,
         /// <summary>
         /// Covers .NET float type
         /// </summary>
-        real,
+        real = 3,
         /// <summary>
         /// Covers .NET double type
         /// </summary>
-        double_precision,
+        double_precision = 4,
         /// <summary>
         /// Covers .NET decimal type
         /// </summary>
-        numeric
+        numeric = 5,
     }
 }
