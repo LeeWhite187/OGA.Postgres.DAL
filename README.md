@@ -15,9 +15,9 @@ Wraps the ceremony of using NpgSQL, to perform the following types of actions:
    With RC return, and with/without Terminal Select
 
 #### DatabaseLayout_Tool
-Abstracts database/table structure management into a serializable layout.\
-This class abstracts a PostgreSQL database (tables, columns, etc) into a serializable layout object.\
-It gives the developer a layout object, which allows the following use cases:
+Abstracts database/table structure management of a PostgreSQL database, into a serializable layout of POCOs.\
+This allows for database management in terms of JSON-serializable layout objects, instead of SQL scripts.\
+Using the layout abstraction of this class, allows the following use cases:
 - Create a database from a layout
 - Create a layout from a database
 - Serialize a layout (of a database) to and from json
