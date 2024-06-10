@@ -12,8 +12,8 @@ Wraps the ceremony of using NpgSQL, to perform the following types of actions:
 - Stored Procedures with RC return, with our without Terminal Select
 
 * Postgres_Tools
-This class includes lots of methods for host, database, and user management.
-- Host Management:
+  This class includes lots of methods for host, database, and user management.
+  - Host Management:
     - Get_DataDirectory() - identifies the filesystem path where databases are stored
     - Get_Database_FolderPath() - locates the specific folder path for a database
 
