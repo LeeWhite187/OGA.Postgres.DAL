@@ -4,8 +4,8 @@ Data Access Layer for PostGres SQL
 ## Description
 This library provides a Data Access Layer (DAL) and a class of tools for managing PostGres SQL databases, tables, and users.
 
-* Postgres_DAL
-  Wraps the ceremony of using NpgSQL, to perform the following types of actions:
+Postgres_DAL
+   Wraps the ceremony of using NpgSQL, to perform the following types of actions:
     - Tabular and Scalar Queries
     - Non Queries
       for sql commands, such as: database creations, role grants, table drops, etc...
