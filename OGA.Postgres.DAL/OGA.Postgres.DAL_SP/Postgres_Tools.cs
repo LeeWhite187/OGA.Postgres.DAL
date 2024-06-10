@@ -79,7 +79,7 @@ namespace OGA.Postgres
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~cSQL_Tools()
+        // ~Postgres_Tools()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
@@ -103,13 +103,15 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int TestConnection()
         {
-            var dal = new Postgres_DAL();
-            dal.Hostname = Hostname;
-            dal.Database = Database;
-            dal.Username = Username;
-            dal.Password = Password;
+            using(var dal = new Postgres_DAL())
+            {
+                dal.Hostname = Hostname;
+                dal.Database = Database;
+                dal.Username = Username;
+                dal.Password = Password;
 
-            return dal.Test_Connection();
+                return dal.Test_Connection();
+            }
         }
 
         #endregion
@@ -597,6 +599,225 @@ namespace OGA.Postgres
                     "Exception occurred");
 
                 return -20;
+            }
+        }
+
+        /// <summary>
+        /// Passes back the owner of the database.
+        /// Returns 1 for success, 0 if database not found, negatives for errors.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="owner"></param>
+        /// <returns></returns>
+        public int GetDatabaseOwner(string database, out string owner)
+        {
+            owner = "";
+            System.Data.DataTable dt = null;
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = "postgres";
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                    $"Attempting to get database owner...");
+
+                if(string.IsNullOrEmpty(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query for the database list...
+                string sql = $"SELECT datname, pg_catalog.pg_get_userbyid(d.datdba) as \"Owner\" " +
+                             $"FROM pg_database d " +
+                             $"WHERE datistemplate = false " +
+                             $"AND datname = '{database}';";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get database owner.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        "Failed to get database owner.");
+
+                    return -2;
+                }
+                // We have a datatable of our owner.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Database not found.
+                    return 0;
+                }
+                // Database was found.
+
+                owner = ((string?)dt.Rows[0]["Owner"]) ?? "";
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                    "Exception occurred while querying for database owner.");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Performs an alter database to transfer ownership.
+        /// Returns 1 for success, 0 if database or user not found, negatives for errors.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="newowner"></param>
+        /// <returns></returns>
+        public int ChangeDatabaseOwner(string database, string newowner)
+        {
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = "postgres";
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                    $"Attempting to get change owner...");
+
+                if(string.IsNullOrEmpty(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"Empty database name.");
+
+                    return -1;
+                }
+                if(string.IsNullOrEmpty(newowner))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"Empty newowner name.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Verify the database exists...
+                if(this.Is_Database_Present(database) != 1)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"Database ({(database ?? "")}) not found.");
+
+                    return 0;
+                }
+                // Verify the user exists...
+                if(this.Does_Login_Exist(newowner) != 1)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"User ({(newowner ?? "")}) not found.");
+
+                    return 0;
+                }
+
+                // Transfer ownership to the new user...
+                string sql = $"ALTER DATABASE {database} " +
+                             $"OWNER TO \"{newowner}\";";
+                if (_dal.Execute_NonQuery(sql) != -1)
+                {
+                    // Failed to change database owner.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        "Failed to change database owner.");
+
+                    return -2;
+                }
+                // We executed the alter database command.
+
+                // Verify the owner changed...
+                var resver = this.GetDatabaseOwner(database, out var actualowner);
+                if(resver != 1)
+                {
+                    // Failed to query database owner.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        "Failed to query database owner.");
+
+                    return -3;
+                }
+
+                if(actualowner != newowner)
+                {
+                    // Failed to update database owner.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        "Failed to update database owner.");
+
+                    return -4;
+                }
+                // If here, the database owner was changed, and verified to be updated.
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                    "Exception occurred while changing database owner.");
+
+                return -20;
+            }
+            finally
+            {
             }
         }
 
@@ -1247,6 +1468,11 @@ namespace OGA.Postgres
             {
             }
         }
+
+        #endregion
+
+
+        #region Permissions Management
 
         /// <summary>
         /// Returns 1 if successful, 0 if not found, negatives for errors.
@@ -3178,6 +3404,146 @@ namespace OGA.Postgres
         }
 
         /// <summary>
+        /// Retrieves the list of primary key constraints for the given table.
+        /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="pklist"></param>
+        /// <returns></returns>
+        public int Get_PrimaryKeyConstraints_forTable(string tableName, out List<PriKeyConstraint> pklist)
+        {
+            System.Data.DataTable dt = null;
+            pklist = new List<PriKeyConstraint>();
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = Database;
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                    $"Attempting to get primary key constraints for table {tableName ?? ""}...");
+
+                if(string.IsNullOrEmpty(tableName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        $"Table name is empty.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT kcu.table_schema, " +
+                             $"kcu.table_name, " +
+                             $"tco.constraint_name, " +
+                             $"kcu.ordinal_position AS position, " +
+                             $"kcu.column_name AS key_column " +
+                             $"FROM information_schema.table_constraints tco " +
+                             $"JOIN information_schema.key_column_usage kcu " +
+                             $"ON kcu.constraint_name = tco.constraint_name " +
+                             $"AND kcu.constraint_schema = tco.constraint_schema " +
+                             $"AND kcu.constraint_name = tco.constraint_name " +
+                             $"WHERE tco.constraint_type = 'PRIMARY KEY' " +
+                             $"AND kcu.table_name = '{tableName}' " +
+                             $"ORDER BY kcu.table_schema, kcu.table_name, position;";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get primary keys from the table.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        "Failed to get primary keys from the table.");
+
+                    return -2;
+                }
+                // We have a datatable of primary keys.
+
+                // See if it contains anything.
+                if (dt.Rows.Count == 0)
+                {
+                    // No primary keys in the table.
+                    // Or, the table doesn't exist.
+
+                    // Verify the table exists...
+                    var restable = this.DoesTableExist(tableName);
+                    if(restable != 1)
+                    {
+                        // Table doesn't exist.
+                        // That's why our key query returned nothing.
+
+                        return 0;
+                    }
+
+                    return 1;
+                }
+                // If here, we have primary keys for the table.
+
+                // Convert the raw list to our type...
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    var pk = new PriKeyConstraint();
+                    pk.table_schema = r["table_schema"] + "";
+                    pk.table_name = r["table_name"] + "";
+                    pk.constraint_name = r["constraint_name"] + "";
+                    pk.key_column = r["key_column"] + "";
+
+                    try
+                    {
+                        pk.position = Convert.ToInt32(r["position"]);
+                    }
+                    catch(Exception e)
+                    {
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                            $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                            $"Exception occurred while converting primary key position for table ({(tableName ?? "")}).");
+
+                        pk.position = -1;
+                    }
+
+                    pklist.Add(pk);
+                }
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
         /// Retrieves the list of columns for the given table.
         /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
         /// Returns 1 if found, 0 if not, negatives for errors.
@@ -3204,6 +3570,15 @@ namespace OGA.Postgres
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
                     $"Attempting to get table names for table {tableName ?? ""}...");
+
+                if(string.IsNullOrEmpty(tableName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                        $"Table name is empty.");
+
+                    return -1;
+                }
 
                 // Connect to the database...
                 var resconn = this._dal.Connect();
@@ -3240,6 +3615,16 @@ namespace OGA.Postgres
                 {
                     // No column in the table.
                     // Or, the table doesn't exist.
+
+                    // Verify the table exists...
+                    var restable = this.DoesTableExist(tableName);
+                    if(restable != 1)
+                    {
+                        // Table doesn't exist.
+                        // That's why our column list query returned nothing.
+
+                        return 0;
+                    }
 
                     return 1;
                 }
@@ -3299,6 +3684,15 @@ namespace OGA.Postgres
                     $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
                     $"Attempting to get column info for table {tableName ?? ""}...");
 
+                if(string.IsNullOrEmpty(tableName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        $"Table name is empty.");
+
+                    return -1;
+                }
+
                 // Connect to the database...
                 var resconn = this._dal.Connect();
                 if(resconn != 1)
@@ -3334,6 +3728,16 @@ namespace OGA.Postgres
                 {
                     // No column in the table.
                     // Or, the table doesn't exist.
+
+                    // Verify the table exists...
+                    var restable = this.DoesTableExist(tableName);
+                    if(restable != 1)
+                    {
+                        // Table doesn't exist.
+                        // That's why our column list query returned nothing.
+
+                        return 0;
+                    }
 
                     return 1;
                 }
@@ -3886,9 +4290,17 @@ namespace OGA.Postgres
             return StringIsAlphaNumberandUnderscore(username);
         }
 
-        static public bool TableNameIsValid(string username)
+        static public bool ColumnNameIsValid(string val)
         {
-            return StringIsAlphaNumberandUnderscore(username);
+            return StringIsAlphaNumberandUnderscore(val);
+        }
+        static public bool TableNameIsValid(string val)
+        {
+            return StringIsAlphaNumberandUnderscore(val);
+        }
+        static public bool DatabaseNameIsValid(string val)
+        {
+            return StringIsAlphaNumberandUnderscore(val);
         }
 
         static public bool StringIsAlphaNumberandUnderscore(string val)

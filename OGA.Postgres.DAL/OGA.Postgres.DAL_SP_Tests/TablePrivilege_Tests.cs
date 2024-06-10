@@ -222,7 +222,6 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
                     pt = new Postgres_Tools();

@@ -9,7 +9,14 @@
     <Import_RootNamespace>OGA.Postgres.DAL_SP</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\Enumerations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\DatabaseLayout_Tool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\VerificationDelta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enumerations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Column.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Database.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Table.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\PriKeyConstraint.cs" />
     <Compile Include="..\OGA.Postgres.DAL_SP\Model\ColumnInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TableColumnDef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_DAL.cs" />

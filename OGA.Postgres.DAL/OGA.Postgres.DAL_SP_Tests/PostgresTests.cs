@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
 using NanoidDotNet;
+using System.Threading.Tasks;
+using OGA.Postgres.DAL;
+using System.Linq;
 
 namespace OGA.Postgres_Tests
 {
@@ -15,6 +18,11 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_1_1  Verify that we can connect to a postgres database with npgsql.
         //  Test_1_1_2  Verify that connection fails to the test postgres database with the bad admin creds.
+
+        //  Test_1_2_1  Verify we can query for the owner of a database.
+        //  Test_1_2_2  Verify we can change the owner of a database.
+
+        //  Test_1_3_1  Verify we can get the primary key column data for a table.
      
         //  Test_1_8_1  Verify that we can create a database whose name doesn't already exist.
         //  Test_1_8_2  Verify that we cannot create a database whose name already exists.
@@ -94,7 +102,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_1_1  Verify that we can connect to the test postgres database with the test admin creds.
         [TestMethod]
-        public void Test_1_1_1()
+        public async Task Test_1_1_1()
         {
             Postgres_DAL dal = null;
 
@@ -118,7 +126,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_1_2  Verify that connection fails to the test postgres database with the bad admin creds.
         [TestMethod]
-        public void Test_1_1_2()
+        public async Task Test_1_1_2()
         {
             Postgres_DAL dal = null;
 
@@ -141,9 +149,264 @@ namespace OGA.Postgres_Tests
         }
 
 
+        //  Test_1_2_1  Verify we can query for the owner of a database.
+        [TestMethod]
+        public async Task Test_1_2_1()
+        {
+            Postgres_Tools pt = null;
+
+            try
+            {
+                pt = new Postgres_Tools();
+                pt.Hostname = dbcreds.Host;
+                pt.Database = dbcreds.Database;
+                pt.Username = dbcreds.User;
+                pt.Password = dbcreds.Password;
+
+                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+
+                // Check that the database doesn't exist...
+                var res1 = pt.Is_Database_Present(dbname);
+                if(res1 != 0)
+                    Assert.Fail("Wrong Value");
+
+                // Create the test database...
+                var res2 = pt.Create_Database(dbname);
+                if(res2 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database now exists...
+                var res3 = pt.Is_Database_Present(dbname);
+                if(res3 != 1)
+                    Assert.Fail("Wrong Value");
+
+
+                // Get the database owner...
+                var reso = pt.GetDatabaseOwner(dbname, out var ownername);
+                if(reso != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Verify the owner is our user that created it...
+                if (ownername != dbcreds.User)
+                    Assert.Fail("Wrong Value");
+
+
+                // Delete the database...
+                var res4 = pt.Drop_Database(dbname);
+                if(res4 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database is no longer present...
+                var res5 = pt.Is_Database_Present(dbname);
+                if(res5 != 0)
+                    Assert.Fail("Wrong Value");
+            }
+            finally
+            {
+                pt?.Dispose();
+            }
+        }
+
+        //  Test_1_2_2  Verify we can change the owner of a database.
+        [TestMethod]
+        public async Task Test_1_2_2()
+        {
+            Postgres_Tools pt = null;
+
+            try
+            {
+                pt = new Postgres_Tools();
+                pt.Hostname = dbcreds.Host;
+                pt.Database = dbcreds.Database;
+                pt.Username = dbcreds.User;
+                pt.Password = dbcreds.Password;
+
+                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+
+                // Check that the database doesn't exist...
+                var res1 = pt.Is_Database_Present(dbname);
+                if(res1 != 0)
+                    Assert.Fail("Wrong Value");
+
+                // Create the test database...
+                var res2 = pt.Create_Database(dbname);
+                if(res2 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database now exists...
+                var res3 = pt.Is_Database_Present(dbname);
+                if(res3 != 1)
+                    Assert.Fail("Wrong Value");
+
+
+                // Get the database owner...
+                var reso = pt.GetDatabaseOwner(dbname, out var ownername);
+                if(reso != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Verify the owner is our user that created it...
+                if (ownername != dbcreds.User)
+                    Assert.Fail("Wrong Value");
+
+
+                // Create a second database user...
+                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                {
+                    var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
+                    if(resa != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+
+                // Transfer ownership to the second user...
+                var reschg = pt.ChangeDatabaseOwner(dbname, mortaluser1);
+                if(reschg != 1)
+                    Assert.Fail("Wrong Value");
+
+
+                // Verify the database owner was changed...
+                var resver = pt.GetDatabaseOwner(dbname, out var actualowner);
+                if(resver != 1)
+                    Assert.Fail("Wrong Value");
+                if(actualowner != mortaluser1)
+                    Assert.Fail("Wrong Value");
+
+
+                // Delete the database...
+                var res4 = pt.Drop_Database(dbname);
+                if(res4 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database is no longer present...
+                var res5 = pt.Is_Database_Present(dbname);
+                if(res5 != 0)
+                    Assert.Fail("Wrong Value");
+            }
+            finally
+            {
+                pt?.Dispose();
+            }
+        }
+
+
+        //  Test_1_3_1  Verify we can get the primary key column data for a table.
+        [TestMethod]
+        public async Task Test_1_3_1()
+        {
+            Postgres_Tools pt = null;
+
+            try
+            {
+                pt = new Postgres_Tools();
+                pt.Hostname = dbcreds.Host;
+                pt.Database = dbcreds.Database;
+                pt.Username = dbcreds.User;
+                pt.Password = dbcreds.Password;
+
+                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+
+                // Check that the database doesn't exist...
+                var res1 = pt.Is_Database_Present(dbname);
+                if(res1 != 0)
+                    Assert.Fail("Wrong Value");
+
+                // Create the test database...
+                var res2 = pt.Create_Database(dbname);
+                if(res2 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database now exists...
+                var res3 = pt.Is_Database_Present(dbname);
+                if(res3 != 1)
+                    Assert.Fail("Wrong Value");
+
+
+                // Create a test table in our test database that has a primary key...
+                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                {
+                    // Swap our connection to the created database...
+                    pt.Dispose();
+                    await Task.Delay(500);
+                    pt = new Postgres_Tools();
+                    pt.Hostname = dbcreds.Host;
+                    pt.Database = dbname;
+                    pt.Username = dbcreds.User;
+                    pt.Password = dbcreds.Password;
+
+                    // Verify we can access the new database...
+                    var res5 = pt.TestConnection();
+                    if(res5 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Create the table definition...
+                    var tch = new TableDefinition(tblname, pt.Username);
+                    tch.Add_Pk_Column("Id", Postgres.DAL.Model.ePkColTypes.integer);
+                    tch.Add_String_Column("IconName", 50, false);
+
+                    // Make the call to create the table...
+                    var res6 = pt.Create_Table(tch);
+                    if(res6 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Confirm the table was created...
+                    var res7 = pt.DoesTableExist(tblname);
+                    if(res7 != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+                // Query for the primary keys of the table...
+                var respk = pt.Get_PrimaryKeyConstraints_forTable(tblname, out var pklist);
+                if(respk != 1 || pklist == null)
+                    Assert.Fail("Wrong Value");
+
+                // Verify we found the primary key we created...
+                if(pklist.Count != 1)
+                    Assert.Fail("Wrong Value");
+                var pkc = pklist.FirstOrDefault(n => n.key_column == "Id");
+                if(pkc == null)
+                    Assert.Fail("Wrong Value");
+                if(pkc.table_name != tblname)
+                    Assert.Fail("Wrong Value");
+
+
+                // To drop the database, we must switch back to the postgres database...
+                {
+                    // Swap our connection back to the catalog...
+                    pt.Dispose();
+                    await Task.Delay(500);
+                    pt = new Postgres_Tools();
+                    pt.Hostname = dbcreds.Host;
+                    pt.Database = dbcreds.Database;
+                    pt.Username = dbcreds.User;
+                    pt.Password = dbcreds.Password;
+
+                    // Verify we can access the postgres database...
+                    var res6a = pt.TestConnection();
+                    if(res6a != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+                // Delete the database...
+                var res8 = pt.Drop_Database(dbname);
+                if(res8 != 1)
+                    Assert.Fail("Wrong Value");
+
+                // Check that the database is no longer present...
+                var res9 = pt.Is_Database_Present(dbname);
+                if(res9 != 0)
+                    Assert.Fail("Wrong Value");
+            }
+            finally
+            {
+                pt?.Dispose();
+            }
+        }
+
+
         //  Test_1_8_1  Verify that we can create a database whose name doesn't already exist.
         [TestMethod]
-        public void Test_1_8_1()
+        public async Task Test_1_8_1()
         {
             Postgres_Tools pt = null;
 
@@ -190,7 +453,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_8_2  Verify that we cannot create a database whose name already exists.
         [TestMethod]
-        public void Test_1_8_2()
+        public async Task Test_1_8_2()
         {
             Postgres_Tools pt = null;
 
@@ -244,7 +507,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_8_3  Verify that we can verify if a database exists.
         [TestMethod]
-        public void Test_1_8_3()
+        public async Task Test_1_8_3()
         {
             Postgres_Tools pt = null;
 
@@ -291,7 +554,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_8_4  Verify that we can delete a database that exists.
         [TestMethod]
-        public void Test_1_8_4()
+        public async Task Test_1_8_4()
         {
             Postgres_Tools pt = null;
 
@@ -338,7 +601,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_8_5  Verify that we cannot delete a database with an unknown name.
         [TestMethod]
-        public void Test_1_8_5()
+        public async Task Test_1_8_5()
         {
             Postgres_Tools pt = null;
 
@@ -370,7 +633,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_8_6  Verify that a user without CreateDB is not allowed to create a database.
         [TestMethod]
-        public void Test_1_8_6()
+        public async Task Test_1_8_6()
         {
             Postgres_Tools pt = null;
 
@@ -431,7 +694,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_9_1  Verify that we can get the folder path of the data folder.
         [TestMethod]
-        public void Test_1_9_1()
+        public async Task Test_1_9_1()
         {
             Postgres_Tools pt = null;
 
@@ -460,7 +723,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_9_2  Verify that we can get the folder path of a database.
         [TestMethod]
-        public void Test_1_9_2()
+        public async Task Test_1_9_2()
         {
             Postgres_Tools pt = null;
 
@@ -492,7 +755,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_10_1  Verify that we can get a list of tables for a given database.
         [TestMethod]
-        public void Test_1_10_1()
+        public async Task Test_1_10_1()
         {
             Postgres_Tools pt = null;
 

@@ -80,7 +80,42 @@ namespace OGA.Postgres.DAL
         }
 
         /// <summary>
-        /// Adds a datetime column to the table schema.
+        /// Adds a non-UTC datetime column to the table schema.
+        /// </summary>
+        /// <param name="colname"></param>
+        /// <param name="canbenull"></param>
+        /// <returns></returns>
+        public int Add_DateTime_Column(string colname, bool canbenull)
+        {
+            if(string.IsNullOrEmpty(colname))
+            {
+                // Invalid column name.
+                return -1;
+            }
+
+            // Ensure the column name doesn't already exist...
+            if(this.columnlist.Exists(m=>m.ColName == colname))
+            {
+                // Column name already exists.
+                return -1;
+            }
+
+            var cd = new TableColumnDef();
+            cd.ColName = colname;
+            cd.IsPk = false;
+            cd.Collate = "";
+            cd.CanBeNull = canbenull;
+            // In PostgreSQL, "timestamp without time zone" is used to represent a non-UTC datetime.
+            // See this: https://oga.atlassian.net/wiki/spaces/~311198967/pages/edit-v2/207388673?draftShareId=65eb5bab-6dc3-414c-85b7-a35d88265cc4&inEditorTemplatesPanel=auto_closed
+            cd.ColType = "timestamp without time zone";
+
+            this.columnlist.Add(cd);
+
+            return 1;            
+        }
+
+        /// <summary>
+        /// Adds a UTC datetime column to the table schema.
         /// </summary>
         /// <param name="colname"></param>
         /// <param name="canbenull"></param>
