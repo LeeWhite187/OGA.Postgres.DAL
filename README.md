@@ -27,7 +27,7 @@ Using the layout abstraction of this class, allows the following use cases:
 - Verify a database is compatible with a starting service, by performing a verification check with a json-serialized layout.
 
 #### Postgres_Tools
-This class includes lots of methods for management of hosts, databases, tables, users, and permissions.
+This class includes lots of methods for management of hosts, databases, tables, users, and permissions, allowing the developer to work in terms of method calls, without SQL scripts.
 - Host Management:
    - Get_DataDirectory()\
      Identifies the filesystem path where databases are stored
