@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\Enumerations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\DatabaseLayout_Tool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\LayoutComparisonOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\VerificationDelta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enumerations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Column.cs" />

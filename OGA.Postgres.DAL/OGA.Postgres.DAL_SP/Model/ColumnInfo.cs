@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,7 +19,14 @@ namespace OGA.Postgres.DAL_SP.Model
 
         public int? maxlength { get; set; }
 
-        public bool isIdentity { get; set; }
+        public bool isIdentity { get; set; } = false;
+
+        /// <summary>
+        /// When isIdentity is true, this column defines when the column is auto-generated.
+        /// This property is UNSET when isIdentity is false.
+        /// </summary>
+        public eIdentityBehavior identityBehavior { get; set; } = eIdentityBehavior.UNSET;
+
 
         public bool isNullable { get; set; }
     }

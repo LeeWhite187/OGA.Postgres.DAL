@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using NLog.LayoutRenderers;
 using NLog.Layouts;
+using NLog.Targets;
 using OGA.Postgres;
 using OGA.Postgres.DAL;
 using OGA.Postgres.DAL.Model;
@@ -53,6 +54,9 @@ namespace OGA.Postgres.CreateVerify
 
         #region ctor / dtor
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public DatabaseLayout_Tool()
         {
             _instancecounter++;
@@ -90,12 +94,17 @@ namespace OGA.Postgres.CreateVerify
         /// Will verify that the given database layout matches the live database and table structure.
         /// Returns 1 if no differences.
         /// Returns 0 with list of differences.
+        /// Accepts an options instance, to drive comparison behavior.
         /// </summary>
         /// <param name="layout"></param>
         /// <param name="ptool"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public (int res, List<VerificationDelta> errs) Verify_Database_Layout(DbLayout_Database layout, Postgres_Tools ptool = null)
+        public (int res, List<VerificationDelta> errs) Verify_Database_Layout(DbLayout_Database layout, Postgres_Tools ptool = null, LayoutComparisonOptions options = null)
         {
+            if (options == null)
+                options = new LayoutComparisonOptions();
+
             bool localtoolinstance = false;
             var errs = new List<VerificationDelta>();
 
@@ -146,6 +155,7 @@ namespace OGA.Postgres.CreateVerify
                     return (0, errs);
                 }
 
+                // Create the tool instance...
                 if(ptool == null)
                 {
                     localtoolinstance = true;
@@ -244,38 +254,41 @@ namespace OGA.Postgres.CreateVerify
                 // In order to access database table info, we have to be on a connection with the containing database.
                 // Currently, we are connected to the postgres database.
                 // So, we will switch to the actual database for the rest of these calls.
-                ptool.Dispose();
-                ptool = new Postgres_Tools();
-                ptool.Hostname = this.Hostname;
-                // Use the database in the layout...
-                ptool.Database = layout.name;
-                ptool.Username = this.Username;
-                ptool.Password = this.Password;
-
-                // Verify we can connect...
-                if(ptool.TestConnection() != 1)
                 {
-                    // Failed to connect with database in layout.
+                    ptool.Dispose();
+                    ptool = new Postgres_Tools();
+                    ptool.Hostname = this.Hostname;
+                    // Use the database in the layout...
+                    ptool.Database = layout.name ?? "";
+                    ptool.Username = this.Username;
+                    ptool.Password = this.Password;
 
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                        $"Failed to connect with Database ({(layout.name)}).");
+                    // Verify we can connect...
+                    if(ptool.TestConnection() != 1)
+                    {
+                        // Failed to connect with database in layout.
 
-                    var err = new VerificationDelta();
-                    err.ObjType = eObjType.Server;
-                    err.ObjName = layout.name ?? "";
-                    err.ParentName = "";
-                    err.ErrText = "Cannot Connect to Database";
-                    err.ErrorType = eErrorType.DatabaseAccessError;
-                    errs.Add(err);
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                            $"Failed to connect with Database ({(layout.name)}).");
 
-                    return (-1, errs);
+                        var err = new VerificationDelta();
+                        err.ObjType = eObjType.Server;
+                        err.ObjName = layout.name ?? "";
+                        err.ParentName = "";
+                        err.ErrText = "Cannot Connect to Database";
+                        err.ErrorType = eErrorType.DatabaseAccessError;
+                        errs.Add(err);
+
+                        return (-1, errs);
+                    }
                 }
 
-                // Verify that each table exists...
+                // Verify that each layout table exists...
+                // The caller can give us an options instance that allows us to ignore extra tables in the live database.
                 foreach(var t in layout.tables)
                 {
-                    if(t == null)
+                    if(t == null || string.IsNullOrEmpty(t.name))
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                             $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
@@ -296,6 +309,8 @@ namespace OGA.Postgres.CreateVerify
                     var restexists = ptool.DoesTableExist(t.name);
                     if(restexists != 1)
                     {
+                        // Table, from layout, is not in the live database.
+
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                             $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
                             $"Table ({(t.name ?? "")}) not found in database ({(layout.name)}).");
@@ -307,64 +322,67 @@ namespace OGA.Postgres.CreateVerify
                         err.ErrText = "Table Not Found";
                         err.ErrorType = eErrorType.NotFound;
                         errs.Add(err);
+
+                        continue;
                     }
-                    else
+                    // Table was found in live database.
+
+                    // Get table column info...
+                    var resci = ptool.Get_ColumnInfo_forTable(t.name, out var livetablecolumnlist);
+                    if(resci != 1)
                     {
-                        // Table was found in live database.
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                            $"Failed to get column info for table ({(t.name ?? "")}) of database ({(layout.name)}).");
 
-                        // Get table column info...
-                        var resci = ptool.Get_ColumnInfo_forTable(t.name, out var livetablecolumnlist);
-                        if(resci != 1)
+                        var err = new VerificationDelta();
+                        err.ObjType = eObjType.Table;
+                        err.ObjName = t.name ?? "";
+                        err.ParentName = layout.name ?? "";
+                        err.ErrText = "Failed to retrieve column info";
+                        err.ErrorType = eErrorType.DatabaseAccessError;
+                        errs.Add(err);
+
+                        return (-1, errs);
+                    }
+                    // Retrieved column info for table.
+
+                    if(livetablecolumnlist == null)
+                        livetablecolumnlist = new List<ColumnInfo>();
+
+                    // Get primary keys for the table...
+                    var respk = ptool.Get_PrimaryKeyConstraints_forTable(t.name, out var pklist);
+                    if(respk != 1 || pklist == null)
+                    {
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                            $"Failed to get primary key list for table ({(t.name ?? "")}) of database ({(layout.name)}).");
+
+                        var err = new VerificationDelta();
+                        err.ObjType = eObjType.Table;
+                        err.ObjName = t.name ?? "";
+                        err.ParentName = layout.name ?? "";
+                        err.ErrText = "Failed to retrieve primary key list";
+                        err.ErrorType = eErrorType.DatabaseAccessError;
+                        errs.Add(err);
+
+                        return (-1, errs);
+                    }
+                    // We have column info to verify.
+                    // We will verify in both directions, so we identify missing columns, and extra columns.
+
+                    // Verify layout columns are in live table...
+                    foreach(var c in livetablecolumnlist)
+                    {
+                        // Get the column info from our layout...
+                        var cli = t.columns.FirstOrDefault(n=>n.name == c.name);
+                        if(cli == null)
                         {
-                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                $"Failed to get column info for table ({(t.name ?? "")}) of database ({(layout.name)}).");
+                            // The live table has a column name that is NOT in the layout.
 
-                            var err = new VerificationDelta();
-                            err.ObjType = eObjType.Table;
-                            err.ObjName = t.name ?? "";
-                            err.ParentName = layout.name ?? "";
-                            err.ErrText = "Failed to retrieve column info";
-                            err.ErrorType = eErrorType.DatabaseAccessError;
-                            errs.Add(err);
-
-                            return (-1, errs);
-                        }
-                        // Retrieved column info for table.
-
-                        if(livetablecolumnlist == null)
-                            livetablecolumnlist = new List<ColumnInfo>();
-
-                        // Get primary keys for the table...
-                        var respk = ptool.Get_PrimaryKeyConstraints_forTable(t.name, out var pklist);
-                        if(respk != 1 || pklist == null)
-                        {
-                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                $"Failed to get primary key list for table ({(t.name ?? "")}) of database ({(layout.name)}).");
-
-                            var err = new VerificationDelta();
-                            err.ObjType = eObjType.Table;
-                            err.ObjName = t.name ?? "";
-                            err.ParentName = layout.name ?? "";
-                            err.ErrText = "Failed to retrieve primary key list";
-                            err.ErrorType = eErrorType.DatabaseAccessError;
-                            errs.Add(err);
-
-                            return (-1, errs);
-                        }
-                        // We have column info to verify.
-                        // We will verify in both directions, so we identify missing columns, and extra columns.
-
-                        // Verify layout columns are in live table...
-                        foreach(var c in livetablecolumnlist)
-                        {
-                            // Get the column info from our layout...
-                            var cli = t.columns.FirstOrDefault(n=>n.name == c.name);
-                            if(cli == null)
+                            // Check if we are to indicate this as a delta...
+                            if(!options.ignoreExtraColumnsInLiveDatabaseTables)
                             {
-                                // The live table has a column name that is NOT in the layout.
-
                                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
                                     $"Live table ({(t.name ?? "")}) has column ({(c.name)}) that is not in table ({(t.name)}).");
@@ -376,177 +394,287 @@ namespace OGA.Postgres.CreateVerify
                                 err.ErrText = "Table column missing from layout";
                                 err.ErrorType = eErrorType.Extra;
                                 errs.Add(err);
-
-                                continue;
                             }
-                            // Live table column name is in layout.
 
-                            // Verify its type...
-                            var resctypematch = this.DoesColumnTypeMatchLayoutType(c.dataType, cli.dataType);
-                            if(!resctypematch)
+                            // The live table is NOT in the layout.
+                            // Nothing to compare.
+                            // We will skip to the next.
+                            continue;
+                        }
+                        // Live table column name is in layout.
+
+                        // Verify its type...
+                        var resctypematch = this.DoesColumnTypeMatchLayoutType(c.dataType, cli.dataType);
+                        if(!resctypematch)
+                        {
+                            // The live table column datatype is not a match to the layout column datatype.
+
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Live table ({(t.name ?? "")}) column ({(c.name)}) datatype ({(c.dataType)}) doesn't match layout column datatype ({(cli.dataType.ToString())}).");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = c.name ?? "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Column datatype different from layout";
+                            err.ErrorType = eErrorType.Different;
+                            errs.Add(err);
+                        }
+                        else
+                        {
+                            // Datatypes are a match.
+
+                            // Verify length if a varchar...
+                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.varchar ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
                             {
-                                // The live table column datatype is not a match to the layout column datatype.
-
-                                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                    $"Live table ({(t.name ?? "")}) column ({(c.name)}) datatype ({(c.dataType)}) doesn't match layout column datatype ({(cli.dataType.ToString())}).");
-
-                                var err = new VerificationDelta();
-                                err.ObjType = eObjType.Column;
-                                err.ObjName = c.name ?? "";
-                                err.ParentName = t.name ?? "";
-                                err.ErrText = "Column datatype different from layout";
-                                err.ErrorType = eErrorType.Different;
-                                errs.Add(err);
-                            }
-                            else
-                            {
-                                // Datatypes are a match.
-
-                                // Verify length if a varchar...
-                                if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.varchar)
+                                // Verify the varchar length is a match...
+                                if(c.maxlength != cli.maxlength)
                                 {
-                                    // Verify the varchar length is a match...
-                                    if(c.maxlength != cli.maxlength)
-                                    {
-                                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                            $"Live table ({(t.name ?? "")}) varchar column ({(c.name)}) has different max length than layout.");
-
-                                        var err = new VerificationDelta();
-                                        err.ObjType = eObjType.Column;
-                                        err.ObjName = c.name ?? "";
-                                        err.ParentName = t.name ?? "";
-                                        err.ErrText = "Varchar column has different max length from layout";
-                                        err.ErrorType = eErrorType.Different;
-                                        errs.Add(err);
-                                    }
-                                }
-                            }
-
-
-                            // Verify its nullable state...
-                            if(c.isNullable != cli.isNullable)
-                            {
-                                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                    $"Live table ({(t.name ?? "")}) column ({(c.name)}) has different isnullable setting from layout.");
-
-                                var err = new VerificationDelta();
-                                err.ObjType = eObjType.Column;
-                                err.ObjName = c.name ?? "";
-                                err.ParentName = t.name ?? "";
-                                err.ErrText = "Column isnullable different from layout";
-                                err.ErrorType = eErrorType.Different;
-                                errs.Add(err);
-                            }
-
-                            // Check if it's a primary key...
-                            if(pklist.Exists(n=>n.key_column == c.name))
-                            {
-                                // Current live table column is a primary key.
-
-                                // Check that our layout indicates that...
-                                if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
-                                    cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
-                                    cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid)
-                                {
-                                    // The column in the layout is a primary key.
-                                    // This matches the column in live table.
-                                }
-                                else
-                                {
-                                    // Layout indicates column is NOT a primary key.
-
                                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                        $"Live table ({(t.name ?? "")}) column ({(c.name)}) is a primary key, but layout shows it is NOT one.");
+                                        $"Live table ({(t.name ?? "")}) varchar column ({(c.name)}) has different max length than layout.");
 
                                     var err = new VerificationDelta();
                                     err.ObjType = eObjType.Column;
                                     err.ObjName = c.name ?? "";
                                     err.ParentName = t.name ?? "";
-                                    err.ErrText = "Live table column should NOT be primary key";
+                                    err.ErrText = "Varchar column has different max length from layout";
                                     err.ErrorType = eErrorType.Different;
                                     errs.Add(err);
-                                }
-                            }
-                            else
-                            {
-                                // Not a primary key.
-                                // Check if it should be...
-
-                                // See if the current live table column is a primary key in the layout...
-                                if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
-                                    cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
-                                    cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid)
-                                {
-                                    // The column in the layout is a primary key.
-                                    // But, the live table column is not one.
-
-                                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                        $"Live table ({(t.name ?? "")}) column ({(c.name)}) is NOT a primary key, but layout shows it as one.");
-
-                                    var err = new VerificationDelta();
-                                    err.ObjType = eObjType.Column;
-                                    err.ObjName = c.name ?? "";
-                                    err.ParentName = t.name ?? "";
-                                    err.ErrText = "Live table column should be primary key";
-                                    err.ErrorType = eErrorType.Different;
-                                    errs.Add(err);
-                                }
-                                else
-                                {
-                                    // Layout and live table both indicate not a primary key.
                                 }
                             }
                         }
-                        // We've iterated all live table columns, and verified ones that are in the layout.
-                        // As well, we've marked live table columns, that are not in the layout, as errors.
-                        // What's left to reconcile is columns in the layout that are NOT columns in the live table.
 
-                        // Verify layout columns are in the live table...
-                        foreach(var c in t.columns)
+
+                        // Verify its nullable state...
+                        if(c.isNullable != cli.isNullable)
                         {
-                            if(c == null)
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Live table ({(t.name ?? "")}) column ({(c.name)}) has different isnullable setting from layout.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = c.name ?? "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Column isnullable different from layout";
+                            err.ErrorType = eErrorType.Different;
+                            errs.Add(err);
+                        }
+
+                        // Check if it's a primary key...
+                        if(pklist.Exists(n=>n.key_column == c.name))
+                        {
+                            // Current live table column is a primary key.
+
+                            // Check that our layout indicates that...
+                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
                             {
-                                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                    $"Null column in table ({(t.name)}) of layout.");
-
-                                var err = new VerificationDelta();
-                                err.ObjType = eObjType.Column;
-                                err.ObjName = "";
-                                err.ParentName = t.name ?? "";
-                                err.ErrText = "Null column in layout";
-                                err.ErrorType = eErrorType.DatabaseAccessError;
-                                errs.Add(err);
-
-                                continue;
+                                // The column in the layout is a primary key.
+                                // This matches the column in live table.
                             }
-
-                            // Get the live table column...
-                            var ltc = livetablecolumnlist.FirstOrDefault(n=>n.name == c.name);
-                            if(ltc == null)
+                            else
                             {
-                                // Layout has a column name that is NOT in the live table.
+                                // Layout indicates column is NOT a primary key.
 
                                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                                    $"Layout has column ({(c.name)}) that is not in live table ({(t.name)}).");
+                                    $"Live table ({(t.name ?? "")}) column ({(c.name)}) is a primary key, but layout shows it is NOT one.");
 
                                 var err = new VerificationDelta();
                                 err.ObjType = eObjType.Column;
                                 err.ObjName = c.name ?? "";
                                 err.ParentName = t.name ?? "";
-                                err.ErrText = "Table column missing from live table";
-                                err.ErrorType = eErrorType.NotFound;
+                                err.ErrText = "Live table column should NOT be primary key";
+                                err.ErrorType = eErrorType.Different;
                                 errs.Add(err);
                             }
-                            // Live table column name is in layout.
-                            // We've already checked properties of the live table columns against their matches in the layout.
-                            // So, we can skip to the next one.
+                        }
+                        else
+                        {
+                            // Not a primary key.
+                            // Check if it should be...
+
+                            // See if the current live table column is a primary key in the layout...
+                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid ||
+                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
+                            {
+                                // The column in the layout is a primary key.
+                                // But, the live table column is not one.
+
+                                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                    $"Live table ({(t.name ?? "")}) column ({(c.name)}) is NOT a primary key, but layout shows it as one.");
+
+                                var err = new VerificationDelta();
+                                err.ObjType = eObjType.Column;
+                                err.ObjName = c.name ?? "";
+                                err.ParentName = t.name ?? "";
+                                err.ErrText = "Live table column should be primary key";
+                                err.ErrorType = eErrorType.Different;
+                                errs.Add(err);
+                            }
+                            else
+                            {
+                                // Layout and live table both indicate not a primary key.
+                            }
+                        }
+
+                        // Verify its identity state...
+                        if(c.isIdentity != cli.isIdentity)
+                        {
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Live table ({(t.name ?? "")}) column ({(c.name)}) has different isIdentity setting from layout.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = c.name ?? "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Column isIdentity different from layout";
+                            err.ErrorType = eErrorType.Different;
+                            errs.Add(err);
+                        }
+
+                        // Verify their identity behaviors...
+                        if(c.identityBehavior != cli.identityBehavior)
+                        {
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Live table ({(t.name ?? "")}) column ({(c.name)}) has different identityBehavior setting from layout.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = c.name ?? "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Column identityBehavior different from layout";
+                            err.ErrorType = eErrorType.Different;
+                            errs.Add(err);
+                        }
+                    }
+                    // We've iterated all live table columns, and verified ones that are in the layout.
+                    // As well, we've marked live table columns, that are not in the layout, as errors.
+                    // What's left to reconcile is columns in the layout that are NOT columns in the live table.
+
+                    // Verify layout columns are in the live table...
+                    foreach(var c in t.columns)
+                    {
+                        if(c == null)
+                        {
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Null column in table ({(t.name)}) of layout.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Null column in layout";
+                            err.ErrorType = eErrorType.DatabaseAccessError;
+                            errs.Add(err);
+
+                            continue;
+                        }
+
+                        // Get the live table column...
+                        var ltc = livetablecolumnlist.FirstOrDefault(n=>n.name == c.name);
+                        if(ltc == null)
+                        {
+                            // Layout has a column name that is NOT in the live table.
+
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Layout has column ({(c.name)}) that is not in live table ({(t.name)}).");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Column;
+                            err.ObjName = c.name ?? "";
+                            err.ParentName = t.name ?? "";
+                            err.ErrText = "Table column missing from live table";
+                            err.ErrorType = eErrorType.NotFound;
+                            errs.Add(err);
+                        }
+                        // Live table column name is in layout.
+                        // We've already checked properties of the live table columns against their matches in the layout.
+                        // So, we can skip to the next one.
+                    }
+                }
+
+                // See if we are to check for extra tables in the live database...
+                if(!options.ignoreExtraTablesInLiveDatabase)
+                {
+                    // We are to check for tables in the live database that don't appear in the layout.
+
+                    // Get the table list of the live database...
+                    var resltl = ptool.Get_TableList_forDatabase(layout.name, out var livetablelist);
+                    if(resltl != 1)
+                    {
+                        // Failed to get table list for live database.
+
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                            $"Failed to get table list for database ({(layout.name)}).");
+
+                        var err = new VerificationDelta();
+                        err.ObjType = eObjType.Database;
+                        err.ObjName = layout.name ?? "";
+                        err.ParentName = "";
+                        err.ErrText = "Cannot Access Database";
+                        err.ErrorType = eErrorType.DatabaseAccessError;
+                        errs.Add(err);
+
+                        // Cannot continue.
+                        return (-1, errs);
+                    }
+
+                    // Verify each live database table is listed in the layout...
+                    foreach(var t in livetablelist)
+                    {
+                        // Skip if null...
+                        if(string.IsNullOrEmpty(t))
+                        {
+                            // Table name is null.
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Null table name from live database.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Layout;
+                            err.ObjName = layout.name ?? "";
+                            err.ParentName = "";
+                            err.ErrText = "Null table in Live Database";
+                            err.ErrorType = eErrorType.DatabaseAccessError;
+                            errs.Add(err);
+
+                            // Consider this fatal to our checks.
+                            return (-1, errs);
+                        }
+
+                        // Check that the table is in the layout...
+                        var lt = layout.tables.FirstOrDefault(n => n.name == t);
+                        if(lt == null)
+                        {
+                            // Live database table is not present in layout.
+                            // If we are here, we are to indicate it as a delta.
+
+                            OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                                $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
+                                $"Database ({(layout.name)}) Table ({(t ?? "")}) not found in layout.");
+
+                            var err = new VerificationDelta();
+                            err.ObjType = eObjType.Table;
+                            err.ObjName = t ?? "";
+                            err.ParentName = layout.name ?? "";
+                            err.ErrText = "Table Not in Layout";
+                            err.ErrorType = eErrorType.Extra;
+                            errs.Add(err);
                         }
                     }
                 }
@@ -709,6 +837,22 @@ namespace OGA.Postgres.CreateVerify
                         clayout.isNullable = cdef.isNullable;
                         clayout.isIdentity = cdef.isIdentity;
 
+                        if(clayout.isIdentity)
+                        {
+                            // The column is an identity column.
+                            // We need to set its identity behavior.
+
+                            if (cdef.identityBehavior == eIdentityBehavior.GenerateByDefault)
+                                clayout.identityBehavior = eIdentityBehavior.GenerateByDefault;
+                            else if (cdef.identityBehavior == eIdentityBehavior.GenerateAlways)
+                                clayout.identityBehavior = eIdentityBehavior.GenerateAlways;
+                            else if (cdef.identityBehavior == eIdentityBehavior.UNSET)
+                                clayout.identityBehavior = eIdentityBehavior.UNSET;
+                            else
+                                clayout.identityBehavior = eIdentityBehavior.UNSET;
+                        }
+
+
                         // Parse the column's datatype...
                         var rescoltype = DatabaseLayout_Tool.Parse_ColDataType(cdef.dataType);
                         if(rescoltype.res != 1)
@@ -757,7 +901,8 @@ namespace OGA.Postgres.CreateVerify
                         clayout.maxlength = null;
 
                         // If the column is a varchar, we need its max length..
-                        if(clayout.dataType == eColDataTypes.varchar)
+                        if(clayout.dataType == eColDataTypes.varchar ||
+                            clayout.dataType == eColDataTypes.pk_varchar)
                             clayout.maxlength = cdef.maxlength;
 
                         // If the column is a text type, we will set length to zero...
@@ -1170,10 +1315,91 @@ namespace OGA.Postgres.CreateVerify
             }
         }
 
+        /// <summary>
+        /// Will catalog a Postgres host as a list of database layouts.
+        /// This can be used as a quick tool, to inspect a host.
+        /// Returns 1 if successful, negatives for errors.
+        /// </summary>
+        /// <returns></returns>
+        public (int res, List<DbLayout_Database> layouts) GetLayouts_forAllHostDatabases()
+        {
+            Postgres_Tools ptool = null;
+            var layouts = new List<DbLayout_Database>();
+
+            try
+            {
+                if(ptool == null)
+                {
+                    // Create an instance...
+                    ptool = new Postgres_Tools();
+                    ptool.Hostname = this.Hostname;
+                    ptool.Database = "postgres";
+                    ptool.Username = this.Username;
+                    ptool.Password = this.Password;
+                }
+
+                // Get a list of databases on the host...
+                var res1 = ptool.Get_DatabaseList(out var dblist);
+                if(res1 != 1 || dblist == null)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetLayouts_forAllHostDatabases)} - " +
+                        $"Failed to get database list.");
+
+                    return (-1, null);
+                }
+
+                // Remove any system databases...
+                dblist.Remove("postgres");
+                dblist.Remove("template1");
+                dblist.Remove("template0");
+
+                // Create a layout for each database...
+                foreach(var d in dblist)
+                {
+                    // Create a layout for the given database...
+                    var res2 = this.CreateLayout_fromDatabase(d);
+                    if(res2.res != 1 || res2.layout == null)
+                    {
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetLayouts_forAllHostDatabases)} - " +
+                            $"Failed to create layout for database ({(d)}).");
+
+                        return (-1, null);
+                    }
+
+                    // Add to the running list...
+                    layouts.Add(res2.layout);
+                }
+
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetLayouts_forAllHostDatabases)} - " +
+                    $"Database layouts created from PostgreSQL host.");
+
+                return (1, layouts);
+            }
+            catch(Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetLayouts_forAllHostDatabases)} - " +
+                    $"Exception occurred while creating datbase layouts for PostgreSQL host.");
+
+                return (-10, null);
+            }
+            finally
+            {
+                try
+                {
+                    ptool?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
         #endregion
 
 
-        #region DataType Conversionss
+        #region DataType Conversions
 
         /// <summary>
         /// Will promote a given datatype to the corresponding primary key column type, if possible.
@@ -1189,6 +1415,8 @@ namespace OGA.Postgres.CreateVerify
                 return (1, eColDataTypes.pk_integer);
             else if (dtype == eColDataTypes.uuid)
                 return (1, eColDataTypes.pk_uuid);
+            else if (dtype == eColDataTypes.varchar)
+                return (1, eColDataTypes.pk_varchar);
             else
                 return (-1, eColDataTypes.notset);
         }
@@ -1212,6 +1440,8 @@ namespace OGA.Postgres.CreateVerify
                 return (1, eColDataTypes.integer);
             else if (dataType == "numeric")
                 return (1, eColDataTypes.numeric);
+            else if (dataType == "boolean")
+                return (1, eColDataTypes.boolean);
             /* Exclude primary key column types, here, since we have a separate method for promoting a type to a primary key.
             else if (dataType == "bigint")
                 return (1, eColDataTypes.pk_bigint);
@@ -1219,6 +1449,8 @@ namespace OGA.Postgres.CreateVerify
                 return (1, eColDataTypes.pk_integer);
             else if (dataType == "uuid")
                 return (1, eColDataTypes.pk_uuid);
+            else if (dataType == "character varying")
+                return (1, eColDataTypes.pk_varchar);
             */
             else if (dataType == "real")
                 return (1, eColDataTypes.real);
@@ -1285,17 +1517,39 @@ namespace OGA.Postgres.CreateVerify
             {
                 res = tch.Add_Numeric_Column(collayoutentry.name, eNumericColTypes.numeric, collayoutentry.isNullable);
             }
+            else if(collayoutentry.dataType == eColDataTypes.boolean)
+            {
+                res = tch.Add_Boolean_Column(collayoutentry.name, collayoutentry.isNullable);
+            }
             else if(collayoutentry.dataType == eColDataTypes.pk_bigint)
             {
-                res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.bigint);
+                // This primary key datatype can have an identity generation behavior.
+                res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.bigint, collayoutentry.identityBehavior);
             }
             else if(collayoutentry.dataType == eColDataTypes.pk_integer)
             {
-                res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.integer);
+                // This primary key datatype can have an identity generation behavior.
+                res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.integer, collayoutentry.identityBehavior);
             }
             else if(collayoutentry.dataType == eColDataTypes.pk_uuid)
             {
                 res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.uuid);
+            }
+            else if(collayoutentry.dataType == eColDataTypes.pk_varchar)
+            {
+                // The primary key is a varchar datatype.
+                if (collayoutentry.maxlength != null && collayoutentry.maxlength.HasValue)
+                {
+                    res = tch.Add_Pk_Column(collayoutentry.name, ePkColTypes.varchar, eIdentityBehavior.UNSET, collayoutentry.maxlength.Value);
+                }
+                else
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(AddColumntoTableDef)} - " +
+                        $"Column ({(collayoutentry.name)}) is varchar, but maxlength is not defined.");
+
+                    res = -13;
+                }
             }
             else if(collayoutentry.dataType == eColDataTypes.real)
             {
@@ -1358,10 +1612,15 @@ namespace OGA.Postgres.CreateVerify
                 return true;
             if(layout_datatype == eColDataTypes.pk_bigint && livetable_dataType == "bigint")
                 return true;
+            if(layout_datatype == eColDataTypes.pk_varchar && livetable_dataType == "character varying")
+                return true;
 
             if(layout_datatype == eColDataTypes.timestampUTC && livetable_dataType == "timestamp with time zone")
                 return true;
             if(layout_datatype == eColDataTypes.timestamp && livetable_dataType == "timestamp without time zone")
+                return true;
+
+            if(layout_datatype == eColDataTypes.boolean && livetable_dataType == "boolean")
                 return true;
 
             if(layout_datatype == eColDataTypes.integer && livetable_dataType == "integer")
@@ -1385,162 +1644,6 @@ namespace OGA.Postgres.CreateVerify
 
             // Not a match...
             return false;
-        }
-
-        /// <summary>
-        /// Compares two given layouts.
-        /// Returns 1 if same.
-        /// </summary>
-        /// <param name="layout1"></param>
-        /// <param name="layout2"></param>
-        /// <param name="tableordinalsmustmatch"></param>
-        /// <param name="ordinalmustmatch"></param>
-        /// <returns></returns>
-        static public int CompareLayouts(DbLayout_Database layout1, DbLayout_Database layout2, bool tableordinalsmustmatch = false, bool ordinalmustmatch = false)
-        {
-            if (layout1 == null || layout2 == null)
-                return -1;
-
-            if(layout1.name != layout2.name)
-                return -1;
-
-            // If either database owner is null or postgres, the other layout owner can be null or postgress.
-            // Otherwise, they must match exactly.
-            if(layout1.owner != layout2.owner)
-            {
-                if((string.IsNullOrEmpty(layout1.owner) || layout1.owner == "postgres") &&
-                    (string.IsNullOrEmpty(layout2.owner) || layout2.owner == "postgres"))
-                {
-                    // Layout1 is owned by postgres.
-                    // Layout2 is owned by postgres.
-                    // The two layouts have the postgres owner.
-                }
-                else
-                {
-                    // Only one has a postgres owner, or neither do.
-                    // They are different.
-                    return -1;
-                }
-            }
-
-            // Iterate tables...
-            // Look for columns not in layout2, and columns that are different
-            foreach(var t in layout1.tables)
-            {
-                var l2t = layout2.tables.FirstOrDefault(n=>n.name == t.name);
-                if(l2t == null)
-                {
-                    // Table missing from layout 2.
-                    return -1;
-                }
-
-                // Iterate columns in each table.
-                var restblcmp = CompareTableLayouts(t, l2t, tableordinalsmustmatch, ordinalmustmatch);
-                if(restblcmp != 1)
-                {
-                    // Tables are different.
-                    return -1;
-                }
-            }
-
-            // Iterate tables from the other...
-            // Look for columns not in layout1.
-            foreach(var t in layout2.tables)
-            {
-                var l1t = layout1.tables.FirstOrDefault(n=>n.name == t.name);
-                if(l1t == null)
-                {
-                    // Table missing from layout 1.
-                    return -1;
-                }
-                // We have a match.
-                // But, we already compared tables that exist in both, in the previous loop.
-                // So, we can skip along.
-            }
-            // If here, we found no differences.
-
-            return 1;
-        }
-
-        /// <summary>
-        /// Compares two table layouts, and returns 1 if same.
-        /// </summary>
-        /// <param name="t1"></param>
-        /// <param name="t2"></param>
-        /// <param name="tableordinalsmustmatch"></param>
-        /// <param name="ordinalmustmatch"></param>
-        /// <returns></returns>
-        static public int CompareTableLayouts(DbLayout_Table t1, DbLayout_Table t2, bool tableordinalsmustmatch = false, bool ordinalmustmatch = false)
-        {
-            if (t1 == null || t2 == null)
-                return -1;
-
-            if (t1.name != t2.name)
-                return -1;
-
-            // Check if ordinals must match...
-            if(tableordinalsmustmatch)
-            {
-                if(t1.ordinal != t2.ordinal)
-                    return -1;
-            }
-
-            // Iterate columns for matches, and ones missing from t2...
-            foreach(var c in t1.columns)
-            {
-                var c2 = t2.columns.FirstOrDefault(n => n.name == c.name);
-                if (c2 == null)
-                    return -1;
-
-                // Compare the two columns...
-                var rescolcmp = CompareColumnLayouts(c, c2, ordinalmustmatch);
-                if(rescolcmp != 1)
-                    return -1;
-            }
-
-            // Now, look for missing columns in t1, that are in t2...
-            foreach(var c in t2.columns)
-            {
-                var c1 = t1.columns.FirstOrDefault(n => n.name == c.name);
-                if (c1 == null)
-                    return -1;
-            }
-
-            return 1;
-        }
-
-        /// <summary>
-        /// Compares two column layouts, and returns 1 if same.
-        /// </summary>
-        /// <param name="c1"></param>
-        /// <param name="c2"></param>
-        /// <param name="ordinalmustmatch"></param>
-        /// <returns></returns>
-        static public int CompareColumnLayouts(DbLayout_Column c1, DbLayout_Column c2, bool ordinalmustmatch = false)
-        {
-            if (c1 == null || c2 == null) return -1;
-
-            if (c1.name != c2.name) return -1;
-
-            if(c1.dataType != c2.dataType) return -1;
-
-            // Check max length if varchar...
-            if(c1.dataType == eColDataTypes.varchar)
-            {
-                if(c1.maxlength != c2.maxlength) return -1;
-            }
-
-            if(c1.isIdentity != c2.isIdentity) return -1;
-
-            if(c1.isNullable != c2.isNullable) return -1;
-
-            // Check if we are to enforce ordinal matches...
-            if(ordinalmustmatch)
-            {
-                if(c1.ordinal != c2.ordinal) return -1;
-            }
-
-            return 1;
         }
 
         #endregion

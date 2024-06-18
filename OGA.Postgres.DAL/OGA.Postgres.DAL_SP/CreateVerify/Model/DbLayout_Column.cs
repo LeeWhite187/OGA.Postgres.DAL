@@ -36,8 +36,16 @@ namespace OGA.Postgres.DAL_SP.Model
 
         /// <summary>
         /// Set if the column is an identity column.
+        /// NOTE: Postgres only allows these datatypes as identity: smallint, int, ot bigint
         /// </summary>
         public bool isIdentity { get; set; }
+
+        /// <summary>
+        /// When isIdentity is true, this column defines when the column is auto-generated.
+        /// This property is NULL when isIdentity is false.
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public eIdentityBehavior identityBehavior { get; set; }
 
         /// <summary>
         /// Set if the column can be NULL.
@@ -117,7 +125,8 @@ namespace OGA.Postgres.DAL_SP.Model
             // Verify a primary key column is not set as nullable...
             if(this.dataType == eColDataTypes.pk_integer ||
                 this.dataType == eColDataTypes.pk_bigint ||
-                this.dataType == eColDataTypes.pk_uuid)
+                this.dataType == eColDataTypes.pk_uuid ||
+                this.dataType == eColDataTypes.pk_varchar)
             {
                 // Column is a primary key.
                 if(this.isNullable)
@@ -137,7 +146,8 @@ namespace OGA.Postgres.DAL_SP.Model
             }
 
             // Verify a varchar column has a length...
-            if(this.dataType == eColDataTypes.varchar)
+            if(this.dataType == eColDataTypes.varchar ||
+                this.dataType == eColDataTypes.pk_varchar)
             {
                 // Column is a varchar.
                 if(this.maxlength == null || this.maxlength < 1)
@@ -156,11 +166,103 @@ namespace OGA.Postgres.DAL_SP.Model
                 }
             }
 
+            // Verify an identity column is the allowed types and a behavior is defined...
+            if(this.isIdentity)
+            {
+                // Postgres allows these to be identity: smallint, int, bigint.
+                // We won't allow a smallint as identities, so, we will disregard them.
+                if(this.dataType == eColDataTypes.bigint || this.dataType == eColDataTypes.pk_bigint ||
+                    this.dataType == eColDataTypes.integer || this.dataType == eColDataTypes.pk_integer)
+                {
+                    // The column is an allowed identity type.
+                }
+                else
+                {
+                    // The column is NOT an allowed identity type.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{nameof(DbLayout_Column)}:-:{nameof(Validate)} - " +
+                        $"Column ({(this.name ?? "")}) is invalid type for identity.");
+
+                    var err = new VerificationDelta();
+                    err.ObjType = eObjType.Column;
+                    err.ObjName = name ?? "";
+                    err.ParentName = parentname;
+                    err.ErrText = "Invalid Datatype for Identity";
+                    err.ErrorType = eErrorType.ValidationError;
+                    errs.Add(err);
+                }
+
+                // Check that a behavior is defined...
+                if(this.identityBehavior == eIdentityBehavior.GenerateByDefault ||
+                    this.identityBehavior == eIdentityBehavior.GenerateAlways)
+                {
+                    // These are the allowed behaviors.
+                }
+                else
+                {
+                    // Undefined behavior state when identity is set.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{nameof(DbLayout_Column)}:-:{nameof(Validate)} - " +
+                        $"Column ({(this.name ?? "")}) is identity, but has invalid behavior type ({(this.identityBehavior.ToString())}).");
+
+                    var err = new VerificationDelta();
+                    err.ObjType = eObjType.Column;
+                    err.ObjName = name ?? "";
+                    err.ParentName = parentname;
+                    err.ErrText = "Invalid Identity Behavior";
+                    err.ErrorType = eErrorType.ValidationError;
+                    errs.Add(err);
+                }
+            }
+
             // Return fail if we accumulated errors...
             if(errs.Count == 0)
                 return (1, errs);
             else
                 return (-1, errs);
+        }
+
+        /// <summary>
+        /// Compares two column layouts, and returns 1 if same.
+        /// Accepts an options instance to drive comparison behavior.
+        /// </summary>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        static public int CompareColumnLayouts(DbLayout_Column c1, DbLayout_Column c2, LayoutComparisonOptions options = null)
+        {
+            if (options == null)
+                options = new LayoutComparisonOptions();
+
+            if (c1 == null || c2 == null) return -1;
+
+            if (c1.name != c2.name) return -1;
+
+            if(c1.dataType != c2.dataType) return -1;
+
+            // Check max length if varchar...
+            if(c1.dataType == eColDataTypes.varchar ||
+                c1.dataType == eColDataTypes.pk_varchar)
+            {
+                if(c1.maxlength != c2.maxlength) return -1;
+            }
+
+            if(c1.isIdentity != c2.isIdentity) return -1;
+
+            if(c1.identityBehavior != c2.identityBehavior) return -1;
+
+            if(c1.isNullable != c2.isNullable) return -1;
+
+            // Check if we are to enforce ordinal matches...
+            if(options.columnOrdinalsMustMatch)
+            {
+                if(c1.ordinal != c2.ordinal) return -1;
+            }
+
+            return 1;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace OGA.Postgres.DAL_SP.Model
@@ -195,6 +196,84 @@ namespace OGA.Postgres.DAL_SP.Model
                 return (1, errs);
             else
                 return (-1, errs);
+        }
+
+        /// <summary>
+        /// Compares two given layouts.
+        /// Returns 1 if same.
+        /// Accepts an options instance to drive comparison behavior.
+        /// </summary>
+        /// <param name="layout1"></param>
+        /// <param name="layout2"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        static public int CompareLayouts(DbLayout_Database layout1, DbLayout_Database layout2, LayoutComparisonOptions options = null)
+        {
+            if (options == null)
+                options = new LayoutComparisonOptions();
+
+            if (layout1 == null || layout2 == null)
+                return -1;
+
+            if(layout1.name != layout2.name)
+                return -1;
+
+            // If either database owner is null or postgres, the other layout owner can be null or postgress.
+            // Otherwise, they must match exactly.
+            if(layout1.owner != layout2.owner)
+            {
+                if((string.IsNullOrEmpty(layout1.owner) || layout1.owner == "postgres") &&
+                    (string.IsNullOrEmpty(layout2.owner) || layout2.owner == "postgres"))
+                {
+                    // Layout1 is owned by postgres.
+                    // Layout2 is owned by postgres.
+                    // The two layouts have the postgres owner.
+                }
+                else
+                {
+                    // Only one has a postgres owner, or neither do.
+                    // They are different.
+                    return -1;
+                }
+            }
+
+            // Iterate tables...
+            // Look for columns not in layout2, and columns that are different
+            foreach(var t in layout1.tables)
+            {
+                var l2t = layout2.tables.FirstOrDefault(n=>n.name == t.name);
+                if(l2t == null)
+                {
+                    // Table missing from layout 2.
+                    return -1;
+                }
+
+                // Iterate columns in each table.
+                var restblcmp = DbLayout_Table.CompareTableLayouts(t, l2t, options);
+                if(restblcmp != 1)
+                {
+                    // Tables are different.
+                    return -1;
+                }
+            }
+
+            // Iterate tables from the other...
+            // Look for columns not in layout1.
+            foreach(var t in layout2.tables)
+            {
+                var l1t = layout1.tables.FirstOrDefault(n=>n.name == t.name);
+                if(l1t == null)
+                {
+                    // Table missing from layout 1.
+                    return -1;
+                }
+                // We have a match.
+                // But, we already compared tables that exist in both, in the previous loop.
+                // So, we can skip along.
+            }
+            // If here, we found no differences.
+
+            return 1;
         }
     }
 }

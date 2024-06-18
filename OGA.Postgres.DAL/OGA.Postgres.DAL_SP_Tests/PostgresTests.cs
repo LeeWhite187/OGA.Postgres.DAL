@@ -36,6 +36,8 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_10_1  Verify that we can get a list of tables for a given database.
 
+        //  Test_1_11_1  Verify that we can get a list of databases on the PostgreSQL host.
+
      */
 
     [TestCategory(Test_Types.Unit_Tests)]
@@ -771,6 +773,36 @@ namespace OGA.Postgres_Tests
                 // Get the data folder path...
                 var res = pt.Get_TableList_forDatabase("dbProjectControls", out var tablelist);
                 if(res != 1)
+                    Assert.Fail("Wrong Value");
+            }
+            finally
+            {
+                pt?.Dispose();
+            }
+        }
+
+
+        //  Test_1_11_1  Verify that we can get a list of databases on the PostgreSQL host.
+        [TestMethod]
+        public async Task Test_1_11_1()
+        {
+            Postgres_Tools pt = null;
+
+            try
+            {
+                pt = new Postgres_Tools();
+                pt.Hostname = dbcreds.Host;
+                pt.Database = "postgres";
+                pt.Username = dbcreds.User;
+                pt.Password = dbcreds.Password;
+
+                // Get a list of databases on the host...
+                var res = pt.Get_DatabaseList(out var dblist);
+                if(res != 1 || dblist == null)
+                    Assert.Fail("Wrong Value");
+
+                // Verify the list contains the catalog...
+                if(!dblist.Contains("postgres"))
                     Assert.Fail("Wrong Value");
             }
             finally

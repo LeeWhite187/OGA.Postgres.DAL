@@ -9,6 +9,7 @@
     <Import_RootNamespace>OGA.Postgres.DAL_SP_Tests</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DbLayout_UseCase_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DatabaseLayout_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UserMgmt_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TableColumnMgmt_Tests.cs" />

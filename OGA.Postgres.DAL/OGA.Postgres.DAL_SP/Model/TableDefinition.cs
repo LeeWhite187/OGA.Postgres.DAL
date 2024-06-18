@@ -1,4 +1,5 @@
 ﻿using OGA.Postgres.DAL.Model;
+using OGA.Postgres.DAL_SP.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -33,12 +34,12 @@ namespace OGA.Postgres.DAL
 
 
         /// <summary>
-        /// Call this method to add a primary key column to the table.
+        /// Adds a boolean column to the table schema.
         /// </summary>
         /// <param name="colname"></param>
-        /// <param name="datatype"></param>
+        /// <param name="canbenull"></param>
         /// <returns></returns>
-        public int Add_Pk_Column(string colname, ePkColTypes datatype)
+        public int Add_Boolean_Column(string colname, bool canbenull)
         {
             if(string.IsNullOrEmpty(colname))
             {
@@ -53,11 +54,62 @@ namespace OGA.Postgres.DAL
                 return -1;
             }
 
+            var cd = new TableColumnDef();
+            cd.ColName = colname;
+            cd.IsPk = false;
+            cd.Collate = "";
+            cd.CanBeNull = canbenull;
+            cd.ColType = "boolean";
+
+            this.columnlist.Add(cd);
+
+            return 1;            
+        }
+
+        /// <summary>
+        /// Call this method to add a primary key column to the table.
+        /// Accepts an optional varchar length parameter, for primary keys of varchar type.
+        /// Accepts an optional identity behavior parameter (identitybehavior), that is set if the column will generate its own sequence identifiers.
+        /// NOTE: identitybehavior is ONLY for dattypes of bigint and integer. All other datatypes will fail validation.
+        /// </summary>
+        /// <param name="colname"></param>
+        /// <param name="datatype"></param>
+        /// <param name="identitybehavior"></param>
+        /// <param name="varcharlength"></param>
+        /// <returns></returns>
+        public int Add_Pk_Column(string colname, ePkColTypes datatype, eIdentityBehavior identitybehavior = eIdentityBehavior.UNSET, int? varcharlength = null)
+        {
+            if(string.IsNullOrEmpty(colname))
+            {
+                // Invalid column name.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{nameof(TableDefinition)}:-:{nameof(Add_Pk_Column)} - " +
+                    $"Column name is empty.");
+
+                return -1;
+            }
+
+            // Ensure the column name doesn't already exist...
+            if(this.columnlist.Exists(m=>m.ColName == colname))
+            {
+                // Column name already exists.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{nameof(TableDefinition)}:-:{nameof(Add_Pk_Column)} - " +
+                    $"Column name already exists.");
+
+                return -1;
+            }
+
             // Ensure a pk doesn't already exist...
             if(this.columnlist.Exists(m=>m.IsPk == true))
             {
                 // A primary key column already exists.
                 // Cannot add another one.
+
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{nameof(TableDefinition)}:-:{nameof(Add_Pk_Column)} - " +
+                    $"A Primary Key column already exists.");
+
                 return -1;
             }
 
@@ -67,12 +119,42 @@ namespace OGA.Postgres.DAL
             cd.Collate = "";
             cd.CanBeNull = false;
 
+            // Set the datatype...
             if (datatype == ePkColTypes.uuid)
                 cd.ColType = "uuid";
             else if (datatype == ePkColTypes.integer)
                 cd.ColType = "integer";
             else if (datatype == ePkColTypes.bigint)
                 cd.ColType = "bigint";
+            else if (datatype == ePkColTypes.varchar)
+            {
+                // The caller wants to add a varchar primary key.
+                // We will require it to have a defined max length.
+                if(varcharlength == null)
+                {
+                    // Caller failed to give us a length for the varchar.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{nameof(TableDefinition)}:-:{nameof(Add_Pk_Column)} - " +
+                        $"Cannot create varchar primary key without max length.");
+
+                    return -2;
+                }
+
+                cd.ColType = $"character varying({varcharlength.Value.ToString()})";
+            }
+
+            // Set identity behavior clause...
+            // We ignore it for invalid types.
+            if(datatype == ePkColTypes.bigint ||
+                datatype == ePkColTypes.integer)
+            {
+                // Datatype is valid for identity behavior usage.
+
+                if (identitybehavior == eIdentityBehavior.GenerateByDefault)
+                    cd.IdentityBehavior = eIdentityBehavior.GenerateByDefault;
+                if(identitybehavior == eIdentityBehavior.GenerateAlways)
+                    cd.IdentityBehavior = eIdentityBehavior.GenerateAlways;
+            }
 
             this.columnlist.Add(cd);
 

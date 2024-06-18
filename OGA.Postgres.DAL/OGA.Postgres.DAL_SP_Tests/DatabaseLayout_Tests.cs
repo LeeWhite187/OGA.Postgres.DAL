@@ -2686,7 +2686,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Verify created layout is a match to what we generated the live database from...
-                var res3 = DatabaseLayout_Tool.CompareLayouts(layout, res2.layout);
+                var res3 = DbLayout_Database.CompareLayouts(layout, res2.layout);
                 if(res3 != 1)
                     Assert.Fail("Layout Mismatch");
 
@@ -3079,7 +3079,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Verify created layout is a match to what we generated the live database from...
-                var res3 = DatabaseLayout_Tool.CompareLayouts(layout, res2.layout);
+                var res3 = DbLayout_Database.CompareLayouts(layout, res2.layout);
                 if(res3 != 1)
                     Assert.Fail("Layout Mismatch");
 
@@ -3276,7 +3276,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Verify created layout is a match to what we generated the live database from...
-                var res3 = DatabaseLayout_Tool.CompareLayouts(layout, res2.layout);
+                var res3 = DbLayout_Database.CompareLayouts(layout, res2.layout);
                 if(res3 != 1)
                     Assert.Fail("Layout Mismatch");
 

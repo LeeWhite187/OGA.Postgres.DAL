@@ -38,6 +38,7 @@ This class includes lots of methods for management of hosts, databases, tables, 
     - Create_Database()
     - Is_Database_Present()
     - Drop_Database()
+    - Get_DatabaseList()
     - GetDatabaseOwner()
     - ChangeDatabaseOwner()
     - Backup_Database() - Not yet implemented.

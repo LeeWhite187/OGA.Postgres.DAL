@@ -1,6 +1,7 @@
 ﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace OGA.Postgres.DAL_SP.Model
@@ -139,7 +140,8 @@ namespace OGA.Postgres.DAL_SP.Model
 
                 if(c.dataType == CreateVerify.Model.eColDataTypes.pk_bigint ||
                     c.dataType == CreateVerify.Model.eColDataTypes.pk_integer ||
-                    c.dataType == CreateVerify.Model.eColDataTypes.pk_uuid)
+                    c.dataType == CreateVerify.Model.eColDataTypes.pk_uuid ||
+                    c.dataType == CreateVerify.Model.eColDataTypes.pk_varchar)
                 {
                     // Current column is the primary key.
                     // Ensure this is the only key we've found...
@@ -187,7 +189,7 @@ namespace OGA.Postgres.DAL_SP.Model
                 }
 
                 // Validate the column's data...
-                var resval = c.Validate(this.name);
+                var resval = c.Validate(this.name ?? "");
                 if(resval.res != 1)
                 {
                     // Layout failed validation.
@@ -216,6 +218,56 @@ namespace OGA.Postgres.DAL_SP.Model
                 return (1, errs);
             else
                 return (-1, errs);
+        }
+
+        /// <summary>
+        /// Compares two table layouts, and returns 1 if same.
+        /// Accepts an options instance to drive comparison behavior.
+        /// </summary>
+        /// <param name="t1"></param>
+        /// <param name="t2"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        static public int CompareTableLayouts(DbLayout_Table t1, DbLayout_Table t2, LayoutComparisonOptions options = null)
+        {
+            if (options == null)
+                options = new LayoutComparisonOptions();
+
+            if (t1 == null || t2 == null)
+                return -1;
+
+            if (t1.name != t2.name)
+                return -1;
+
+            // Check if ordinals must match...
+            if(options.tableOrdinalsMustMatch)
+            {
+                if(t1.ordinal != t2.ordinal)
+                    return -1;
+            }
+
+            // Iterate columns for matches, and ones missing from t2...
+            foreach(var c in t1.columns)
+            {
+                var c2 = t2.columns.FirstOrDefault(n => n.name == c.name);
+                if (c2 == null)
+                    return -1;
+
+                // Compare the two columns...
+                var rescolcmp = DbLayout_Column.CompareColumnLayouts(c, c2, options);
+                if(rescolcmp != 1)
+                    return -1;
+            }
+
+            // Now, look for missing columns in t1, that are in t2...
+            foreach(var c in t2.columns)
+            {
+                var c1 = t1.columns.FirstOrDefault(n => n.name == c.name);
+                if (c1 == null)
+                    return -1;
+            }
+
+            return 1;
         }
     }
 }

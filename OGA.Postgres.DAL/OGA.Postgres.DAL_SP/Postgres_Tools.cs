@@ -603,6 +603,98 @@ namespace OGA.Postgres
         }
 
         /// <summary>
+        /// Retrieves the list of databases on the given Postgres host.
+        /// Returns 1 for success, negatives for errors.
+        /// </summary>
+        /// <param name="dblist"></param>
+        /// <returns></returns>
+        public int Get_DatabaseList(out List<string> dblist)
+        {
+            System.Data.DataTable dt = null;
+            dblist = new List<string>();
+
+            if (_dal == null)
+            {
+                _dal = new Postgres_DAL();
+                _dal.Hostname = Hostname;
+                _dal.Database = "postgres";
+                _dal.Username = Username;
+                _dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                    $"Attempting to get database names...");
+
+                // Connect to the catalog...
+                var resconn = this._dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Compose the sql query we will perform...
+                string sql = "SELECT datname FROM pg_database;";
+
+                if (_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get database names from the host.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                        "Failed to get database names from the host.");
+
+                    return -2;
+                }
+                // We have a table of database names.
+
+                // See if it contains anything.
+                if (dt.Rows.Count == 0)
+                {
+                    // The catalog will always show up in this query.
+                    // So, if we have no entries something is wrong.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                        "Failed to get database names from the host.");
+
+                    return -1;
+                }
+                // If here, we have database names.
+
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string sss = r[0] + "";
+                    dblist.Add(sss);
+                }
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
         /// Passes back the owner of the database.
         /// Returns 1 for success, 0 if database not found, negatives for errors.
         /// </summary>
@@ -3706,7 +3798,8 @@ namespace OGA.Postgres
                 }
 
                 // Compose the sql query we will perform.
-                string sql = $"SELECT table_catalog, \"table_name\", \"column_name\", ordinal_position, is_nullable, data_type, character_maximum_length, is_identity " +
+                string sql = $"SELECT table_catalog, \"table_name\", \"column_name\", ordinal_position, is_nullable, data_type, character_maximum_length, " +
+                                $"is_identity, identity_generation " +
                                 $"FROM information_schema.columns " +
                                 $"WHERE table_schema = 'public' " +
                                 $"AND table_name = '{tableName}' " +
@@ -3788,9 +3881,34 @@ namespace OGA.Postgres
                     {
                         string val = ((string)r["is_identity"]) ?? "";
                         if(val == "NO")
+                        {
                             ct.isIdentity = false;
+                            ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                        }
                         else if(val == "YES")
+                        {
                             ct.isIdentity = true;
+
+                            // Get the identity behavior...
+                            try
+                            {
+                                string ib = ((string)r["identity_generation"]) ?? "";
+                                if (ib == "ALWAYS")
+                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
+                                else if (ib == "BY DEFAULT")
+                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
+                                else
+                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                            }
+                            catch (Exception e)
+                            {
+                                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                                    $"Exception occurred while parsing identity_generation for column ({(ct.name ?? "")})");
+
+                                return -21;
+                            }
+                        }
                         else
                             ct.isIdentity = false;
                     }
