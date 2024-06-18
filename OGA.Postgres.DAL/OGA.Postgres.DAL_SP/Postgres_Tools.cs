@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using OGA.Postgres;
 using OGA.Postgres.DAL;
-using OGA.Postgres.DAL_SP.Model;
+using OGA.Postgres.DAL.Model;
 using OpenTelemetry;
 using System;
 using System.Collections.Generic;
@@ -3883,7 +3883,7 @@ namespace OGA.Postgres
                         if(val == "NO")
                         {
                             ct.isIdentity = false;
-                            ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                            ct.identityBehavior = DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                         }
                         else if(val == "YES")
                         {
@@ -3894,11 +3894,11 @@ namespace OGA.Postgres
                             {
                                 string ib = ((string)r["identity_generation"]) ?? "";
                                 if (ib == "ALWAYS")
-                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
+                                    ct.identityBehavior = DAL.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
                                 else if (ib == "BY DEFAULT")
-                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
+                                    ct.identityBehavior = DAL.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
                                 else
-                                    ct.identityBehavior = DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                                    ct.identityBehavior = DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                             }
                             catch (Exception e)
                             {

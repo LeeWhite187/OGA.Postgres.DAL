@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.Model
+namespace OGA.Postgres.DAL.Model
 {
     /// <summary>
     /// Holds data for a single primary key constraint, of a table.

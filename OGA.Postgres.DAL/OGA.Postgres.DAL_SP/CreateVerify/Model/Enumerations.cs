@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.CreateVerify.Model
+namespace OGA.Postgres.DAL.CreateVerify.Model
 {
     /// <summary>
     /// Running list of the different types of column datatypes we use, based on .NET datatypes to store.

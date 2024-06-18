@@ -6,8 +6,8 @@ using NLog.Targets;
 using OGA.Postgres;
 using OGA.Postgres.DAL;
 using OGA.Postgres.DAL.Model;
-using OGA.Postgres.DAL_SP.CreateVerify.Model;
-using OGA.Postgres.DAL_SP.Model;
+using OGA.Postgres.DAL.CreateVerify.Model;
+using OGA.Postgres.DAL.Model;
 using OpenTelemetry;
 using System;
 using System.Collections.Generic;
@@ -426,8 +426,8 @@ namespace OGA.Postgres.CreateVerify
                             // Datatypes are a match.
 
                             // Verify length if a varchar...
-                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.varchar ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
+                            if(cli.dataType == DAL.CreateVerify.Model.eColDataTypes.varchar ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_varchar)
                             {
                                 // Verify the varchar length is a match...
                                 if(c.maxlength != cli.maxlength)
@@ -470,10 +470,10 @@ namespace OGA.Postgres.CreateVerify
                             // Current live table column is a primary key.
 
                             // Check that our layout indicates that...
-                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
+                            if(cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_integer ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_bigint ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_uuid ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_varchar)
                             {
                                 // The column in the layout is a primary key.
                                 // This matches the column in live table.
@@ -501,10 +501,10 @@ namespace OGA.Postgres.CreateVerify
                             // Check if it should be...
 
                             // See if the current live table column is a primary key in the layout...
-                            if(cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid ||
-                                cli.dataType == DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar)
+                            if(cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_integer ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_bigint ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_uuid ||
+                                cli.dataType == DAL.CreateVerify.Model.eColDataTypes.pk_varchar)
                             {
                                 // The column in the layout is a primary key.
                                 // But, the live table column is not one.

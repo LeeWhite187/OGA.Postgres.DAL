@@ -1,10 +1,10 @@
-﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
+﻿using OGA.Postgres.DAL.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.Model
+namespace OGA.Postgres.DAL.Model
 {
     /// <summary>
     /// Holds the info necessary to create/verify a database table.

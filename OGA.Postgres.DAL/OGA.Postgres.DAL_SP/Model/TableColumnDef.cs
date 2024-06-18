@@ -1,4 +1,4 @@
-﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
+﻿using OGA.Postgres.DAL.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -13,7 +13,7 @@ using OGA.Postgres.DAL;
 using System.Linq;
 using Mono.Unix.Native;
 using OGA.Postgres.CreateVerify;
-using OGA.Postgres.DAL_SP.Model;
+using OGA.Postgres.DAL.Model;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Npgsql.Replication;
@@ -411,11 +411,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_uuid;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, in a NOT IsNullable state...
@@ -433,11 +433,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_varchar;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_varchar;
                 col1.maxlength = 74;
                 col1.isNullable = false;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 // Add primary key of type, varchar...
@@ -455,11 +455,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = true;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -477,11 +477,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = true;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.GenerateAlways;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -499,11 +499,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = true;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -521,11 +521,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = true;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.GenerateByDefault;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -543,11 +543,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_bigint;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -565,11 +565,11 @@ namespace OGA.Postgres_Tests
                 var col1 = new DbLayout_Column();
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.pk_integer;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
                 col1.isNullable = false;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 // Add columns of each non-key type, so there's presence for any unanticipated edge-case...
@@ -599,22 +599,22 @@ namespace OGA.Postgres_Tests
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.timestamp;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.timestamp;
                 col1.maxlength = null;
                 col1.isNullable = isnullable;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
                 col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
-                col2.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.timestampUTC;
+                col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.timestampUTC;
                 col2.maxlength = null;
                 col2.isNullable = isnullable;
                 col2.isIdentity = false;
-                col2.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col2.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col2);
             }
 
@@ -624,22 +624,22 @@ namespace OGA.Postgres_Tests
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.varchar;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.varchar;
                 col1.maxlength = 47;
                 col1.isNullable = isnullable;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
                 col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
-                col2.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.text;
+                col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.text;
                 col2.maxlength = 0;
                 col2.isNullable = isnullable;
                 col2.isIdentity = false;
-                col2.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col2.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col2);
             }
 
@@ -649,11 +649,11 @@ namespace OGA.Postgres_Tests
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.boolean;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.boolean;
                 col1.maxlength = 0;
                 col1.isNullable = isnullable;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
             }
 
@@ -663,11 +663,11 @@ namespace OGA.Postgres_Tests
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.uuid;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.uuid;
                 col1.maxlength = 0;
                 col1.isNullable = isnullable;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
             }
 
@@ -677,55 +677,55 @@ namespace OGA.Postgres_Tests
                 col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
-                col1.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.bigint;
+                col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.bigint;
                 col1.maxlength = 0;
                 col1.isNullable = isnullable;
                 col1.isIdentity = false;
-                col1.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col1.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
                 col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
-                col2.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.double_precision;
+                col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.double_precision;
                 col2.maxlength = 0;
                 col2.isNullable = isnullable;
                 col2.isIdentity = false;
-                col2.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col2.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col2);
 
                 var col3 = new DbLayout_Column();
                 col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col3.ordinal = lastusedordinal;
-                col3.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.integer;
+                col3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 col3.maxlength = 0;
                 col3.isNullable = isnullable;
                 col3.isIdentity = false;
-                col3.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col3.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col3);
 
                 var col4 = new DbLayout_Column();
                 col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col4.ordinal = lastusedordinal;
-                col4.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.numeric;
+                col4.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.numeric;
                 col4.maxlength = 0;
                 col4.isNullable = isnullable;
                 col4.isIdentity = false;
-                col4.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col4.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col4);
 
                 var col5 = new DbLayout_Column();
                 col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col5.ordinal = lastusedordinal;
-                col5.dataType = Postgres.DAL_SP.CreateVerify.Model.eColDataTypes.real;
+                col5.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.real;
                 col5.maxlength = 0;
                 col5.isNullable = isnullable;
                 col5.isIdentity = false;
-                col5.identityBehavior = Postgres.DAL_SP.CreateVerify.Model.eIdentityBehavior.UNSET;
+                col5.identityBehavior = Postgres.DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                 tbl.columns.Add(col5);
             }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.CreateVerify.Model
+namespace OGA.Postgres.DAL.CreateVerify.Model
 {
     /// <summary>
     /// Options used to drive database and layout comparison behavior.

@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json.Converters;
-using OGA.Postgres.DAL_SP.CreateVerify.Model;
+using OGA.Postgres.DAL.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
-namespace OGA.Postgres.DAL_SP.Model
+namespace OGA.Postgres.DAL.Model
 {
     /// <summary>
     /// Holds the info necessary to create/verify a column of a database table.

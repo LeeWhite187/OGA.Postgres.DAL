@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.CreateVerify.Model
+namespace OGA.Postgres.DAL.CreateVerify.Model
 {
     /// <summary>
     /// Represents a single difference between a layout and a live database object.

@@ -1,9 +1,9 @@
-﻿using OGA.Postgres.DAL_SP.CreateVerify.Model;
+﻿using OGA.Postgres.DAL.CreateVerify.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.Model
+namespace OGA.Postgres.DAL.Model
 {
     /// <summary>
     /// Holds the name and type of a table column.
