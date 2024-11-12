@@ -14,7 +14,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)UserMgmt_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TableColumnMgmt_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TablePrivilege_Tests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestTemplate_Assembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\TestTemplate_Assembly.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PostgresTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
   </ItemGroup>
 </Project>
