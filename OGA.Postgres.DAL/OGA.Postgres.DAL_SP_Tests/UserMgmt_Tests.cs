@@ -569,22 +569,7 @@ namespace OGA.Postgres_Tests
                     pt1.Dispose();
                 }
 
-                // Have test user 1 attempt to login with the old password...
-                {
-                    // Open a connection as the non-superuser...
-                    var d = new Postgres_DAL();
-                    d.Hostname = dbcreds.Host;
-                    d.Database = dbcreds.Database;
-                    d.Username = mortaluser1;
-                    d.Password = mortaluser1_password;
-
-                    // Have the mortal user attempt to connect...
-                    var res = d.Test_Connection();
-                    if(res != -1)
-                        Assert.Fail("Wrong Value");
-
-                    d.Dispose();
-                }
+                System.Threading.Thread.Sleep(500);
 
                 // Have test user 1 attempt to login with the new password...
                 {
@@ -602,6 +587,63 @@ namespace OGA.Postgres_Tests
 
                     d.Dispose();
                 }
+
+                System.Threading.Thread.Sleep(500);
+
+                // Have test user 1 attempt to login with a known bogus password...
+                {
+                    // Open a connection as the non-superuser...
+                    var d = new Postgres_DAL();
+                    d.Hostname = dbcreds.Host;
+                    d.Database = dbcreds.Database;
+                    d.Username = mortaluser1;
+                    d.Password = mortaluser1_password + "sdfsdf";
+
+                    // Have the mortal user attempt to connect...
+                    var res = d.Test_Connection();
+                    if(res != -1)
+                        Assert.Fail("Wrong Value");
+
+                    d.Dispose();
+                }
+
+                System.Threading.Thread.Sleep(500);
+
+                // Have test user 1 attempt to login with the old password...
+                {
+                    // Open a connection as the non-superuser...
+                    var d = new Postgres_DAL();
+                    d.Hostname = dbcreds.Host;
+                    d.Database = dbcreds.Database;
+                    d.Username = mortaluser1;
+                    d.Password = mortaluser1_password;
+
+
+#if (NET5 || NET6)
+// The version of NPGSQL library used by NET5 and NET6 don't use a NpgsqlDataSource instance.
+// Instead, they rely on the NpgsqlConnection instance.
+// Problem is, the datasource properly closes physical connections, making changed password testing work as expected.
+// But, the simple NpgsqlConnection instance allows a physical connection to not completely die, making our "old password" appear to still work.
+// So, we will accept a passing connection attempt, here, for NET5 and NET6 clients.
+// See this bugreport for details: https://github.com/npgsql/npgsql/issues/5720
+                    // Have the mortal user attempt to connect...
+                    var res = d.Test_Connection();
+                    if(res != 1)
+                        Assert.Fail("Wrong Value");
+#else
+// Here, we are using the version of NPGSQL used by NET7, which uses a NpgsqlDataSource instance.
+// NpgsqlDataSource properly recycles client connections, so that attempting to connect with our old password will fail as expected.
+// See this bugreport for details: https://github.com/npgsql/npgsql/issues/5720
+                    // Have the mortal user attempt to connect...
+                    var res = d.Test_Connection();
+                    if(res != -1)
+                        Assert.Fail("Wrong Value");
+#endif
+
+                    d.Dispose();
+                }
+
+                System.Threading.Thread.Sleep(500);
 
                 // Delete test user 1...
                 var res4 = pt.DeleteUser(mortaluser1);

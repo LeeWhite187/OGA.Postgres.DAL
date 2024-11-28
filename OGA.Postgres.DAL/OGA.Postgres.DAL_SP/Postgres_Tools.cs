@@ -1625,7 +1625,8 @@ namespace OGA.Postgres
                 }
 
                 // Change the user password...
-                string sql = $"ALTER USER {username} WITH PASSWORD '{password}';";
+                string sql = $"ALTER USER {username} PASSWORD '{password}';";
+                //string sql = $"ALTER USER {username} WITH PASSWORD '{password}';";
                 if (this._dal.Execute_NonQuery(sql) != -1)
                 {
                     // Change user password command failed.

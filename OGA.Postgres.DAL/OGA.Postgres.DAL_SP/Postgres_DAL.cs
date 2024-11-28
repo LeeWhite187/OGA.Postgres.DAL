@@ -21,12 +21,17 @@ namespace OGA.Postgres
         private string _connstring;
         private bool _explicit_ConnectionOpen_Called;
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, this DAL leaves it out when compiled for NET5.
+#else
         private NpgsqlDataSource _dbDSource = null;
+#endif
         private NpgsqlConnection _dbConnection = null;
 
         private bool disposedValue;
 
-        #endregion
+#endregion
 
 
         #region Properties
@@ -176,7 +181,12 @@ namespace OGA.Postgres
 
                 // Accept the created connection and datasource...
                 this._dbConnection = res.conn;
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, this DAL leaves it out when compiled for NET5.
+#else
                 this._dbDSource = res.dsource;
+#endif
 
                 // See if we were called to make a persistent connection...
                 if(calledfrompublicconnect)
@@ -229,6 +239,10 @@ namespace OGA.Postgres
 
             this._dbConnection = null;
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, this DAL leaves it out when compiled for NET5.
+#else
             try
             {
                 this._dbDSource?.Dispose();
@@ -236,6 +250,7 @@ namespace OGA.Postgres
             catch (Exception) { }
 
             this._dbDSource = null;
+#endif
 
             _explicit_ConnectionOpen_Called = false;
 
@@ -324,7 +339,13 @@ namespace OGA.Postgres
 
                 // Attempt to create a connection...
                 var res = this.CreateConnection();
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, we don't check that it was created.
+                if(res.res != 1 || res.conn == null)
+#else
                 if(res.res != 1 || res.conn == null || res.dsource == null)
+#endif
                 {
                     // Connection failed.
 
@@ -359,10 +380,20 @@ namespace OGA.Postgres
         /// This was done, to consolidate connection creation logic, for easier management.
         /// </summary>
         /// <returns></returns>
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, the return signature doesn't include it.
+        private (int res, Npgsql.NpgsqlConnection? conn) CreateConnection()
+#else
         private (int res, NpgsqlDataSource dsource, Npgsql.NpgsqlConnection? conn) CreateConnection()
+#endif
         {
             bool success = false;
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+#else
             NpgsqlDataSource? ds = null;
+#endif
             NpgsqlConnection? conn = null;
 
             // See if the connection string has been set.
@@ -381,7 +412,13 @@ namespace OGA.Postgres
                         $"{_classname}:-:{nameof(CreateConnection)} - " +
                         "An error occurred while piecing together the connection string.");
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, the return signature doesn't include it.
+                    return (-1, null);
+#else
                     return (-1, null, null);
+#endif
                 }
                 // If here, we have a connection string.
             }
@@ -397,11 +434,19 @@ namespace OGA.Postgres
                     $"{_classname}:-:{nameof(CreateConnection)} - " +
                     "Attempting to open a connection to Postgres server...");
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, we directly create the connection instance in NET5.
+                conn = new Npgsql.NpgsqlConnection(this._connstring);
+                conn.Open();
+#else
+
                 // Create a datasource...
                 ds = NpgsqlDataSource.Create(this._connstring);
 
                 // Open a connection...
                 conn = ds.OpenConnection();
+#endif
 
                 // Wait for it to respond as Open...
                 var res = OGA.Common.Process.cRuntime_Helpers.WaitforCondition(() =>
@@ -414,7 +459,13 @@ namespace OGA.Postgres
                         $"{_classname}:-:{nameof(CreateConnection)} - " +
                         "Connection failed to reach Open state.");
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, the return signature doesn't include it.
+                    return (-2, null);
+#else
                     return (-2, null, null);
+#endif
                 }
                 // If here, the connection reads as Open.
 
@@ -425,7 +476,13 @@ namespace OGA.Postgres
                 success = true;
 
                 // If here, we have a connection we can use to query for data.
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, the return signature doesn't include it.
+                return (1, conn);
+#else
                 return (1, ds, conn);
+#endif
             }
             catch (Exception e)
             {
@@ -435,7 +492,13 @@ namespace OGA.Postgres
                     $"{_classname}:-:{nameof(CreateConnection)} - " +
                     "An exception was caught while connecting to the database.");
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, the return signature doesn't include it.
+                return (-2, null);
+#else
                 return (-2, null, null);
+#endif
             }
             finally
             {
@@ -452,12 +515,16 @@ namespace OGA.Postgres
 
                     conn = null;
 
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+#else
                     try
                     {
                         ds?.Dispose();
                     } catch(Exception) { }
 
                     ds = null;
+#endif
                 }
             }
         }
