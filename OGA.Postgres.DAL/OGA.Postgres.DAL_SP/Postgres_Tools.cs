@@ -503,7 +503,7 @@ namespace OGA.Postgres
             }
         }
         /// <summary>
-        /// Drops the given database from the SQL Server instance.
+        /// Drops the given database from the Postgres instance.
         /// Returns 1 for success. Negatives for errors.
         /// </summary>
         /// <param name="database"></param>
@@ -570,7 +570,7 @@ namespace OGA.Postgres
                 else
                     sql = sql + $";";
 
-                // Execute it on the sql server instance...
+                // Execute it on the Postgres instance...
                 int resdrop = _dal.Execute_NonQuery(sql);
                 if (resdrop != -1)
                 {
@@ -4040,9 +4040,9 @@ namespace OGA.Postgres
 
         //            if (_dal.Execute_NonQuery(sql) != 1)
         //            {
-        //                // Failed to add database role to the sql server instance.
+        //                // Failed to add database role to the Postgres instance.
         //                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error("{0}: " +
-        //                    "Failed to add database role to the sql server instance."
+        //                    "Failed to add database role to the Postgres instance."
         //                        , nameof(Postgres_Tools));
 
         //                return -2;
