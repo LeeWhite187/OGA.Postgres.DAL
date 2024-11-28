@@ -38,7 +38,7 @@ namespace OGA.Postgres
 
         #region Public Properties
 
-        public int InstanceId { get; set; }
+        public int InstanceId { get; private set; }
 
         public string Hostname { get; set; }
         public string Database { get; set; }
@@ -141,7 +141,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DataDirectory)} - " +
                     $"Attempting to get data foldet path...");
 
                 // Connect to the database...
@@ -150,7 +150,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DataDirectory)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -166,7 +166,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get file locations.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DataDirectory)} - " +
                         "Failed to get file locations.");
 
                     return -2;
@@ -189,7 +189,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DataDirectory)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DataDirectory)} - " +
                     "Exception occurred while querying for file locations.");
 
                 return -20;
@@ -227,14 +227,14 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                     $"Attempting to get data foldet path...");
 
                 // Verify both givens exist...
                 if(string.IsNullOrEmpty(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -246,7 +246,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -258,7 +258,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get data directory.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         $"Failed to get data directory.");
 
                     return -2;
@@ -275,7 +275,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get file locations.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         "Failed to get database oid.");
 
                     return -2;
@@ -301,7 +301,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                     "Exception occurred while querying for database folder path.");
 
                 return -20;
@@ -342,13 +342,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                     $"Attempting to get database names...");
 
                 if(string.IsNullOrEmpty(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -360,7 +360,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -376,7 +376,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get database list.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                         "Failed to get database list.");
 
                     return -2;
@@ -396,7 +396,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Is_Database_Present)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                     "Exception occurred while querying for database list.");
 
                 return -20;
@@ -432,13 +432,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Create_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                     $"Attempting to create database...");
 
                 if(string.IsNullOrEmpty(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -450,7 +450,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -477,7 +477,7 @@ namespace OGA.Postgres
                 {
                     // Error occurred while adding the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                         "Error occurred while adding the database.");
 
                     return -4;
@@ -496,7 +496,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Create_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -523,13 +523,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Drop_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                     $"Attempting to drop database...");
 
                 if(string.IsNullOrEmpty(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -541,7 +541,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -576,7 +576,7 @@ namespace OGA.Postgres
                 {
                     // Error occurred while dropping the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                         "Error occurred while dropping the database.");
 
                     return -4;
@@ -595,7 +595,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Drop_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -625,7 +625,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                     $"Attempting to get database names...");
 
                 // Connect to the catalog...
@@ -634,7 +634,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -647,7 +647,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get database names from the host.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                         "Failed to get database names from the host.");
 
                     return -2;
@@ -661,7 +661,7 @@ namespace OGA.Postgres
                     // So, if we have no entries something is wrong.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                         "Failed to get database names from the host.");
 
                     return -1;
@@ -679,7 +679,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DatabaseList)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -718,13 +718,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                     $"Attempting to get database owner...");
 
                 if(string.IsNullOrEmpty(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -736,7 +736,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -752,7 +752,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                         "Failed to get database owner.");
 
                     return -2;
@@ -774,7 +774,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GetDatabaseOwner)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                     "Exception occurred while querying for database owner.");
 
                 return -20;
@@ -810,13 +810,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                     $"Attempting to get change owner...");
 
                 if(string.IsNullOrEmpty(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -824,7 +824,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(newowner))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"Empty newowner name.");
 
                     return -1;
@@ -836,7 +836,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -846,7 +846,7 @@ namespace OGA.Postgres
                 if(this.Is_Database_Present(database) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"Database ({(database ?? "")}) not found.");
 
                     return 0;
@@ -855,7 +855,7 @@ namespace OGA.Postgres
                 if(this.Does_Login_Exist(newowner) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"User ({(newowner ?? "")}) not found.");
 
                     return 0;
@@ -868,7 +868,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         "Failed to change database owner.");
 
                     return -2;
@@ -881,7 +881,7 @@ namespace OGA.Postgres
                 {
                     // Failed to query database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         "Failed to query database owner.");
 
                     return -3;
@@ -891,7 +891,7 @@ namespace OGA.Postgres
                 {
                     // Failed to update database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         "Failed to update database owner.");
 
                     return -4;
@@ -903,7 +903,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(ChangeDatabaseOwner)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                     "Exception occurred while changing database owner.");
 
                 return -20;
@@ -934,7 +934,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                     $"Attempting to backup database to file...\r\n:" +
                     $"Database = {databaseName ?? ""};\r\n" +
                     $"BackupFile = {filePath ?? ""};");
@@ -943,7 +943,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -951,7 +951,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(filePath))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                         $"Empty filepath.");
 
                     return -1;
@@ -963,7 +963,7 @@ namespace OGA.Postgres
                 {
                     // Database doesn't exist.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Backup_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                         "Database not found.");
 
                     return -1;
@@ -992,7 +992,7 @@ namespace OGA.Postgres
 
                 // Database was backed up.
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                     "Backup finished.");
 
                 return 1;
@@ -1000,7 +1000,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Backup_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -1037,7 +1037,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Restore_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                     $"Attempting to restore database from file...\r\n:" +
                     $"Database = {databaseName ?? ""};\r\n" +
                     $"BackupFile = {filePath ?? ""};");
@@ -1046,7 +1046,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                         $"Empty database name.");
 
                     return -1;
@@ -1054,7 +1054,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(filePath))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                         $"Empty filepath.");
 
                     return -1;
@@ -1066,7 +1066,7 @@ namespace OGA.Postgres
                 {
                     // Database doesn't exist.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                         "Database exists.");
 
                     return -1;
@@ -1075,7 +1075,7 @@ namespace OGA.Postgres
                 {
                     // Failed to query for database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Restore_Database)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                         "Failed to query for database.");
 
                     return -1;
@@ -1105,7 +1105,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Restore_Database)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -1142,13 +1142,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                     $"Attempting to get disk size for database, {databaseName ?? ""}...");
 
                 if(string.IsNullOrEmpty(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                         "Empty database.");
 
                     return (-1, 0);
@@ -1160,7 +1160,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                         $"Failed to connect to server.");
 
                     return (-1, 0);
@@ -1172,7 +1172,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get database size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                         $"Failed to get disk size for database, {databaseName ?? ""}.");
 
                     return (-2, 0);
@@ -1194,7 +1194,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_DatabaseSize)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                     "Exception occurred");
 
                 return (-20, 0);
@@ -1236,14 +1236,14 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(CreateUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                     $"Attempting to create user...");
 
                 if(!UserNameIsValid(username))
                 {
                     // Invalid Username.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                         $"Invalid Username.");
 
                     return -1;
@@ -1255,7 +1255,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1271,7 +1271,7 @@ namespace OGA.Postgres
                 {
                     // Create user command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                         "Create user command failed.");
 
                     return -2;
@@ -1282,7 +1282,7 @@ namespace OGA.Postgres
                 if(resq != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                         "User not found.");
 
                     return -3;
@@ -1293,7 +1293,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(CreateUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                     $"Exception occurred to database: {(Database ?? "")}");
 
                 return -20;
@@ -1326,7 +1326,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GetUserList)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
                     $"Attempting to check for login to database: {(Database ?? "")}...");
 
                 // Connect to the database...
@@ -1335,7 +1335,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetUserList)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1350,7 +1350,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetUserList)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -1373,7 +1373,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GetUserList)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
                     $"Exception occurred to database: {(Database ?? "")}");
 
                 return -20;
@@ -1409,13 +1409,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Does_Login_Exist)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                     $"Attempting to check for login to database: {(Database ?? "")}...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Does_Login_Exist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1427,7 +1427,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Does_Login_Exist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1443,7 +1443,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Does_Login_Exist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -1479,7 +1479,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Does_Login_Exist)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                     $"Exception occurred to database: {(Database ?? "")}");
 
                 return -20;
@@ -1514,14 +1514,14 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(DeleteUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                     $"Attempting to delete user...");
 
                 if(string.IsNullOrEmpty(username))
                 {
                     // Empty username.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DeleteUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                         $"Empty Username.");
 
                     return -1;
@@ -1533,7 +1533,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DeleteUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1545,7 +1545,7 @@ namespace OGA.Postgres
                 {
                     // Delete user command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DeleteUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                         "Delete user command failed.");
 
                     return -2;
@@ -1556,7 +1556,7 @@ namespace OGA.Postgres
                 if(resq != 0)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DeleteUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                         "User was not confirmed as dropped.");
 
                     return -3;
@@ -1567,7 +1567,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(DeleteUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                     $"Exception occurred to database: {(Database ?? "")}");
 
                 return -20;
@@ -1598,14 +1598,14 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(ChangeUserPassword)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                     $"Attempting to create user...");
 
                 if(string.IsNullOrEmpty(username))
                 {
                     // Empty Username.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeUserPassword)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                         $"Empty Username.");
 
                     return -1;
@@ -1617,7 +1617,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeUserPassword)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1629,7 +1629,7 @@ namespace OGA.Postgres
                 {
                     // Change user password command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(ChangeUserPassword)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                         "Change user password command failed.");
 
                     return -2;
@@ -1640,7 +1640,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(ChangeUserPassword)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                     $"Exception occurred to database: {(Database ?? "")}");
 
                 return -20;
@@ -1674,13 +1674,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GrantSuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1692,7 +1692,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1704,7 +1704,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -1715,7 +1715,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GrantSuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -1743,13 +1743,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(DenySuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenySuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1761,7 +1761,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenySuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1773,7 +1773,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenySuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -1784,7 +1784,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(DenySuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -1815,13 +1815,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(IsSuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                     $"Attempting to check superuser status...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(IsSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1833,7 +1833,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(IsSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1848,7 +1848,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(IsSuperUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -1872,7 +1872,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(IsSuperUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -1906,13 +1906,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1924,7 +1924,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -1936,7 +1936,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -1947,7 +1947,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -1975,13 +1975,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -1993,7 +1993,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2005,7 +2005,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -2016,7 +2016,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2047,13 +2047,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Attempting to check DBCreate role...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -2065,7 +2065,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2080,7 +2080,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -2104,7 +2104,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2138,13 +2138,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -2156,7 +2156,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2168,7 +2168,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -2179,7 +2179,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2207,13 +2207,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -2225,7 +2225,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2237,7 +2237,7 @@ namespace OGA.Postgres
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -2248,7 +2248,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2279,13 +2279,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Attempting to check CreateRole role...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         $"Empty login name.");
 
                     return -1;
@@ -2297,7 +2297,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2312,7 +2312,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -2336,7 +2336,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2372,13 +2372,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                     $"Attempting to grant privileges on database, {databaseName ?? ""}...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         "Empty login.");
 
                     return -1;
@@ -2386,7 +2386,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         "Empty database.");
 
                     return -1;
@@ -2398,7 +2398,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2409,7 +2409,7 @@ namespace OGA.Postgres
                 if(res1 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         $"Login Not Found.");
 
                     return -1;
@@ -2420,7 +2420,7 @@ namespace OGA.Postgres
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         $"Database Not Found.");
 
                     return -1;
@@ -2434,7 +2434,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get database size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         $"Failed to grant privileges on database, {databaseName ?? ""}.");
 
                     return -2;
@@ -2445,7 +2445,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GrantAllforUserOnDatabase)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -2476,13 +2476,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                     $"Attempting to grant privileges on table, {tableName ?? ""}...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         "Empty login.");
 
                     return -1;
@@ -2490,7 +2490,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         "Empty tableName.");
 
                     return -1;
@@ -2502,7 +2502,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2513,7 +2513,7 @@ namespace OGA.Postgres
                 if(res1 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         $"Login Not Found.");
 
                     return 0;
@@ -2523,7 +2523,7 @@ namespace OGA.Postgres
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         $"Table Not Found.");
 
                     return 0;
@@ -2536,7 +2536,7 @@ namespace OGA.Postgres
                 if (_dal.Execute_NonQuery(sql) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         $"Failed to grant privileges on table, {tableName ?? ""}.");
 
                     return -2;
@@ -2547,7 +2547,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GrantAllforUserOnTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -2580,13 +2580,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                     $"Attempting to grant privilege ({privileges.ToString()}) on table, {(tableName ?? "")}...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         "Empty login.");
 
                     return -1;
@@ -2594,7 +2594,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         "Empty tableName.");
 
                     return -1;
@@ -2606,7 +2606,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2617,7 +2617,7 @@ namespace OGA.Postgres
                 if(res1 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Login Not Found.");
 
                     return -1;
@@ -2628,7 +2628,7 @@ namespace OGA.Postgres
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Table Not Found.");
 
                     return -1;
@@ -2654,7 +2654,7 @@ namespace OGA.Postgres
                     if(respriv != 1)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                            $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                             $"Failed to get user privileges for table.");
 
                         return -1;
@@ -2707,7 +2707,7 @@ namespace OGA.Postgres
                 if (_dal.Execute_NonQuery(sql) != -1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Failed to update privileges for user ({(login ?? "")}) on table, {tableName ?? ""}.");
 
                     return -2;
@@ -2718,7 +2718,7 @@ namespace OGA.Postgres
                 if(respriv2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Failed to get updated user privileges for table.");
 
                     return -1;
@@ -2728,7 +2728,7 @@ namespace OGA.Postgres
                 if(updatedprivs != privileges)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Privileges were not updated.");
 
                     return -3;
@@ -2739,7 +2739,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(SetTablePrivilegesforUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -2775,13 +2775,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                     $"Attempting to query privileges on table, {(tableName ?? "")} for user ({(login ?? "")})...");
 
                 if(string.IsNullOrEmpty(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         "Empty login.");
 
                     return -1;
@@ -2789,7 +2789,7 @@ namespace OGA.Postgres
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         "Empty tableName.");
 
                     return -1;
@@ -2801,7 +2801,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2812,7 +2812,7 @@ namespace OGA.Postgres
                 if(res1 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         $"Login Not Found.");
 
                     return -1;
@@ -2823,7 +2823,7 @@ namespace OGA.Postgres
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         $"Table Not Found.");
 
                     return -1;
@@ -2838,7 +2838,7 @@ namespace OGA.Postgres
                 if (_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         $"Failed to query privileges for user ({(login ?? "")}) on table, {tableName ?? ""}.");
 
                     return -2;
@@ -2886,7 +2886,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(GetTablePrivilegesforUser)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -2931,7 +2931,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
                     $"Attempting to get table names for database {databaseName ?? ""}...");
 
                 // Connect to the database...
@@ -2940,7 +2940,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2956,7 +2956,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get table names from the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
                         "Failed to get table names from the database.");
 
                     return -2;
@@ -2985,7 +2985,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_TableList_forDatabase)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3022,13 +3022,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                     $"Attempting to get table size for table, {tablename ?? ""}...");
 
                 if(string.IsNullOrEmpty(tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                         "Empty tablename.");
 
                     return (-1, 0);
@@ -3040,7 +3040,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                         $"Failed to connect to server.");
 
                     return (-1, 0);
@@ -3052,7 +3052,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get table size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                         $"Failed to get table size for table, {tablename ?? ""}.");
 
                     return (-2, 0);
@@ -3074,7 +3074,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_TableSize)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                     "Exception occurred");
 
                 return (-20, 0);
@@ -3111,7 +3111,7 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                     $"Attempting to get table row counts for database {Database}...");
 
                 // Connect to the database...
@@ -3120,7 +3120,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3135,7 +3135,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get row counts from the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                         "Failed to get row counts from the database.");
 
                     return -2;
@@ -3149,7 +3149,7 @@ namespace OGA.Postgres
                     // Return an error.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                         $"Did not get any row counts for database {Database}. Database name might be wrong.");
 
                     return -3;
@@ -3174,7 +3174,7 @@ namespace OGA.Postgres
                     {
                         // An exception occurred while parsing in table row size data.
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                            $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                             $"An exception occurred while parsing in table row size data for database {Database}.");
 
                         return -4;
@@ -3189,7 +3189,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_RowCount_for_Tables)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3224,13 +3224,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                     $"Attempting to query if table ({(tableName ?? "")}) exists...");
 
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                         $"Empty table name.");
 
                     return -1;
@@ -3242,7 +3242,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3253,7 +3253,7 @@ namespace OGA.Postgres
                 if(res2 != 1 || tl == null)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                         $"Table Not Found.");
 
                     return -1;
@@ -3261,7 +3261,7 @@ namespace OGA.Postgres
                 if(!tl.Contains(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                         $"Table Not Found.");
 
                     return 0;
@@ -3273,7 +3273,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(DoesTableExist)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3302,7 +3302,7 @@ namespace OGA.Postgres
             if(tabledef == null)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                    $"{_classname}:-:{nameof(Create_Table)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                     $"Null table definition.");
 
                 return -1;
@@ -3311,13 +3311,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Create_Table)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                     $"Attempting to create table ({(tabledef.tablename ?? "")})...");
 
                 if(string.IsNullOrEmpty(tabledef.tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                         $"Empty table name.");
 
                     return -1;
@@ -3329,7 +3329,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3348,7 +3348,7 @@ namespace OGA.Postgres
                     // Failed to query for table.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                         $"Failed to query for table.");
 
                     return -1;
@@ -3364,7 +3364,7 @@ namespace OGA.Postgres
                 {
                     // Error occurred while adding the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Create_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                         "Error occurred while adding the table.");
 
                     return -4;
@@ -3383,7 +3383,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Create_Table)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3412,13 +3412,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Drop_Table)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                     $"Attempting to drop table ({(tableName ?? "")})...");
 
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                         $"Empty table name.");
 
                     return -1;
@@ -3430,7 +3430,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3448,7 +3448,7 @@ namespace OGA.Postgres
                     // Failed to query for table.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                         $"Failed to query for table.");
 
                     return -1;
@@ -3464,7 +3464,7 @@ namespace OGA.Postgres
                 {
                     // Error occurred while dropping the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                         "Error occurred while dropping the table.");
 
                     return -4;
@@ -3476,7 +3476,7 @@ namespace OGA.Postgres
                     // The table was not dropped as expected.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Drop_Table)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                         "Table drop failed. Table is still present.");
 
                     return -5;
@@ -3488,7 +3488,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Drop_Table)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3520,13 +3520,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                     $"Attempting to get primary key constraints for table {tableName ?? ""}...");
 
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                         $"Table name is empty.");
 
                     return -1;
@@ -3538,7 +3538,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3563,7 +3563,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get primary keys from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                         "Failed to get primary keys from the table.");
 
                     return -2;
@@ -3606,7 +3606,7 @@ namespace OGA.Postgres
                     catch(Exception e)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                            $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                             $"Exception occurred while converting primary key position for table ({(tableName ?? "")}).");
 
                         pk.position = -1;
@@ -3620,7 +3620,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3660,13 +3660,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                     $"Attempting to get table names for table {tableName ?? ""}...");
 
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                         $"Table name is empty.");
 
                     return -1;
@@ -3678,7 +3678,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3695,7 +3695,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get column names from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                         "Failed to get column names from the table.");
 
                     return -2;
@@ -3733,7 +3733,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_ColumnList_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                     "Exception occurred");
 
                 return -20;
@@ -3773,13 +3773,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                     $"Attempting to get column info for table {tableName ?? ""}...");
 
                 if(string.IsNullOrEmpty(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                         $"Table name is empty.");
 
                     return -1;
@@ -3791,7 +3791,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3809,7 +3809,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get column names from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                         "Failed to get column info from the table.");
 
                     return -2;
@@ -3903,7 +3903,7 @@ namespace OGA.Postgres
                             catch (Exception e)
                             {
                                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                                     $"Exception occurred while parsing identity_generation for column ({(ct.name ?? "")})");
 
                                 return -21;
@@ -3925,7 +3925,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(Get_ColumnInfo_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                     "Exception occurred");
 
                 return -20;
