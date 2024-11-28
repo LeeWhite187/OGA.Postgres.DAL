@@ -505,6 +505,7 @@ namespace OGA.Postgres
         /// <summary>
         /// Drops the given database from the Postgres instance.
         /// Returns 1 for success. Negatives for errors.
+        /// set 'force' to true, if there may be other clients connected to the database.
         /// </summary>
         /// <param name="database"></param>
         /// <param name="force"></param>
