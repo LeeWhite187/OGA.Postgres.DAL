@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
-using NanoidDotNet;
 using System.Threading.Tasks;
 using OGA.Postgres.DAL;
 using System.Linq;
@@ -152,7 +151,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a live test database, that covers all datatypes...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Create a live database, via layout...
                 DbLayout_Database layout = this.CreateLayout_UsingAllTypes();
@@ -234,7 +233,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a database layout, that covers all datatypes...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 DbLayout_Database layout = this.CreateLayout_UsingAllTypes();
                 layout.name = dbname;
 
@@ -318,7 +317,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a database layout, that covers all datatypes...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 DbLayout_Database layout = this.CreateLayout_UsingAllTypes();
                 layout.name = dbname;
 
@@ -396,7 +395,7 @@ namespace OGA.Postgres_Tests
         {
             // Create a live database, via layout...
             DbLayout_Database layout = new DbLayout_Database();
-            layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+            layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
             layout.owner = "postgres";
 
             // To exercise all types, we will need eight tables, to see all combinations of primary keys and identity behaviors.
@@ -404,12 +403,12 @@ namespace OGA.Postgres_Tests
             // Add table 1...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
 
                 // Add primary key of type, uuid...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.maxlength = null;
@@ -426,12 +425,12 @@ namespace OGA.Postgres_Tests
             // Add table 2...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 2;
 
                 // Add primary key of type, varchar...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_varchar;
                 col1.maxlength = 74;
@@ -448,12 +447,12 @@ namespace OGA.Postgres_Tests
             // Add table 3...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 3;
 
                 // Add primary key of type, bigint, as generatealways identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
@@ -470,12 +469,12 @@ namespace OGA.Postgres_Tests
             // Add table 4...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 4;
 
                 // Add primary key of type, int, as generatealways identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
@@ -492,12 +491,12 @@ namespace OGA.Postgres_Tests
             // Add table 5...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 5;
 
                 // Add primary key of type, bigint, as generatedefault identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
@@ -514,12 +513,12 @@ namespace OGA.Postgres_Tests
             // Add table 6...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 6;
 
                 // Add primary key of type, int, as generatedefault identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
@@ -536,12 +535,12 @@ namespace OGA.Postgres_Tests
             // Add table 7...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 7;
 
                 // Add primary key of type, bigint, as NO identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.maxlength = null;
@@ -558,12 +557,12 @@ namespace OGA.Postgres_Tests
             // Add table 8...
             {
                 DbLayout_Table tbl = new DbLayout_Table();
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 8;
 
                 // Add primary key of type, int, as NO identity...
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 col1.maxlength = null;
@@ -596,7 +595,7 @@ namespace OGA.Postgres_Tests
             // Add datetime types...
             {
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.timestamp;
@@ -607,7 +606,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
-                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.timestampUTC;
@@ -621,7 +620,7 @@ namespace OGA.Postgres_Tests
             // Add string types...
             {
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.varchar;
@@ -632,7 +631,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
-                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.text;
@@ -646,7 +645,7 @@ namespace OGA.Postgres_Tests
             // Add bool type...
             {
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.boolean;
@@ -660,7 +659,7 @@ namespace OGA.Postgres_Tests
             // Add uuid type...
             {
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.uuid;
@@ -674,7 +673,7 @@ namespace OGA.Postgres_Tests
             // Add numeric datatypes...
             {
                 var col1 = new DbLayout_Column();
-                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col1.ordinal = lastusedordinal;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.bigint;
@@ -685,7 +684,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col1);
 
                 var col2 = new DbLayout_Column();
-                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col2.ordinal = lastusedordinal;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.double_precision;
@@ -696,7 +695,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col2);
 
                 var col3 = new DbLayout_Column();
-                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col3.ordinal = lastusedordinal;
                 col3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
@@ -707,7 +706,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col3);
 
                 var col4 = new DbLayout_Column();
-                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col4.ordinal = lastusedordinal;
                 col4.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.numeric;
@@ -718,7 +717,7 @@ namespace OGA.Postgres_Tests
                 tbl.columns.Add(col4);
 
                 var col5 = new DbLayout_Column();
-                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 lastusedordinal++;
                 col5.ordinal = lastusedordinal;
                 col5.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.real;

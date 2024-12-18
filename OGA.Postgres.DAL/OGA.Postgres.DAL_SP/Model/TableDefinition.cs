@@ -70,7 +70,7 @@ namespace OGA.Postgres.DAL
         /// Call this method to add a primary key column to the table.
         /// Accepts an optional varchar length parameter, for primary keys of varchar type.
         /// Accepts an optional identity behavior parameter (identitybehavior), that is set if the column will generate its own sequence identifiers.
-        /// NOTE: identitybehavior is ONLY for dattypes of bigint and integer. All other datatypes will fail validation.
+        /// NOTE: identitybehavior is ONLY for datatypes of bigint and integer. All other datatypes will fail validation.
         /// </summary>
         /// <param name="colname"></param>
         /// <param name="datatype"></param>

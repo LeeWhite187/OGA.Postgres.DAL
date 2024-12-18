@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
-using NanoidDotNet;
 using OGA.Postgres.DAL;
 using System.Threading.Tasks;
 
@@ -122,8 +121,8 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -210,7 +209,7 @@ namespace OGA.Postgres_Tests
                 pt.Database = dbcreds.Database;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -241,7 +240,7 @@ namespace OGA.Postgres_Tests
                 pt.Database = dbcreds.Database;
 
                 // Create a test username...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Verify it doesn't exist...
                 var res2 = pt.Does_Login_Exist(username);
@@ -275,8 +274,8 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a non superuser...
-                string mortaluser = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res1 = pt.CreateUser(mortaluser, mortaluser_password);
                 if(res1 != 1)
                     Assert.Fail("Wrong Value");
@@ -289,7 +288,7 @@ namespace OGA.Postgres_Tests
                 pt2.Password = mortaluser_password;
 
                 // Have the mortal user attempt to create a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res2 = pt2.CreateUser(username);
                 if(res2 != -2)
                     Assert.Fail("Wrong Value");
@@ -318,8 +317,8 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a non superuser...
-                string mortaluser = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res1 = pt.CreateUser(mortaluser, mortaluser_password);
                 if(res1 != 1)
                     Assert.Fail("Wrong Value");
@@ -344,7 +343,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Attempt to change the test user's password...
-                string newpassword = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string newpassword = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res2 = pt.ChangeUserPassword(mortaluser, newpassword);
                 if(res2 != 1)
                     Assert.Fail("Wrong Value");
@@ -394,15 +393,15 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create test user 1...
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res1 = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(res1 != 1)
                     Assert.Fail("Wrong Value");
 
                 // Create test user 2...
-                string mortaluser2 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser2_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser2 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser2_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res2 = pt.CreateUser(mortaluser2, mortaluser2_password);
                 if(res2 != 1)
                     Assert.Fail("Wrong Value");
@@ -444,7 +443,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Have test user 1 attempt to change the password of test user 2...
-                string newpassword2 = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string newpassword2 = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Open a connection as test user 1...
                     var pt1 = new Postgres_Tools();
@@ -528,8 +527,8 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create test user 1...
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res1 = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(res1 != 1)
                     Assert.Fail("Wrong Value");
@@ -552,7 +551,7 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Have test user 1 attempt to change their password...
-                string mortaluser1_password2 = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password2 = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Open a connection as test user 1...
                     var pt1 = new Postgres_Tools();
@@ -698,7 +697,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -734,7 +733,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -780,7 +779,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -862,7 +861,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -898,7 +897,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -944,7 +943,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -1026,7 +1025,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -1062,7 +1061,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");
@@ -1108,7 +1107,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Attempt to add a test user...
-                string username = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string username = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var res = pt.CreateUser(username);
                 if(res != 1)
                     Assert.Fail("Wrong Value");

@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
-using NanoidDotNet;
 using System.Threading.Tasks;
 using OGA.Postgres.DAL;
 using System.Linq;
@@ -182,7 +181,7 @@ namespace OGA.Postgres_Tests
             {
 
                 // Create a test database...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -195,16 +194,16 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
                 tbl.columns.Add(col1);
                 DbLayout_Column col2 = new DbLayout_Column();
-                col2.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col2.ordinal = 2;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.isNullable = false;
@@ -241,20 +240,20 @@ namespace OGA.Postgres_Tests
 
                 // Create layout with a table with multiple tables with same name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
                 tbl.columns.Add(col1);
                 DbLayout_Column col2 = new DbLayout_Column();
-                col2.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col2.ordinal = 2;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col2.isNullable = false;
@@ -295,7 +294,7 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a bad database name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + "_ *";
+                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + "_ *";
                 layout.owner = "";
 
                 var dlt = new DatabaseLayout_Tool();
@@ -329,11 +328,11 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a table with a bad table name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
                 tbl.ordinal = 1;
 
                 var dlt = new DatabaseLayout_Tool();
@@ -367,14 +366,14 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a table with a bad column name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
+                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
@@ -416,14 +415,14 @@ namespace OGA.Postgres_Tests
 
                 // Create layout with a table with multiple columns, in same table, with same name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 col1.isNullable = true;
@@ -460,7 +459,7 @@ namespace OGA.Postgres_Tests
         {
             try
             {
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -473,7 +472,7 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
 
                 var res2 = dlt.Verify_Database_Layout(layout);
@@ -508,7 +507,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -543,7 +542,7 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create layout with a database owner that doesn't exist...
-                string dbowner = "testowner" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbowner = "testowner" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 DbLayout_Database layout = new DbLayout_Database();
                 layout.name = dbname;
                 layout.owner = dbowner;
@@ -593,8 +592,8 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a unique owner...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -622,7 +621,7 @@ namespace OGA.Postgres_Tests
 
 
                     // Create a second database user...
-                    string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                    string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                     var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                     if(resa != 1)
                         Assert.Fail("Wrong Value");
@@ -649,7 +648,7 @@ namespace OGA.Postgres_Tests
                 // Create layout with a table with a totally different user...
                 DbLayout_Database layout = new DbLayout_Database();
                 layout.name = dbname;
-                layout.owner = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.owner = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var res1 = dlt.Verify_Database_Layout(layout);
                 if(res1.res != 0)
@@ -696,7 +695,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -725,7 +724,7 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 tbl.ordinal = 1;
 
                 var res1 = dlt.Verify_Database_Layout(layout);
@@ -774,7 +773,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -793,8 +792,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -853,7 +852,7 @@ namespace OGA.Postgres_Tests
                 col2.isNullable = true;
                 tbl.columns.Add(col2);
                 //DbLayout_Column col3 = new DbLayout_Column();
-                //col3.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                //col3.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 //col3.ordinal = 3;
                 //col3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 //tbl.columns.Add(col3);
@@ -911,7 +910,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -930,8 +929,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -990,7 +989,7 @@ namespace OGA.Postgres_Tests
                 col2.isNullable = true;
                 tbl.columns.Add(col2);
                 DbLayout_Column col3 = new DbLayout_Column();
-                col3.name = "testcol" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col3.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 col3.ordinal = 3;
                 col3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 col2.isNullable = true;
@@ -1058,7 +1057,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1077,9 +1076,9 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname3 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname3 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1201,7 +1200,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1220,8 +1219,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1343,7 +1342,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1362,8 +1361,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1476,7 +1475,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1495,8 +1494,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1618,7 +1617,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1637,8 +1636,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1760,7 +1759,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1779,8 +1778,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -1905,7 +1904,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1924,8 +1923,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -2047,7 +2046,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2066,13 +2065,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname1 = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname2 = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c1 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c3 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c1 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname1 = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname2 = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet1c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet1c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet1c3 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet2c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet2c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -2241,9 +2240,9 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string testtable1 = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string testtable2 = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string testtable1 = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string testtable2 = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2263,8 +2262,8 @@ namespace OGA.Postgres_Tests
 
 
                 // Create one of the test tables in our test database...
-                string colnamet2c1 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c2 = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet2c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet2c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -2327,21 +2326,21 @@ namespace OGA.Postgres_Tests
                 tbl1.ordinal = 1;
 
                 DbLayout_Column colt1c1 = new DbLayout_Column();
-                colt1c1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 colt1c1.ordinal = 1;
                 colt1c1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 colt1c1.isNullable = false;
                 tbl1.columns.Add(colt1c1);
 
                 DbLayout_Column colt1c2 = new DbLayout_Column();
-                colt1c2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 colt1c2.ordinal = 2;
                 colt1c2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.double_precision;
                 colt1c2.isNullable = true;
                 tbl1.columns.Add(colt1c2);
 
                 DbLayout_Column colt1c3 = new DbLayout_Column();
-                colt1c3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 colt1c3.ordinal = 3;
                 colt1c3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.uuid;
                 colt1c3.isNullable = true;
@@ -2464,7 +2463,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2545,7 +2544,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Create a database layout of moderate complexity...
                 DbLayout_Database layout = new DbLayout_Database();
@@ -2556,13 +2555,13 @@ namespace OGA.Postgres_Tests
                     // Add table 1...
                     {
                         DbLayout_Table tbl1 = new DbLayout_Table();
-                        tbl1.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                        tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                         tbl1.ordinal = 1;
 
                         // Add columns...
                         {
                             var col1 = new DbLayout_Column();
-                            col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col1.ordinal = 1;
                             col1.maxlength = null;
                             col1.isNullable = false;
@@ -2571,7 +2570,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col1);
 
                             var col2 = new DbLayout_Column();
-                            col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col2.ordinal = 2;
                             col2.maxlength = null;
                             col2.isNullable = true;
@@ -2580,7 +2579,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col2);
 
                             var col3 = new DbLayout_Column();
-                            col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col3.ordinal = 3;
                             col3.maxlength = 50;
                             col3.isNullable = false;
@@ -2589,7 +2588,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col3);
 
                             var col4 = new DbLayout_Column();
-                            col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col4.ordinal = 4;
                             col4.maxlength = null;
                             col4.isNullable = true;
@@ -2598,7 +2597,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col4);
 
                             var col5 = new DbLayout_Column();
-                            col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col5.ordinal = 5;
                             col5.maxlength = null;
                             col5.isNullable = true;
@@ -2613,13 +2612,13 @@ namespace OGA.Postgres_Tests
                     // Add table 2...
                     {
                         DbLayout_Table tbl2 = new DbLayout_Table();
-                        tbl2.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                        tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                         tbl2.ordinal = 2;
 
                         // Add columns...
                         {
                             var col1 = new DbLayout_Column();
-                            col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col1.ordinal = 1;
                             col1.maxlength = null;
                             col1.isNullable = false;
@@ -2628,7 +2627,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col1);
 
                             var col2 = new DbLayout_Column();
-                            col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col2.ordinal = 2;
                             col2.maxlength = null;
                             col2.isNullable = true;
@@ -2637,7 +2636,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col2);
 
                             var col3 = new DbLayout_Column();
-                            col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col3.ordinal = 3;
                             col3.maxlength = 50;
                             col3.isNullable = false;
@@ -2646,7 +2645,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col3);
 
                             var col4 = new DbLayout_Column();
-                            col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col4.ordinal = 4;
                             col4.maxlength = null;
                             col4.isNullable = true;
@@ -2655,7 +2654,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col4);
 
                             var col5 = new DbLayout_Column();
-                            col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             col5.ordinal = 5;
                             col5.maxlength = null;
                             col5.isNullable = true;
@@ -2739,7 +2738,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -2758,13 +2757,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2773,7 +2772,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2782,7 +2781,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2791,7 +2790,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2800,7 +2799,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -2815,13 +2814,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2830,7 +2829,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2839,7 +2838,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2848,7 +2847,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2857,7 +2856,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -2935,7 +2934,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -2954,13 +2953,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2969,7 +2968,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2978,7 +2977,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2987,7 +2986,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2996,7 +2995,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3011,13 +3010,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3026,7 +3025,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3035,7 +3034,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3044,7 +3043,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3053,7 +3052,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3132,7 +3131,7 @@ namespace OGA.Postgres_Tests
                 pt.Password = dbcreds.Password;
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -3151,13 +3150,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3166,7 +3165,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3175,7 +3174,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3184,7 +3183,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3193,7 +3192,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3208,13 +3207,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3223,7 +3222,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3232,7 +3231,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3241,7 +3240,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3250,7 +3249,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3289,7 +3288,7 @@ namespace OGA.Postgres_Tests
                 var layout2 = Newtonsoft.Json.JsonConvert.DeserializeObject<DbLayout_Database>(jsonlayout);
 
                 // Give the "retrieved" database a different name, so we can create a database on the same test host...
-                layout2.name = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout2.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Use the "retrieved" layout to create an identical database...
                 var res4 = dlt.Create_Database_fromLayout(layout2);

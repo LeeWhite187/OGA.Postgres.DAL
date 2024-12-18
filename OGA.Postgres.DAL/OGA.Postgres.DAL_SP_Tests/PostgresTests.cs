@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using OGA.Common.Config.structs;
-using NanoidDotNet;
 using System.Threading.Tasks;
 using OGA.Postgres.DAL;
 using System.Linq;
@@ -165,7 +164,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -223,7 +222,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -252,8 +251,8 @@ namespace OGA.Postgres_Tests
 
 
                 // Create a second database user...
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                     if(resa != 1)
@@ -306,7 +305,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -325,7 +324,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Create a test table in our test database that has a primary key...
-                string tblname = "testtbl" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
@@ -420,7 +419,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -467,7 +466,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -521,7 +520,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -568,7 +567,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -615,7 +614,7 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Password = dbcreds.Password;
 
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
                 // Check that the database doesn't exist...
                 var res1 = pt.Is_Database_Present(dbname);
@@ -649,15 +648,15 @@ namespace OGA.Postgres_Tests
 
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Create the test database name...
-                string dbname = "testdb" + NanoidDotNet.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
 
 
                 // Have test user 1 attempt to create the test database...
