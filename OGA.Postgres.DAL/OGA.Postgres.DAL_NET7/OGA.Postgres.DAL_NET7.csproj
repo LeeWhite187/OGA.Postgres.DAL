@@ -38,7 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="7.0.9" />
-    <PackageReference Include="OGA.Common.Lib.NetCore" Version="3.8.0" />
+    <PackageReference Include="OGA.Common.Lib.NetCore" Version="3.10.1" />
     <PackageReference Include="OGA.SharedKernel" Version="3.6.0" />
   </ItemGroup>
 
