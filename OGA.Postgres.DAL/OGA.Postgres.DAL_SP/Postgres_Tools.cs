@@ -231,7 +231,7 @@ namespace OGA.Postgres
                     $"Attempting to get data foldet path...");
 
                 // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
@@ -345,7 +345,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                     $"Attempting to get database names...");
 
-                if(string.IsNullOrEmpty(database))
+                if(string.IsNullOrWhiteSpace(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
@@ -435,7 +435,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                     $"Attempting to create database...");
 
-                if(string.IsNullOrEmpty(database))
+                if(string.IsNullOrWhiteSpace(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
@@ -527,7 +527,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                     $"Attempting to drop database...");
 
-                if(string.IsNullOrEmpty(database))
+                if(string.IsNullOrWhiteSpace(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
@@ -722,7 +722,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                     $"Attempting to get database owner...");
 
-                if(string.IsNullOrEmpty(database))
+                if(string.IsNullOrWhiteSpace(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
@@ -814,7 +814,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                     $"Attempting to get change owner...");
 
-                if(string.IsNullOrEmpty(database))
+                if(string.IsNullOrWhiteSpace(database))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
@@ -822,7 +822,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(newowner))
+                if(string.IsNullOrWhiteSpace(newowner))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
@@ -941,7 +941,7 @@ namespace OGA.Postgres
                     $"BackupFile = {filePath ?? ""};");
 
                 // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
@@ -949,7 +949,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(filePath))
+                if(string.IsNullOrWhiteSpace(filePath))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
@@ -1044,7 +1044,7 @@ namespace OGA.Postgres
                     $"BackupFile = {filePath ?? ""};");
 
                 // Verify both givens exist...
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
@@ -1052,7 +1052,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(filePath))
+                if(string.IsNullOrWhiteSpace(filePath))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
@@ -1146,7 +1146,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                     $"Attempting to get disk size for database, {databaseName ?? ""}...");
 
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
@@ -1264,7 +1264,7 @@ namespace OGA.Postgres
 
                 // Add the user...
                 string sql = "";
-                if(string.IsNullOrEmpty(password))
+                if(string.IsNullOrWhiteSpace(password))
                     sql = $"CREATE USER {username};";
                 else
                     sql = $"CREATE USER {username} WITH PASSWORD '{password}';";
@@ -1413,7 +1413,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                     $"Attempting to check for login to database: {(Database ?? "")}...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
@@ -1518,7 +1518,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                     $"Attempting to delete user...");
 
-                if(string.IsNullOrEmpty(username))
+                if(string.IsNullOrWhiteSpace(username))
                 {
                     // Empty username.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1602,7 +1602,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                     $"Attempting to create user...");
 
-                if(string.IsNullOrEmpty(username))
+                if(string.IsNullOrWhiteSpace(username))
                 {
                     // Empty Username.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1679,7 +1679,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
@@ -1748,7 +1748,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
@@ -1820,7 +1820,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                     $"Attempting to check superuser status...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
@@ -1911,7 +1911,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
@@ -1980,7 +1980,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
@@ -2052,7 +2052,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Attempting to check DBCreate role...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
@@ -2143,7 +2143,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
@@ -2212,7 +2212,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                     $"Attempting to check for login...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
@@ -2284,7 +2284,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                     $"Attempting to check CreateRole role...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
@@ -2377,7 +2377,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                     $"Attempting to grant privileges on database, {databaseName ?? ""}...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
@@ -2385,7 +2385,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
@@ -2481,7 +2481,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                     $"Attempting to grant privileges on table, {tableName ?? ""}...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
@@ -2489,7 +2489,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
@@ -2585,7 +2585,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                     $"Attempting to grant privilege ({privileges.ToString()}) on table, {(tableName ?? "")}...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
@@ -2593,7 +2593,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
@@ -2698,9 +2698,9 @@ namespace OGA.Postgres
                     }
 
                     // Create a single sql command to run...
-                    if(!string.IsNullOrEmpty(sqladd))
+                    if(!string.IsNullOrWhiteSpace(sqladd))
                         sql = sql + sqladd;
-                    if(!string.IsNullOrEmpty(sqlremove))
+                    if(!string.IsNullOrWhiteSpace(sqlremove))
                         sql = sql + sqlremove;
                 }
                 // We have a sql command to run.
@@ -2780,7 +2780,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                     $"Attempting to query privileges on table, {(tableName ?? "")} for user ({(login ?? "")})...");
 
-                if(string.IsNullOrEmpty(login))
+                if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
@@ -2788,7 +2788,7 @@ namespace OGA.Postgres
 
                     return -1;
                 }
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
@@ -2942,7 +2942,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3027,7 +3027,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                     $"Attempting to get table size for table, {tablename ?? ""}...");
 
-                if(string.IsNullOrEmpty(tablename))
+                if(string.IsNullOrWhiteSpace(tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
@@ -3229,7 +3229,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                     $"Attempting to query if table ({(tableName ?? "")}) exists...");
 
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
@@ -3316,7 +3316,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                     $"Attempting to create table ({(tabledef.tablename ?? "")})...");
 
-                if(string.IsNullOrEmpty(tabledef.tablename))
+                if(string.IsNullOrWhiteSpace(tabledef.tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
@@ -3417,7 +3417,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                     $"Attempting to drop table ({(tableName ?? "")})...");
 
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
@@ -3525,7 +3525,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                     $"Attempting to get primary key constraints for table {tableName ?? ""}...");
 
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
@@ -3665,7 +3665,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
                     $"Attempting to get table names for table {tableName ?? ""}...");
 
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
@@ -3778,7 +3778,7 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                     $"Attempting to get column info for table {tableName ?? ""}...");
 
-                if(string.IsNullOrEmpty(tableName))
+                if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +

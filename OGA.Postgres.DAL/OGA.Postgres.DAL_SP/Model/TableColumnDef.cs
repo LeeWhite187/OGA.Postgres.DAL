@@ -35,7 +35,7 @@ namespace OGA.Postgres.DAL.Model
             string sql = $"\"{this.ColName}\" {this.ColType}";
 
             // Add any collation...
-            if(!string.IsNullOrEmpty(this.Collate))
+            if(!string.IsNullOrWhiteSpace(this.Collate))
                 sql = sql + " " + this.Collate;
 
             // Add any not null constraint...

@@ -20,7 +20,7 @@ namespace OGA.Postgres.DAL.CreateVerify.Model
         notset = 0,
 
         /// <summary>
-        /// Covers .NET Int32 type
+        /// Covers .NET Boolean type
         /// </summary>
         boolean = 101,
 
@@ -127,7 +127,7 @@ namespace OGA.Postgres.DAL.CreateVerify.Model
     /// Defines the generation behavior an identity column uses.
     /// NOTE: This is only valid for bigint and integer datatypes.
     /// ByDefault will accept the user-specified value if included in an INSERT.
-    /// Always will create an error if the value is included in an INSERT.
+    /// Always will be created at insert, and error if the value is included in the INSERT statement.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum eIdentityBehavior

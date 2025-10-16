@@ -23,9 +23,9 @@ namespace OGA.Postgres.DAL
         {
             columnlist = new List<TableColumnDef>();
 
-            if (string.IsNullOrEmpty(tablename))
+            if (string.IsNullOrWhiteSpace(tablename))
                 throw new Exception("Invalid table name");
-            if (string.IsNullOrEmpty(owner))
+            if (string.IsNullOrWhiteSpace(owner))
                 throw new Exception("Invalid owner");
 
             this.tablename = tablename;
@@ -41,7 +41,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_Boolean_Column(string colname, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;
@@ -79,7 +79,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_Pk_Column(string colname, ePkColTypes datatype, eIdentityBehavior identitybehavior = eIdentityBehavior.UNSET, int? varcharlength = null)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -169,7 +169,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_DateTime_Column(string colname, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;
@@ -188,7 +188,7 @@ namespace OGA.Postgres.DAL
             cd.Collate = "";
             cd.CanBeNull = canbenull;
             // In PostgreSQL, "timestamp without time zone" is used to represent a non-UTC datetime.
-            // See this: https://oga.atlassian.net/wiki/spaces/~311198967/pages/edit-v2/207388673?draftShareId=65eb5bab-6dc3-414c-85b7-a35d88265cc4&inEditorTemplatesPanel=auto_closed
+            // See this: https://wiki.galaxydump.com/link/221
             cd.ColType = "timestamp without time zone";
 
             this.columnlist.Add(cd);
@@ -204,7 +204,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_UTCDateTime_Column(string colname, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;
@@ -223,7 +223,7 @@ namespace OGA.Postgres.DAL
             cd.Collate = "";
             cd.CanBeNull = canbenull;
             // In PostgreSQL, "timestamp with time zone" is used to represent a UTC datetime.
-            // See this: https://oga.atlassian.net/wiki/spaces/~311198967/pages/edit-v2/207388673?draftShareId=65eb5bab-6dc3-414c-85b7-a35d88265cc4&inEditorTemplatesPanel=auto_closed
+            // See this: https://wiki.galaxydump.com/link/221
             cd.ColType = "timestamp with time zone";
 
             this.columnlist.Add(cd);
@@ -239,7 +239,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_Guid_Column(string colname, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;
@@ -273,7 +273,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_Numeric_Column(string colname, eNumericColTypes datatype, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;
@@ -318,7 +318,7 @@ namespace OGA.Postgres.DAL
         /// <returns></returns>
         public int Add_String_Column(string colname, int length, bool canbenull)
         {
-            if(string.IsNullOrEmpty(colname))
+            if(string.IsNullOrWhiteSpace(colname))
             {
                 // Invalid column name.
                 return -1;

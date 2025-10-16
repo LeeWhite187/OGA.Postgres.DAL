@@ -206,7 +206,7 @@ namespace OGA.Postgres.CreateVerify
                 // The database exists.
 
                 // Verify the database owner is correct...
-                if(string.IsNullOrEmpty(layout.owner))
+                if(string.IsNullOrWhiteSpace(layout.owner))
                 {
                     // No owner was specified.
                     // Nothing to check.
@@ -288,7 +288,7 @@ namespace OGA.Postgres.CreateVerify
                 // The caller can give us an options instance that allows us to ignore extra tables in the live database.
                 foreach(var t in layout.tables)
                 {
-                    if(t == null || string.IsNullOrEmpty(t.name))
+                    if(t == null || string.IsNullOrWhiteSpace(t.name))
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                             $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
@@ -638,7 +638,7 @@ namespace OGA.Postgres.CreateVerify
                     foreach(var t in livetablelist)
                     {
                         // Skip if null...
-                        if(string.IsNullOrEmpty(t))
+                        if(string.IsNullOrWhiteSpace(t))
                         {
                             // Table name is null.
                             OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -711,7 +711,7 @@ namespace OGA.Postgres.CreateVerify
 
             try
             {
-                if(string.IsNullOrEmpty(databaseName))
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
                     // Database name is blank.
 
@@ -1138,7 +1138,7 @@ namespace OGA.Postgres.CreateVerify
                 }
 
                 // Set the database owner if needed...
-                if(!string.IsNullOrEmpty(layout.owner))
+                if(!string.IsNullOrWhiteSpace(layout.owner))
                 {
                     // The layout includes a database owner.
                     // We will set the database owner.
@@ -1429,7 +1429,7 @@ namespace OGA.Postgres.CreateVerify
         /// <returns></returns>
         static public (int res, eColDataTypes dtype) Parse_ColDataType(string dataType)
         {
-            if(string.IsNullOrEmpty(dataType))
+            if(string.IsNullOrWhiteSpace(dataType))
                 return (-1, eColDataTypes.notset);
 
             if (dataType == "bigint")

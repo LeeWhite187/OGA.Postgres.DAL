@@ -397,7 +397,7 @@ namespace OGA.Postgres
             NpgsqlConnection? conn = null;
 
             // See if the connection string has been set.
-            if (string.IsNullOrEmpty(_connstring))
+            if (string.IsNullOrWhiteSpace(_connstring))
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
                     $"{_classname}:-:{nameof(CreateConnection)} - " +
@@ -766,7 +766,7 @@ namespace OGA.Postgres
         /// Set the copyargs string to your preamble: COPY tablename (field1, field2, field3) FROM STDIN (FORMAT BINARY)
         /// NOTE: Usage of the BeginBinaryImport call lets us avoid a need to escape/sanitize strings, as each one is converted to binary, instead of raw SQL.
         /// Populate rows with the writer in the callback.
-        /// See this article for usage: https://oga.atlassian.net/wiki/spaces/~311198967/pages/211091547/PostgreSQL+Bulk+Insert
+        /// See this article for usage: https://wiki.galaxydump.com/link/271
         /// </summary>
         /// <param name="copyargs"></param>
         /// <param name="callback"></param>

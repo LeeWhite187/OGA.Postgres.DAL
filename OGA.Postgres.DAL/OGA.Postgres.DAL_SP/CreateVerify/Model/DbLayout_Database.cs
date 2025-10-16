@@ -68,7 +68,7 @@ namespace OGA.Postgres.DAL.Model
             }
 
             // Verify the database owner is valid, if set...
-            if(!string.IsNullOrEmpty(this.owner))
+            if(!string.IsNullOrWhiteSpace(this.owner))
             {
                 if(!Postgres_Tools.UserNameIsValid(this.owner))
                 {
@@ -222,8 +222,8 @@ namespace OGA.Postgres.DAL.Model
             // Otherwise, they must match exactly.
             if(layout1.owner != layout2.owner)
             {
-                if((string.IsNullOrEmpty(layout1.owner) || layout1.owner == "postgres") &&
-                    (string.IsNullOrEmpty(layout2.owner) || layout2.owner == "postgres"))
+                if((string.IsNullOrWhiteSpace(layout1.owner) || layout1.owner == "postgres") &&
+                    (string.IsNullOrWhiteSpace(layout2.owner) || layout2.owner == "postgres"))
                 {
                     // Layout1 is owned by postgres.
                     // Layout2 is owned by postgres.
