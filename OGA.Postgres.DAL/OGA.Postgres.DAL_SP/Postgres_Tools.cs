@@ -67,6 +67,11 @@ namespace OGA.Postgres
 
                 try
                 {
+                    _dal?.Disconnect();
+                }
+                catch (Exception) { }
+                try
+                {
                     _dal?.Dispose();
                 }
                 catch (Exception) { }
