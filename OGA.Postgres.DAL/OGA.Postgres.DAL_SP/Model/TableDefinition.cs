@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Text;
-using OGA.Postgres.DAL_SP.Model;
 
 namespace OGA.Postgres.DAL
 {

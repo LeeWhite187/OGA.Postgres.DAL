@@ -10,7 +10,7 @@ using OGA.Common.Config.structs;
 using OGA.Postgres.DAL;
 using System.Threading.Tasks;
 using System.Linq;
-using OGA.Postgres.DAL_SP.Model;
+using OGA.Postgres.DAL.Model;
 
 namespace OGA.Postgres_Tests
 {

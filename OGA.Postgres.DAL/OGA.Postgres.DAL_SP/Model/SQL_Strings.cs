@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OGA.Postgres.DAL_SP.Model
+namespace OGA.Postgres.DAL.Model
 {
     public class SQL_Datatype_Names
     {
