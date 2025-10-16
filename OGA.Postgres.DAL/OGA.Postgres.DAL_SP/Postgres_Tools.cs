@@ -3645,7 +3645,7 @@ namespace OGA.Postgres
         /// <param name="tableName"></param>
         /// <param name="columnlist"></param>
         /// <returns></returns>
-        public int Get_ColumnList_forTable(string tableName, out List<string> columnlist)
+        public int Get_Columns_for_Table(string tableName, out List<string> columnlist)
         {
             System.Data.DataTable dt = null;
             columnlist = new List<string>();
@@ -3662,13 +3662,13 @@ namespace OGA.Postgres
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                     $"Attempting to get table names for table {tableName ?? ""}...");
 
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                         $"Table name is empty.");
 
                     return -1;
@@ -3680,7 +3680,7 @@ namespace OGA.Postgres
                 {
                     // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -3697,7 +3697,7 @@ namespace OGA.Postgres
                 {
                     // Failed to get column names from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                         "Failed to get column names from the table.");
 
                     return -2;
@@ -3735,7 +3735,7 @@ namespace OGA.Postgres
             catch (Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnList_forTable)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                     "Exception occurred");
 
                 return -20;

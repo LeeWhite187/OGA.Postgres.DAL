@@ -1432,15 +1432,15 @@ namespace OGA.Postgres.CreateVerify
             if(string.IsNullOrWhiteSpace(dataType))
                 return (-1, eColDataTypes.notset);
 
-            if (dataType == "bigint")
+            if (dataType == SQL_Datatype_Names.CONST_SQL_bigint)
                 return (1, eColDataTypes.bigint);
-            else if (dataType == "double precision")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_double_precision)
                 return (1, eColDataTypes.double_precision);
-            else if (dataType == "integer")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_integer)
                 return (1, eColDataTypes.integer);
-            else if (dataType == "numeric")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_numeric)
                 return (1, eColDataTypes.numeric);
-            else if (dataType == "boolean")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_boolean)
                 return (1, eColDataTypes.boolean);
             /* Exclude primary key column types, here, since we have a separate method for promoting a type to a primary key.
             else if (dataType == "bigint")
@@ -1452,17 +1452,17 @@ namespace OGA.Postgres.CreateVerify
             else if (dataType == "character varying")
                 return (1, eColDataTypes.pk_varchar);
             */
-            else if (dataType == "real")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_real)
                 return (1, eColDataTypes.real);
-            else if (dataType == "text")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_text)
                 return (1, eColDataTypes.text);
-            else if (dataType == "timestamp without time zone")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_timestamp_without_time_zone)
                 return (1, eColDataTypes.timestamp);
-            else if (dataType == "timestamp with time zone")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_timestamp_with_time_zone)
                 return (1, eColDataTypes.timestampUTC);
-            else if (dataType == "uuid")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_uuid)
                 return (1, eColDataTypes.uuid);
-            else if (dataType == "character varying")
+            else if (dataType == SQL_Datatype_Names.CONST_SQL_character_varying)
                 return (1, eColDataTypes.varchar);
             else
                 return (-1, eColDataTypes.notset);
@@ -1606,40 +1606,40 @@ namespace OGA.Postgres.CreateVerify
         /// <returns></returns>
         private bool DoesColumnTypeMatchLayoutType(string livetable_dataType, eColDataTypes layout_datatype)
         {
-            if(layout_datatype == eColDataTypes.pk_uuid && livetable_dataType == "uuid")
+            if(layout_datatype == eColDataTypes.pk_uuid && livetable_dataType == SQL_Datatype_Names.CONST_SQL_uuid)
                 return true;
-            if(layout_datatype == eColDataTypes.pk_integer && livetable_dataType == "integer")
+            if(layout_datatype == eColDataTypes.pk_integer && livetable_dataType == SQL_Datatype_Names.CONST_SQL_integer)
                 return true;
-            if(layout_datatype == eColDataTypes.pk_bigint && livetable_dataType == "bigint")
+            if(layout_datatype == eColDataTypes.pk_bigint && livetable_dataType == SQL_Datatype_Names.CONST_SQL_bigint)
                 return true;
-            if(layout_datatype == eColDataTypes.pk_varchar && livetable_dataType == "character varying")
-                return true;
-
-            if(layout_datatype == eColDataTypes.timestampUTC && livetable_dataType == "timestamp with time zone")
-                return true;
-            if(layout_datatype == eColDataTypes.timestamp && livetable_dataType == "timestamp without time zone")
+            if(layout_datatype == eColDataTypes.pk_varchar && livetable_dataType == SQL_Datatype_Names.CONST_SQL_character_varying)
                 return true;
 
-            if(layout_datatype == eColDataTypes.boolean && livetable_dataType == "boolean")
+            if(layout_datatype == eColDataTypes.timestampUTC && livetable_dataType == SQL_Datatype_Names.CONST_SQL_timestamp_with_time_zone)
+                return true;
+            if(layout_datatype == eColDataTypes.timestamp && livetable_dataType == SQL_Datatype_Names.CONST_SQL_timestamp_without_time_zone)
                 return true;
 
-            if(layout_datatype == eColDataTypes.integer && livetable_dataType == "integer")
-                return true;
-            if(layout_datatype == eColDataTypes.bigint && livetable_dataType == "bigint")
-                return true;
-            if(layout_datatype == eColDataTypes.real && livetable_dataType == "real")
-                return true;
-            if(layout_datatype == eColDataTypes.double_precision && livetable_dataType == "double precision")
-                return true;
-            if(layout_datatype == eColDataTypes.numeric && livetable_dataType == "numeric")
+            if(layout_datatype == eColDataTypes.boolean && livetable_dataType == SQL_Datatype_Names.CONST_SQL_boolean)
                 return true;
 
-            if(layout_datatype == eColDataTypes.varchar && livetable_dataType == "character varying")
+            if(layout_datatype == eColDataTypes.integer && livetable_dataType == SQL_Datatype_Names.CONST_SQL_integer)
                 return true;
-            if(layout_datatype == eColDataTypes.text && livetable_dataType == "text")
+            if(layout_datatype == eColDataTypes.bigint && livetable_dataType == SQL_Datatype_Names.CONST_SQL_bigint)
+                return true;
+            if(layout_datatype == eColDataTypes.real && livetable_dataType == SQL_Datatype_Names.CONST_SQL_real)
+                return true;
+            if(layout_datatype == eColDataTypes.double_precision && livetable_dataType == SQL_Datatype_Names.CONST_SQL_double_precision)
+                return true;
+            if(layout_datatype == eColDataTypes.numeric && livetable_dataType == SQL_Datatype_Names.CONST_SQL_numeric)
                 return true;
 
-            if(layout_datatype == eColDataTypes.uuid && livetable_dataType == "uuid")
+            if(layout_datatype == eColDataTypes.varchar && livetable_dataType == SQL_Datatype_Names.CONST_SQL_character_varying)
+                return true;
+            if(layout_datatype == eColDataTypes.text && livetable_dataType == SQL_Datatype_Names.CONST_SQL_text)
+                return true;
+
+            if(layout_datatype == eColDataTypes.uuid && livetable_dataType == SQL_Datatype_Names.CONST_SQL_uuid)
                 return true;
 
             // Not a match...

@@ -180,7 +180,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Query for column names of the table...
-                var res4 = pt.Get_ColumnList_forTable(tblname, out var collist);
+                var res4 = pt.Get_Columns_for_Table(tblname, out var collist);
                 if(res4 != 1 || collist == null || collist.Count == 0)
                     Assert.Fail("Wrong Value");
 
@@ -449,7 +449,7 @@ namespace OGA.Postgres_Tests
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{nameof(PostgresTests)}:-::{nameof(Get_Config_from_CentralConfig)} - " +
+                    $"{nameof(TableColumnMgmt_Tests)}:-::{nameof(Get_Config_from_CentralConfig)} - " +
                     $"Exception occurred while requesting config ({name}) from central config");
 
                 return -1;
