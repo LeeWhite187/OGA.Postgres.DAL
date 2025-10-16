@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Database.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CreateVerify\Model\DbLayout_Table.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\PriKeyConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\SQL_Datatype_Names.cs" />
     <Compile Include="..\OGA.Postgres.DAL_SP\Model\ColumnInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TableColumnDef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Postgres_DAL.cs" />

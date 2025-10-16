@@ -10,6 +10,7 @@ using OGA.Common.Config.structs;
 using OGA.Postgres.DAL;
 using System.Threading.Tasks;
 using System.Linq;
+using OGA.Postgres.DAL_SP.Model;
 
 namespace OGA.Postgres_Tests
 {
@@ -303,7 +304,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
                 if(c1.isIdentity != false)
                     Assert.Fail("Wrong Value");
-                if(c1.dataType != "integer")
+                if(c1.dataType != SQL_Datatype_Names.CONST_SQL_integer)
                     Assert.Fail("Wrong Value");
                 if(c1.isNullable != false)
                     Assert.Fail("Wrong Value");
@@ -317,7 +318,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
                 if(c2.isIdentity != false)
                     Assert.Fail("Wrong Value");
-                if(c2.dataType != "uuid")
+                if(c2.dataType != SQL_Datatype_Names.CONST_SQL_uuid)
                     Assert.Fail("Wrong Value");
                 if(c2.isNullable != false)
                     Assert.Fail("Wrong Value");
@@ -331,7 +332,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
                 if(c3.isIdentity != false)
                     Assert.Fail("Wrong Value");
-                if(c3.dataType != "timestamp with time zone")
+                if(c3.dataType != SQL_Datatype_Names.CONST_SQL_timestamp_with_time_zone)
                     Assert.Fail("Wrong Value");
                 if(c3.isNullable != true)
                     Assert.Fail("Wrong Value");
@@ -345,7 +346,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
                 if(c4.isIdentity != false)
                     Assert.Fail("Wrong Value");
-                if(c4.dataType != "bigint")
+                if(c4.dataType != SQL_Datatype_Names.CONST_SQL_bigint)
                     Assert.Fail("Wrong Value");
                 if(c4.isNullable != true)
                     Assert.Fail("Wrong Value");
@@ -359,7 +360,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
                 if(c5.isIdentity != false)
                     Assert.Fail("Wrong Value");
-                if(c5.dataType != "character varying")
+                if(c5.dataType != SQL_Datatype_Names.CONST_SQL_character_varying)
                     Assert.Fail("Wrong Value");
                 if(c5.isNullable != true)
                     Assert.Fail("Wrong Value");

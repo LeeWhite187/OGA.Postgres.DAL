@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Text;
+using OGA.Postgres.DAL_SP.Model;
 
 namespace OGA.Postgres.DAL
 {
@@ -59,7 +60,7 @@ namespace OGA.Postgres.DAL
             cd.IsPk = false;
             cd.Collate = "";
             cd.CanBeNull = canbenull;
-            cd.ColType = "boolean";
+            cd.ColType = SQL_Datatype_Names.CONST_SQL_boolean;
 
             this.columnlist.Add(cd);
 
@@ -121,11 +122,11 @@ namespace OGA.Postgres.DAL
 
             // Set the datatype...
             if (datatype == ePkColTypes.uuid)
-                cd.ColType = "uuid";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_uuid;
             else if (datatype == ePkColTypes.integer)
-                cd.ColType = "integer";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_integer;
             else if (datatype == ePkColTypes.bigint)
-                cd.ColType = "bigint";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_bigint;
             else if (datatype == ePkColTypes.varchar)
             {
                 // The caller wants to add a varchar primary key.
@@ -140,7 +141,7 @@ namespace OGA.Postgres.DAL
                     return -2;
                 }
 
-                cd.ColType = $"character varying({varcharlength.Value.ToString()})";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_character_varying + $"({varcharlength.Value.ToString()})";
             }
 
             // Set identity behavior clause...
@@ -189,7 +190,7 @@ namespace OGA.Postgres.DAL
             cd.CanBeNull = canbenull;
             // In PostgreSQL, "timestamp without time zone" is used to represent a non-UTC datetime.
             // See this: https://wiki.galaxydump.com/link/221
-            cd.ColType = "timestamp without time zone";
+            cd.ColType = SQL_Datatype_Names.CONST_SQL_timestamp_without_time_zone;
 
             this.columnlist.Add(cd);
 
@@ -224,7 +225,7 @@ namespace OGA.Postgres.DAL
             cd.CanBeNull = canbenull;
             // In PostgreSQL, "timestamp with time zone" is used to represent a UTC datetime.
             // See this: https://wiki.galaxydump.com/link/221
-            cd.ColType = "timestamp with time zone";
+            cd.ColType = SQL_Datatype_Names.CONST_SQL_timestamp_with_time_zone;
 
             this.columnlist.Add(cd);
 
@@ -257,7 +258,7 @@ namespace OGA.Postgres.DAL
             cd.IsPk = false;
             cd.Collate = "";
             cd.CanBeNull = canbenull;
-            cd.ColType = "uuid";
+            cd.ColType = SQL_Datatype_Names.CONST_SQL_uuid;
 
             this.columnlist.Add(cd);
 
@@ -293,15 +294,15 @@ namespace OGA.Postgres.DAL
             cd.CanBeNull = canbenull;
 
             if (datatype == eNumericColTypes.integer)
-                cd.ColType = "integer";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_integer;
             else if (datatype == eNumericColTypes.bigint)
-                cd.ColType = "bigint";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_bigint;
             else if (datatype == eNumericColTypes.real)
-                cd.ColType = "real";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_real;
             else if (datatype == eNumericColTypes.double_precision)
-                cd.ColType = "double precision";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_double_precision;
             else if (datatype == eNumericColTypes.numeric)
-                cd.ColType = "numeric";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_numeric;
 
             this.columnlist.Add(cd);
 
@@ -339,12 +340,12 @@ namespace OGA.Postgres.DAL
 
             if(length <= 0)
             {
-                cd.ColType = "text";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_text;
                 cd.Collate = "COLLATE pg_catalog.\"default\"";
             }
             else
             {
-                cd.ColType = $"character varying({length.ToString()})";
+                cd.ColType = SQL_Datatype_Names.CONST_SQL_character_varying + $"({length.ToString()})";
                 cd.Collate = "COLLATE pg_catalog.\"default\"";
             }
 
