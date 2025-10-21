@@ -15,6 +15,7 @@ using OGA.Postgres.CreateVerify;
 using OGA.Postgres.DAL.Model;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using OGA.MSSQL.DAL_Tests.Helpers;
 
 namespace OGA.Postgres_Tests
 {
@@ -60,10 +61,8 @@ namespace OGA.Postgres_Tests
 
     [TestCategory(Test_Types.Unit_Tests)]
     [TestClass]
-    public class DatabaseLayout_Tests : OGA.Testing.Lib.Test_Base_abstract
+    public class DatabaseLayout_Tests : ProjectTest_Base
     {
-        protected OGA.Common.Config.structs.cPostGresDbConfig dbcreds;
-
         #region Setup
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace OGA.Postgres_Tests
             {
 
                 // Create a test database...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -194,16 +193,16 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = this.GenerateColumnName();
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
                 tbl.columns.Add(col1);
                 DbLayout_Column col2 = new DbLayout_Column();
-                col2.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = this.GenerateColumnName();
                 col2.ordinal = 2;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col1.isNullable = false;
@@ -240,20 +239,20 @@ namespace OGA.Postgres_Tests
 
                 // Create layout with a table with multiple tables with same name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = this.GenerateDatabaseName();
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = this.GenerateColumnName();
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
                 tbl.columns.Add(col1);
                 DbLayout_Column col2 = new DbLayout_Column();
-                col2.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col2.name = this.GenerateColumnName();
                 col2.ordinal = 2;
                 col2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_bigint;
                 col2.isNullable = false;
@@ -294,7 +293,7 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a bad database name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + "_ *";
+                layout.name = this.GenerateDatabaseName() + "_ *";
                 layout.owner = "";
 
                 var dlt = new DatabaseLayout_Tool();
@@ -328,11 +327,11 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a table with a bad table name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = this.GenerateDatabaseName();
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
+                tbl.name = this.GenerateColumnName() + " _*";
                 tbl.ordinal = 1;
 
                 var dlt = new DatabaseLayout_Tool();
@@ -366,14 +365,14 @@ namespace OGA.Postgres_Tests
             {
                 // Create layout with a table with a bad column name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = this.GenerateDatabaseName();
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890") + " _*";
+                col1.name = this.GenerateColumnName() + " _*";
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_uuid;
                 col1.isNullable = false;
@@ -415,14 +414,14 @@ namespace OGA.Postgres_Tests
 
                 // Create layout with a table with multiple columns, in same table, with same name...
                 DbLayout_Database layout = new DbLayout_Database();
-                layout.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.name = this.GenerateDatabaseName();
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
                 DbLayout_Column col1 = new DbLayout_Column();
-                col1.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col1.name = this.GenerateColumnName();
                 col1.ordinal = 1;
                 col1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 col1.isNullable = true;
@@ -459,7 +458,7 @@ namespace OGA.Postgres_Tests
         {
             try
             {
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -472,7 +471,7 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
 
                 var res2 = dlt.Verify_Database_Layout(layout);
@@ -501,13 +500,9 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -542,7 +537,7 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create layout with a database owner that doesn't exist...
-                string dbowner = "testowner" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbowner = this.GenerateTestUser();
                 DbLayout_Database layout = new DbLayout_Database();
                 layout.name = dbname;
                 layout.owner = dbowner;
@@ -585,15 +580,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a unique owner...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string mortaluser1 = this.GenerateTestUser();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -621,7 +612,7 @@ namespace OGA.Postgres_Tests
 
 
                     // Create a second database user...
-                    string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                    string mortaluser1_password = this.GenerateUserPassword();
                     var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                     if(resa != 1)
                         Assert.Fail("Wrong Value");
@@ -648,7 +639,7 @@ namespace OGA.Postgres_Tests
                 // Create layout with a table with a totally different user...
                 DbLayout_Database layout = new DbLayout_Database();
                 layout.name = dbname;
-                layout.owner = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout.owner = this.GenerateTestUser();
 
                 var res1 = dlt.Verify_Database_Layout(layout);
                 if(res1.res != 0)
@@ -688,14 +679,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -724,7 +711,7 @@ namespace OGA.Postgres_Tests
                 layout.owner = "";
                 DbLayout_Table tbl = new DbLayout_Table();
                 layout.tables.Add(tbl);
-                tbl.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                tbl.name = this.GenerateTableName();
                 tbl.ordinal = 1;
 
                 var res1 = dlt.Verify_Database_Layout(layout);
@@ -766,14 +753,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -792,17 +775,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -864,14 +843,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -903,14 +877,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -929,17 +899,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -989,7 +955,7 @@ namespace OGA.Postgres_Tests
                 col2.isNullable = true;
                 tbl.columns.Add(col2);
                 DbLayout_Column col3 = new DbLayout_Column();
-                col3.name = "testcol" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                col3.name = this.GenerateColumnName();
                 col3.ordinal = 3;
                 col3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.integer;
                 col2.isNullable = true;
@@ -1014,11 +980,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1050,14 +1012,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1076,18 +1034,14 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname3 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
+                string colname3 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1157,11 +1111,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1193,14 +1143,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1219,17 +1165,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1299,11 +1241,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1335,14 +1273,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1361,17 +1295,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1432,11 +1362,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1468,14 +1394,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1494,17 +1416,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1574,11 +1492,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1610,14 +1524,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1636,17 +1546,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1716,11 +1622,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1752,14 +1654,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1778,17 +1676,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -1861,11 +1755,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -1897,14 +1787,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -1923,17 +1809,13 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colname2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname = this.GenerateTableName();
+                string colname2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -2001,11 +1883,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2039,14 +1917,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2065,22 +1939,18 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test table in our test database...
-                string tblname1 = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname2 = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet1c3 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string tblname1 = this.GenerateTableName();
+                string tblname2 = this.GenerateTableName();
+                string colnamet1c1 = this.GenerateColumnName();
+                string colnamet1c2 = this.GenerateColumnName();
+                string colnamet1c3 = this.GenerateColumnName();
+                string colnamet2c1 = this.GenerateColumnName();
+                string colnamet2c2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -2197,11 +2067,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2233,16 +2099,12 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string testtable1 = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string testtable2 = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string testtable1 = this.GenerateTableName();
+                string testtable2 = this.GenerateTableName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2262,17 +2124,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Create one of the test tables in our test database...
-                string colnamet2c1 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string colnamet2c2 = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string colnamet2c1 = this.GenerateColumnName();
+                string colnamet2c2 = this.GenerateColumnName();
                 {
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res5 = pt.TestConnection();
@@ -2326,21 +2184,21 @@ namespace OGA.Postgres_Tests
                 tbl1.ordinal = 1;
 
                 DbLayout_Column colt1c1 = new DbLayout_Column();
-                colt1c1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c1.name = this.GenerateColumnName();
                 colt1c1.ordinal = 1;
                 colt1c1.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.pk_integer;
                 colt1c1.isNullable = false;
                 tbl1.columns.Add(colt1c1);
 
                 DbLayout_Column colt1c2 = new DbLayout_Column();
-                colt1c2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c2.name = this.GenerateColumnName();
                 colt1c2.ordinal = 2;
                 colt1c2.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.double_precision;
                 colt1c2.isNullable = true;
                 tbl1.columns.Add(colt1c2);
 
                 DbLayout_Column colt1c3 = new DbLayout_Column();
-                colt1c3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                colt1c3.name = this.GenerateColumnName();
                 colt1c3.ordinal = 3;
                 colt1c3.dataType = Postgres.DAL.CreateVerify.Model.eColDataTypes.uuid;
                 colt1c3.isNullable = true;
@@ -2419,11 +2277,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2456,14 +2310,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2501,11 +2351,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2537,14 +2383,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 // Create a database layout of moderate complexity...
                 DbLayout_Database layout = new DbLayout_Database();
@@ -2555,13 +2397,13 @@ namespace OGA.Postgres_Tests
                     // Add table 1...
                     {
                         DbLayout_Table tbl1 = new DbLayout_Table();
-                        tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                        tbl1.name = this.GenerateTableName();
                         tbl1.ordinal = 1;
 
                         // Add columns...
                         {
                             var col1 = new DbLayout_Column();
-                            col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col1.name = this.GenerateColumnName();
                             col1.ordinal = 1;
                             col1.maxlength = null;
                             col1.isNullable = false;
@@ -2570,7 +2412,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col1);
 
                             var col2 = new DbLayout_Column();
-                            col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col2.name = this.GenerateColumnName();
                             col2.ordinal = 2;
                             col2.maxlength = null;
                             col2.isNullable = true;
@@ -2579,7 +2421,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col2);
 
                             var col3 = new DbLayout_Column();
-                            col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col3.name = this.GenerateColumnName();
                             col3.ordinal = 3;
                             col3.maxlength = 50;
                             col3.isNullable = false;
@@ -2588,7 +2430,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col3);
 
                             var col4 = new DbLayout_Column();
-                            col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col4.name = this.GenerateColumnName();
                             col4.ordinal = 4;
                             col4.maxlength = null;
                             col4.isNullable = true;
@@ -2597,7 +2439,7 @@ namespace OGA.Postgres_Tests
                             tbl1.columns.Add(col4);
 
                             var col5 = new DbLayout_Column();
-                            col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col5.name = this.GenerateColumnName();
                             col5.ordinal = 5;
                             col5.maxlength = null;
                             col5.isNullable = true;
@@ -2612,13 +2454,13 @@ namespace OGA.Postgres_Tests
                     // Add table 2...
                     {
                         DbLayout_Table tbl2 = new DbLayout_Table();
-                        tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                        tbl2.name = this.GenerateTableName();
                         tbl2.ordinal = 2;
 
                         // Add columns...
                         {
                             var col1 = new DbLayout_Column();
-                            col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col1.name = this.GenerateColumnName();
                             col1.ordinal = 1;
                             col1.maxlength = null;
                             col1.isNullable = false;
@@ -2627,7 +2469,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col1);
 
                             var col2 = new DbLayout_Column();
-                            col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col2.name = this.GenerateColumnName();
                             col2.ordinal = 2;
                             col2.maxlength = null;
                             col2.isNullable = true;
@@ -2636,7 +2478,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col2);
 
                             var col3 = new DbLayout_Column();
-                            col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col3.name = this.GenerateColumnName();
                             col3.ordinal = 3;
                             col3.maxlength = 50;
                             col3.isNullable = false;
@@ -2645,7 +2487,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col3);
 
                             var col4 = new DbLayout_Column();
-                            col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col4.name = this.GenerateColumnName();
                             col4.ordinal = 4;
                             col4.maxlength = null;
                             col4.isNullable = true;
@@ -2654,7 +2496,7 @@ namespace OGA.Postgres_Tests
                             tbl2.columns.Add(col4);
 
                             var col5 = new DbLayout_Column();
-                            col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            col5.name = this.GenerateColumnName();
                             col5.ordinal = 5;
                             col5.maxlength = null;
                             col5.isNullable = true;
@@ -2695,11 +2537,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2731,14 +2569,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -2757,13 +2591,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = this.GenerateTableName();
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2772,7 +2606,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2781,7 +2615,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2790,7 +2624,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2799,7 +2633,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -2814,13 +2648,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = this.GenerateTableName();
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2829,7 +2663,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2838,7 +2672,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2847,7 +2681,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2856,7 +2690,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -2891,11 +2725,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -2927,14 +2757,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -2953,13 +2779,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = this.GenerateTableName();
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -2968,7 +2794,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -2977,7 +2803,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -2986,7 +2812,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -2995,7 +2821,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3010,13 +2836,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = this.GenerateTableName();
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3025,7 +2851,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3034,7 +2860,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3043,7 +2869,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3052,7 +2878,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3088,11 +2914,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -3124,14 +2946,10 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we will verify...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
 
                 var dlt = new DatabaseLayout_Tool();
                 dlt.Hostname = dbcreds.Host;
@@ -3150,13 +2968,13 @@ namespace OGA.Postgres_Tests
                         // Add table 1...
                         {
                             DbLayout_Table tbl1 = new DbLayout_Table();
-                            tbl1.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl1.name = this.GenerateTableName();
                             tbl1.ordinal = 1;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3165,7 +2983,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3174,7 +2992,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3183,7 +3001,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3192,7 +3010,7 @@ namespace OGA.Postgres_Tests
                                 tbl1.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3207,13 +3025,13 @@ namespace OGA.Postgres_Tests
                         // Add table 2...
                         {
                             DbLayout_Table tbl2 = new DbLayout_Table();
-                            tbl2.name = "testtable" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                            tbl2.name = this.GenerateTableName();
                             tbl2.ordinal = 2;
 
                             // Add columns...
                             {
                                 var col1 = new DbLayout_Column();
-                                col1.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col1.name = this.GenerateColumnName();
                                 col1.ordinal = 1;
                                 col1.maxlength = null;
                                 col1.isNullable = false;
@@ -3222,7 +3040,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col1);
 
                                 var col2 = new DbLayout_Column();
-                                col2.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col2.name = this.GenerateColumnName();
                                 col2.ordinal = 2;
                                 col2.maxlength = null;
                                 col2.isNullable = true;
@@ -3231,7 +3049,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col2);
 
                                 var col3 = new DbLayout_Column();
-                                col3.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col3.name = this.GenerateColumnName();
                                 col3.ordinal = 3;
                                 col3.maxlength = 50;
                                 col3.isNullable = false;
@@ -3240,7 +3058,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col3);
 
                                 var col4 = new DbLayout_Column();
-                                col4.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col4.name = this.GenerateColumnName();
                                 col4.ordinal = 4;
                                 col4.maxlength = null;
                                 col4.isNullable = true;
@@ -3249,7 +3067,7 @@ namespace OGA.Postgres_Tests
                                 tbl2.columns.Add(col4);
 
                                 var col5 = new DbLayout_Column();
-                                col5.name = "testcolumn" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                                col5.name = this.GenerateColumnName();
                                 col5.ordinal = 5;
                                 col5.maxlength = null;
                                 col5.isNullable = true;
@@ -3288,7 +3106,7 @@ namespace OGA.Postgres_Tests
                 var layout2 = Newtonsoft.Json.JsonConvert.DeserializeObject<DbLayout_Database>(jsonlayout);
 
                 // Give the "retrieved" database a different name, so we can create a database on the same test host...
-                layout2.name = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                layout2.name = this.GenerateDatabaseName();
 
                 // Use the "retrieved" layout to create an identical database...
                 var res4 = dlt.Create_Database_fromLayout(layout2);
@@ -3301,11 +3119,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection back to the catalog...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres database...
                     var res6a = pt.TestConnection();
@@ -3343,56 +3157,6 @@ namespace OGA.Postgres_Tests
         
 
         #region Private Methods
-
-        private void GetTestDatabaseUserCreds()
-        {
-            var res = Get_Config_from_CentralConfig("PostGresTestAdmin", out var config);
-            if (res != 1)
-                throw new Exception("Failed to get database creds.");
-
-            var cfg = Newtonsoft.Json.JsonConvert.DeserializeObject<cPostGresDbConfig>(config);
-            if(cfg == null)
-                throw new Exception("Failed to get database creds.");
-
-            dbcreds = cfg;
-        }
-
-        static public int Get_Config_from_CentralConfig(string name, out string jsonstring)
-        {
-            jsonstring = "";
-            try
-            {
-                // Normally, we will look to the host control service running on the host of our docker engine.
-                // But if we are not running in a container, we will look to our localhost or the dev cluster.
-                string origin = "";
-                origin = "192.168.1.201";
-                // This was set to localhost, but overridden to point to our dev cluster.
-                // origin = "localhost";
-
-
-                // Compose the url for central configuration...
-                // Normally, this will point to the docker host DNS entry: host.docker.internal.
-                // But, we will switch this out if we are running outside of a container:
-                string url = $"http://{origin}:4180/api/apiv1/Config_v1/Config/" + name;
-
-                // Get the config from the host control service...
-                var res = OGA.Common.WebService.cWebService_Client_v4.Web_Request_Method(url, OGA.Common.WebService.eHttp_Verbs.GET);
-
-                if (res.StatusCode != System.Net.HttpStatusCode.OK)
-                    return -1;
-
-                jsonstring = res.JSONResponse;
-                return 1;
-            }
-            catch(Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{nameof(PostgresTests)}:-::{nameof(Get_Config_from_CentralConfig)} - " +
-                    $"Exception occurred while requesting config ({name}) from central config");
-
-                return -1;
-            }
-        }
 
         #endregion
     }

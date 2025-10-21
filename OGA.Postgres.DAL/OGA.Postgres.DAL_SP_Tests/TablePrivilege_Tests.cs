@@ -9,6 +9,7 @@ using System.Web;
 using OGA.Common.Config.structs;
 using OGA.Postgres.DAL;
 using System.Threading.Tasks;
+using OGA.MSSQL.DAL_Tests.Helpers;
 
 namespace OGA.Postgres_Tests
 {
@@ -41,10 +42,8 @@ namespace OGA.Postgres_Tests
 
     [TestCategory(Test_Types.Unit_Tests)]
     [TestClass]
-    public class TablePrivilege_Tests : OGA.Testing.Lib.Test_Base_abstract
+    public class TablePrivilege_Tests : ProjectTest_Base
     {
-        protected OGA.Common.Config.structs.cPostGresDbConfig dbcreds;
-
         #region Setup
 
         /// <summary>
@@ -142,15 +141,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -160,11 +155,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -188,8 +179,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -223,11 +214,7 @@ namespace OGA.Postgres_Tests
                 {
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -259,15 +246,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -277,11 +260,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -306,8 +285,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -320,14 +299,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -359,15 +333,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -377,11 +347,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -406,7 +372,7 @@ namespace OGA.Postgres_Tests
 
 
                 // Check table privileges for a bogus user...
-                string bogususer = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string bogususer = this.GenerateTestUser();
                 var res4 = pt.GetTablePrivilegesforUser(tblname, bogususer , out var privs);
                 if(res4 != -1)
                     Assert.Fail("Wrong Value");
@@ -414,14 +380,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -453,15 +414,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -471,11 +428,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -499,8 +452,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -508,14 +461,9 @@ namespace OGA.Postgres_Tests
 
                 // Swap connection back to the system catalog...
                 {
-                    // Swap our connection back to the postgres database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the system catalog...
                     var res2 = pt.TestConnection();
@@ -553,15 +501,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -571,11 +515,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -599,8 +539,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -645,14 +585,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -684,15 +619,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -702,11 +633,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -730,8 +657,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -779,14 +706,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -819,15 +741,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -837,11 +755,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -865,8 +779,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -898,14 +812,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -937,15 +846,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -956,10 +861,7 @@ namespace OGA.Postgres_Tests
                     pt.Dispose();
                     await Task.Delay(500);
                     pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -983,8 +885,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1032,14 +934,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1071,15 +968,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1089,11 +982,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1117,8 +1006,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1150,14 +1039,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1189,15 +1073,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1207,11 +1087,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1235,8 +1111,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1284,14 +1160,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1323,15 +1194,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1341,11 +1208,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1369,8 +1232,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1402,14 +1265,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1441,15 +1299,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1459,11 +1313,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1487,8 +1337,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1536,14 +1386,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1575,15 +1420,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1593,11 +1434,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1621,8 +1458,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1654,14 +1491,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1693,15 +1525,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1711,11 +1539,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1739,8 +1563,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1788,14 +1612,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1827,15 +1646,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1845,11 +1660,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1873,8 +1684,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -1906,14 +1717,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -1945,15 +1751,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -1963,11 +1765,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -1991,8 +1789,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -2040,14 +1838,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -2079,15 +1872,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -2097,11 +1886,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -2125,8 +1910,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -2158,14 +1943,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -2197,15 +1977,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -2215,11 +1991,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -2243,8 +2015,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -2292,14 +2064,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -2331,15 +2098,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -2349,11 +2112,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -2377,8 +2136,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -2410,14 +2169,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -2449,15 +2203,11 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = new Postgres_Tools();
-                pt.Hostname = dbcreds.Host;
-                pt.Database = dbcreds.Database;
-                pt.Username = dbcreds.User;
-                pt.Password = dbcreds.Password;
+                pt = Get_ToolInstance_forPostgres();
 
                 // Create a test database with a table we can test with...
-                string dbname = "testdb" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string tblname = "testtbl" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string dbname = this.GenerateDatabaseName();
+                string tblname = this.GenerateTableName();
                 {
                     // Create a test database...
                     var res1 = pt.Create_Database(dbname);
@@ -2467,11 +2217,7 @@ namespace OGA.Postgres_Tests
                     // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbname;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forDatabase(dbname);
 
                     // Verify we can access the new database...
                     var res2 = pt.TestConnection();
@@ -2495,8 +2241,8 @@ namespace OGA.Postgres_Tests
                 }
 
                 // Create a test user...
-                string mortaluser1 = "testuser" + Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
-                string mortaluser1_password = Nanoid.Nanoid.Generate(size: 10, alphabet:"abcdefghijklmnopqrstuvwxyz01234567890");
+                string mortaluser1 = this.GenerateTestUser();
+                string mortaluser1_password = this.GenerateUserPassword();
                 var resa = pt.CreateUser(mortaluser1, mortaluser1_password);
                 if(resa != 1)
                     Assert.Fail("Wrong Value");
@@ -2544,14 +2290,9 @@ namespace OGA.Postgres_Tests
 
                 // To drop the database, we must switch back to the postgres database...
                 {
-                    // Swap our connection to the created database...
                     pt.Dispose();
                     await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt.Hostname = dbcreds.Host;
-                    pt.Database = dbcreds.Database;
-                    pt.Username = dbcreds.User;
-                    pt.Password = dbcreds.Password;
+                    pt = Get_ToolInstance_forPostgres();
 
                     // Verify we can access the postgres databaes...
                     var res2 = pt.TestConnection();
@@ -2577,56 +2318,6 @@ namespace OGA.Postgres_Tests
 
 
         #region Private Methods
-
-        private void GetTestDatabaseUserCreds()
-        {
-            var res = Get_Config_from_CentralConfig("PostGresTestAdmin", out var config);
-            if (res != 1)
-                throw new Exception("Failed to get database creds.");
-
-            var cfg = Newtonsoft.Json.JsonConvert.DeserializeObject<cPostGresDbConfig>(config);
-            if(cfg == null)
-                throw new Exception("Failed to get database creds.");
-
-            dbcreds = cfg;
-        }
-
-        static public int Get_Config_from_CentralConfig(string name, out string jsonstring)
-        {
-            jsonstring = "";
-            try
-            {
-                // Normally, we will look to the host control service running on the host of our docker engine.
-                // But if we are not running in a container, we will look to our localhost or the dev cluster.
-                string origin = "";
-                origin = "192.168.1.201";
-                // This was set to localhost, but overridden to point to our dev cluster.
-                // origin = "localhost";
-
-
-                // Compose the url for central configuration...
-                // Normally, this will point to the docker host DNS entry: host.docker.internal.
-                // But, we will switch this out if we are running outside of a container:
-                string url = $"http://{origin}:4180/api/apiv1/Config_v1/Config/" + name;
-
-                // Get the config from the host control service...
-                var res = OGA.Common.WebService.cWebService_Client_v4.Web_Request_Method(url, OGA.Common.WebService.eHttp_Verbs.GET);
-
-                if (res.StatusCode != System.Net.HttpStatusCode.OK)
-                    return -1;
-
-                jsonstring = res.JSONResponse;
-                return 1;
-            }
-            catch(Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{nameof(PostgresTests)}:-::{nameof(Get_Config_from_CentralConfig)} - " +
-                    $"Exception occurred while requesting config ({name}) from central config");
-
-                return -1;
-            }
-        }
 
         #endregion
     }

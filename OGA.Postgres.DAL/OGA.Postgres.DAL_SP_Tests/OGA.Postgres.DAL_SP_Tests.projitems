@@ -11,13 +11,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DbLayout_UseCase_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DatabaseLayout_Tests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\ProjectTest_Base.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UserMgmt_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TableColumnMgmt_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TablePrivilege_Tests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\TestTemplate_Assembly.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PostgresTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
+    <Compile Include="$(MSBuildThisFileDirectory)Postgres_Tools_Tests.cs" />
   </ItemGroup>
 </Project>

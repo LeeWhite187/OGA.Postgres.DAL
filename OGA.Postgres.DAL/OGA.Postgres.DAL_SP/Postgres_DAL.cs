@@ -1058,8 +1058,13 @@ namespace OGA.Postgres
 
         /// <summary>
         /// Performs a non-query command.
+        /// CALL THIS METHOD FOR COMMANDS THAT CHANGE DATA OR SCHEMA: INSERT, UPDATE, DELETE, CREATE, ALTER, etc...
         /// Accepts a timeout in seconds. 0 for no timeout.
-        /// Returns 1 for success. Negatives for error.
+        /// NOTES on return values:
+        /// When executing DDL (CREATE, ALTER, DROP, GRANT, or RENAME), this will return a -1 for success. "-1" simply means no rows to count.
+        /// When executing SELECT, this will return -1, because the caller needs to use ExecuteReader or ExecuteScalar to see results.
+        /// When executing INSERT, UPDATE, or DELETE, this returns the number of rows affected.
+        /// Other negatives indicate a problem with the call or a specific error received.
         /// </summary>
         /// <param name="querystring"></param>
         /// <param name="timeout"></param>
@@ -1076,7 +1081,7 @@ namespace OGA.Postgres
                     $"{_classname}:-:{nameof(Execute_NonQuery)} - " +
                     "Already disposed.");
 
-                return -1;
+                return -2;
             }
 
             try
@@ -1092,7 +1097,7 @@ namespace OGA.Postgres
                         $"{_classname}:-:{nameof(Execute_NonQuery)} - " +
                         "Already disposed.");
 
-                    return -1;
+                    return -2;
                 }
                 // If here, we have a connection we can use.
 
@@ -1102,6 +1107,8 @@ namespace OGA.Postgres
                     cmd = new NpgsqlCommand(querystring, _dbConnection);
                     cmd.CommandTimeout = timeout;
 
+                    // If the ExecuteNonQuery() method returns, it was successful.
+                    // It throws exceptions if it errors.
                     int res = cmd.ExecuteNonQuery();
                     return res;
                 }
