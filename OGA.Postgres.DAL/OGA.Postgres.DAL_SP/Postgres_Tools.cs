@@ -503,7 +503,7 @@ namespace OGA.Postgres
         /// <summary>
         /// Drops the given database from the Postgres instance.
         /// Returns 1 for success. Negatives for errors.
-        /// set 'force' to true, if there may be other clients connected to the database.
+        /// Set 'force' to true, if there may be other clients connected to the database.
         /// </summary>
         /// <param name="database"></param>
         /// <param name="force"></param>
@@ -1326,7 +1326,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
-                    $"Attempting to check for login to database: {(Database ?? "")}...");
+                    $"Attempting to get user list on database: {(Database ?? "")}...");
 
                 // Connect to the database...
                 var resconn = this._admin_dal.Connect();
@@ -1373,7 +1373,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
-                    $"Exception occurred to database: {(Database ?? "")}");
+                    $"Exception occurred while getting a list of users on the SQL host.");
 
                 return -20;
             }
@@ -3002,95 +3002,6 @@ namespace OGA.Postgres
         }
 
         /// <summary>
-        /// Gets the table size of the given table in the current database.
-        /// Returns 1 if found, 0 if not, negatives for errors.
-        /// </summary>
-        /// <param name="tablename"></param>
-        /// <returns></returns>
-        public (int res, long size) Get_TableSize(string tablename)
-        {
-            System.Data.DataTable dt = null;
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
-            try
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                    $"Attempting to get table size for table, {tablename ?? ""}...");
-
-                if(string.IsNullOrWhiteSpace(tablename))
-                {
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                        "Empty tablename.");
-
-                    return (-1, 0);
-                }
-
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
-                {
-                    // Failed to connect to server.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                        $"Failed to connect to server.");
-
-                    return (-1, 0);
-                }
-
-                // Compose the sql query we will perform.
-                string sql = $"SELECT pg_total_relation_size((SELECT oid FROM pg_class WHERE relname = '{tablename}'));";
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
-                {
-                    // Failed to get table size.
-                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                        $"Failed to get table size for table, {tablename ?? ""}.");
-
-                    return (-2, 0);
-                }
-                // We have a table size.
-
-                // See if it contains anything.
-                if (dt.Rows.Count != 1)
-                {
-                    // Table not found.
-
-                    return (0, 0);
-                }
-                // If here, we have the table entry.
-
-                long sss = ((long)dt.Rows[0][0]);
-                return (1, sss);
-            }
-            catch (Exception e)
-            {
-                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                    "Exception occurred");
-
-                return (-20, 0);
-            }
-            finally
-            {
-                try
-                {
-                    dt?.Dispose();
-                }
-                catch (Exception) { }
-            }
-        }
-
-        /// <summary>
         /// Gets the row count for each table in the database the user connects to.
         /// </summary>
         /// <param name="rowdata"></param>
@@ -3194,6 +3105,95 @@ namespace OGA.Postgres
                     "Exception occurred");
 
                 return -20;
+            }
+            finally
+            {
+                try
+                {
+                    dt?.Dispose();
+                }
+                catch (Exception) { }
+            }
+        }
+
+        /// <summary>
+        /// Gets the table size of the given table in the current database.
+        /// Returns 1 if found, 0 if not, negatives for errors.
+        /// </summary>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public (int res, long size) Get_TableSize(string tablename)
+        {
+            System.Data.DataTable dt = null;
+
+            if (_admin_dal == null)
+            {
+                _admin_dal = new Postgres_DAL();
+                _admin_dal.Hostname = Hostname;
+                _admin_dal.Database = Database;
+                _admin_dal.Username = Username;
+                _admin_dal.Password = Password;
+            }
+
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                    $"Attempting to get table size for table, {tablename ?? ""}...");
+
+                if(string.IsNullOrWhiteSpace(tablename))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                        "Empty tablename.");
+
+                    return (-1, 0);
+                }
+
+                // Connect to the database...
+                var resconn = this._admin_dal.Connect();
+                if(resconn != 1)
+                {
+                    // Failed to connect to server.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                        $"Failed to connect to server.");
+
+                    return (-1, 0);
+                }
+
+                // Compose the sql query we will perform.
+                string sql = $"SELECT pg_total_relation_size((SELECT oid FROM pg_class WHERE relname = '{tablename}'));";
+                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                {
+                    // Failed to get table size.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                        $"Failed to get table size for table, {tablename ?? ""}.");
+
+                    return (-2, 0);
+                }
+                // We have a table size.
+
+                // See if it contains anything.
+                if (dt.Rows.Count != 1)
+                {
+                    // Table not found.
+
+                    return (0, 0);
+                }
+                // If here, we have the table entry.
+
+                long sss = ((long)dt.Rows[0][0]);
+                return (1, sss);
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                    "Exception occurred");
+
+                return (-20, 0);
             }
             finally
             {
@@ -4404,24 +4404,48 @@ namespace OGA.Postgres
             return pcl;
         }
 
-        static public bool UserNameIsValid(string username)
+        /// <summary>
+        /// Requires the given user name to begin with a letter or underscore, and contain letters, numbers, or underscores.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        static public bool UserNameIsValid(string val)
         {
-            return StringIsAlphaNumberandUnderscore(username);
+            return StringIsAlphaNumberandUnderscore(val);
         }
-
+        /// <summary>
+        /// Requires the given column name to begin with a letter or underscore, and contain letters, numbers, or underscores.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         static public bool ColumnNameIsValid(string val)
         {
             return StringIsAlphaNumberandUnderscore(val);
         }
+        /// <summary>
+        /// Requires the given table name to begin with a letter or underscore, and contain letters, numbers, or underscores.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         static public bool TableNameIsValid(string val)
         {
             return StringIsAlphaNumberandUnderscore(val);
         }
+        /// <summary>
+        /// Requires the given database name to begin with a letter or underscore, and contain letters, numbers, or underscores.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         static public bool DatabaseNameIsValid(string val)
         {
             return StringIsAlphaNumberandUnderscore(val);
         }
 
+        /// <summary>
+        /// Checks that the given string begins with a letter or underscore, and contain letters, numbers, or underscores.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         static public bool StringIsAlphaNumberandUnderscore(string val)
         {
             if (string.IsNullOrWhiteSpace(val))
@@ -4429,7 +4453,7 @@ namespace OGA.Postgres
                 return false;
             }
 
-            Regex regex = new Regex("^[a-zA-Z0-9_]+$");
+            Regex regex = new Regex("^[A-Za-z_][A-Za-z0-9_]*$");
             if (regex.IsMatch(val))
             {
                 return true;

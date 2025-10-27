@@ -157,7 +157,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_2_1  Verify username validator limits to letters, numbers, and underscores.
         [TestMethod]
-        public void Test_1_2_1()
+        public async Task Test_1_2_1()
         {
             var res1 = Postgres_Tools.UserNameIsValid("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
             if (!res1)
@@ -191,7 +191,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_3_1  Verify that we can add and delete a user.
         [TestMethod]
-        public void Test_1_3_1()
+        public async Task Test_1_3_1()
         {
             Postgres_Tools pt = null;
 
@@ -218,7 +218,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_3_2  Verify that no error results from deleting a nonexistant user.
         [TestMethod]
-        public void Test_1_3_2()
+        public async Task Test_1_3_2()
         {
             Postgres_Tools pt = null;
 
@@ -247,7 +247,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_3_3  Verify that a nonsuperuser cannot add and delete a user.
         [TestMethod]
-        public void Test_1_3_3()
+        public async Task Test_1_3_3()
         {
             Postgres_Tools pt = null;
             Postgres_Tools pt2 = null;
@@ -286,7 +286,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_4_1  Verify that we can change a test user's password.
         [TestMethod]
-        public void Test_1_4_1()
+        public async Task Test_1_4_1()
         {
             Postgres_Tools pt = null;
             Postgres_Tools pt2 = null;
@@ -358,7 +358,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_4_2  Verify that a non superuser cannot change a test user's password.
         [TestMethod]
-        public void Test_1_4_2()
+        public async Task Test_1_4_2()
         {
             Postgres_Tools pt = null;
             Postgres_Tools pt2 = null;
@@ -488,7 +488,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_4_3  Verify that a non superuser can change their own password.
         [TestMethod]
-        public void Test_1_4_3()
+        public async Task Test_1_4_3()
         {
             Postgres_Tools pt = null;
             Postgres_Tools pt2 = null;
@@ -630,7 +630,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_5_1  Verify that we can check a superuser is actually a superuser.
         [TestMethod]
-        public void Test_1_5_1()
+        public async Task Test_1_5_1()
         {
             Postgres_Tools pt = null;
 
@@ -651,7 +651,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_5_2  Verify that we can check a non superuser is not a superuser.
         [TestMethod]
-        public void Test_1_5_2()
+        public async Task Test_1_5_2()
         {
             Postgres_Tools pt = null;
 
@@ -683,7 +683,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_5_3  Verify that we can promote a user to superuser.
         [TestMethod]
-        public void Test_1_5_3()
+        public async Task Test_1_5_3()
         {
             Postgres_Tools pt = null;
 
@@ -725,7 +725,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_5_4  Verify that we can demote a user from superuser to regular user.
         [TestMethod]
-        public void Test_1_5_4()
+        public async Task Test_1_5_4()
         {
             Postgres_Tools pt = null;
 
@@ -778,7 +778,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_6_1  Verify that we can check a user has CreateDB.
         [TestMethod]
-        public void Test_1_6_1()
+        public async Task Test_1_6_1()
         {
             Postgres_Tools pt = null;
 
@@ -799,7 +799,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_6_2  Verify that we can check a user does not have CreateDB.
         [TestMethod]
-        public void Test_1_6_2()
+        public async Task Test_1_6_2()
         {
             Postgres_Tools pt = null;
 
@@ -831,7 +831,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_6_3  Verify that we can grant CreateDB to a user.
         [TestMethod]
-        public void Test_1_6_3()
+        public async Task Test_1_6_3()
         {
             Postgres_Tools pt = null;
 
@@ -873,7 +873,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_6_4  Verify that we can deny CreateDB to a user.
         [TestMethod]
-        public void Test_1_6_4()
+        public async Task Test_1_6_4()
         {
             Postgres_Tools pt = null;
 
@@ -926,7 +926,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_7_1  Verify that we can check a user has CreateRole.
         [TestMethod]
-        public void Test_1_7_1()
+        public async Task Test_1_7_1()
         {
             Postgres_Tools pt = null;
 
@@ -947,7 +947,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_7_2  Verify that we can check a user does not have CreateRole.
         [TestMethod]
-        public void Test_1_7_2()
+        public async Task Test_1_7_2()
         {
             Postgres_Tools pt = null;
 
@@ -979,7 +979,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_7_3  Verify that we can grant CreateRole to a user.
         [TestMethod]
-        public void Test_1_7_3()
+        public async Task Test_1_7_3()
         {
             Postgres_Tools pt = null;
 
@@ -1021,7 +1021,7 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_7_4  Verify that we can deny CreateRole to a user.
         [TestMethod]
-        public void Test_1_7_4()
+        public async Task Test_1_7_4()
         {
             Postgres_Tools pt = null;
 
