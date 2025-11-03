@@ -18,6 +18,11 @@ namespace OGA.Postgres.DAL
 
         public string tablespace { get; set; } = "pg_default";
 
+        /// <summary>
+        /// Number of defined columns in table definition.
+        /// </summary>
+        public int ColumnCount { get => this.columnlist?.Count ?? 0; }
+
 
         public TableDefinition(string tablename, string owner)
         {

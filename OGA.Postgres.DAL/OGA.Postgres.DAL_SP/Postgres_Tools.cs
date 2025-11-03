@@ -3324,6 +3324,15 @@ namespace OGA.Postgres
                     return -1;
                 }
 
+                if (tabledef.ColumnCount == 0)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
+                        $"Empty table definition.");
+
+                    return -1;
+                }
+
                 // Connect to the database...
                 var resconn = this._admin_dal.Connect();
                 if(resconn != 1)
