@@ -2928,15 +2928,15 @@ namespace OGA.Postgres
                 }
 
                 // Compose the sql...
-                string sql = $@"GRANT USAGE ON SCHEMA public TO {login};
-                                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {login};
-                                GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {login};
+                string sql = $@"GRANT USAGE ON SCHEMA public TO '{login}';
+                                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO '{login}';
+                                GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO '{login}';
 
                                 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-                                GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {login};
+                                GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO '{login}';
 
                                 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-                                GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO {login};";
+                                GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO '{login}';";
 
                 if (dbdal.Execute_NonQuery(sql) != 1)
                 {
