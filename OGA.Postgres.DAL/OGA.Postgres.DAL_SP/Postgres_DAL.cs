@@ -396,7 +396,7 @@ namespace OGA.Postgres
 #if (NET5 || NET6)
     // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
     // So, we don't check that it was created.
-                    this.CloseandDisposeConnection(this._dbConnection);
+                    this.CloseandDisposeConnection(res1.conn, true);
                     res1.conn = null;
 #else
                     this.CloseandDisposeConnection(res1.conn, res1.dsource, true);

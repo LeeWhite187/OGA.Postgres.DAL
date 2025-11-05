@@ -47,6 +47,13 @@ namespace OGA.Postgres
         public string Username { get; set; }
         public string Password { get; set; }
 
+        /// <summary>
+        /// Set this flag if you want database connections to NOT pool in background.
+        /// Generally, this should be off (false) in production.
+        /// But, it is good to enable in testing, to ensure that connections properly close when expected, and are not pooled for reuse.
+        /// </summary>
+        public bool Cfg_ClearConnectionPoolOnClose { get; set; } = false;
+
         #endregion
 
 
@@ -110,6 +117,7 @@ namespace OGA.Postgres
                 dal.Database = "postgres";
                 dal.Username = Username;
                 dal.Password = Password;
+                dal.Cfg_ClearConnectionPoolOnClose = this.Cfg_ClearConnectionPoolOnClose;
 
                 return dal.Test_Connection();
             }
@@ -131,6 +139,7 @@ namespace OGA.Postgres
                 dal.Database = database;
                 dal.Username = Username;
                 dal.Password = Password;
+                dal.Cfg_ClearConnectionPoolOnClose = this.Cfg_ClearConnectionPoolOnClose;
 
                 result = dal.Test_Connection();
             }
@@ -253,6 +262,98 @@ namespace OGA.Postgres
 
                 folderpath = null;
                 return -20;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to query the number of active connections to a database.
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public (int res, int count) GetConnectionCountforDatabase(string database)
+        {
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                    $"Attempting to get connection count to database ({(database ?? "")})...");
+
+                if (string.IsNullOrWhiteSpace(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                        $"Empty database name.");
+
+                    return (-1, -1);
+                }
+
+                // Connect to the database...
+                if (!this.ConnectMasterDAL())
+                {
+                    // Failed to connect to master.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                        $"Failed to connect to server.");
+
+                    return (-1, -1);
+                }
+
+                // Get connection count to the database...
+                string sql = "SELECT COUNT(*) AS \"ActiveConnections\" " +
+                                "FROM pg_stat_activity " +
+                                $"WHERE datname = '{database}';";
+
+                var resconn = this._master_dal.Execute_Scalar(sql, System.Data.CommandType.Text, out var conncount);
+                if (resconn == 0)
+                {
+                    // Database not present.
+                    // We will return a zero for this.
+
+                    return (1, 0);
+                }
+                if (resconn != 1)
+                {
+                    // Failed to get connection count.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                        "Failed to get connection count.");
+
+                    return (-2, -1);
+                }
+
+                if(conncount == null)
+                {
+                    // Database not found.
+                    return (1, 0);
+                }
+
+                try
+                {
+                    var cc = Convert.ToInt32(conncount);
+
+                    return (1, cc);
+                }
+                catch(Exception)
+                {
+                    // Failed to get connection count.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                        "Failed to get connection count.");
+
+                    return (-2, -1);
+                }
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                    "Exception occurred while changing database owner.");
+
+                return (-20, -1);
+            }
+            finally
+            {
             }
         }
 
@@ -4493,6 +4594,7 @@ namespace OGA.Postgres
                 _master_dal.Database = "postgres";
                 _master_dal.Username = Username;
                 _master_dal.Password = Password;
+                _master_dal.Cfg_ClearConnectionPoolOnClose = this.Cfg_ClearConnectionPoolOnClose;
             }
         }
 
@@ -4567,6 +4669,7 @@ namespace OGA.Postgres
                         dal.Database = database;
                         dal.Username = Username;
                         dal.Password = Password;
+                        dal.Cfg_ClearConnectionPoolOnClose = this.Cfg_ClearConnectionPoolOnClose;
                     }
 
                     // Ensure it's connected before we add it...

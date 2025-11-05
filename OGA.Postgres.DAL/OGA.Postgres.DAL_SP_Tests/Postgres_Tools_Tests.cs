@@ -18,6 +18,8 @@ namespace OGA.Postgres_Tests
 
         //  Test_1_1_1  Verify that we can connect to a postgres database with npgsql.
         //  Test_1_1_2  Verify that connection fails to the test postgres database with the bad admin creds.
+        //  Test_1_1_3  Verify that a call to TestConnection() closes and disposes its connection.
+        //  Test_1_1_4  Verify that a call to TestConnection_toDatabase() closes and disposes its connection.
 
         //  Test_1_2_1  Verify we can query for the owner of a database.
         //  Test_1_2_2  Verify we can change the owner of a database.
@@ -143,6 +145,187 @@ namespace OGA.Postgres_Tests
             finally
             {
                 pt?.Dispose();
+            }
+        }
+
+        //  Test_1_1_3  Verify that a call to TestConnection() closes and disposes its connection.
+        [TestMethod]
+        public async Task Test_1_1_3()
+        {
+            Postgres_Tools ptadmin = null;
+            Postgres_Tools pttest = null;
+
+            try
+            {
+                // Create the tools instance...
+                ptadmin = Get_ToolInstance_forPostgres();
+                //ptadmin.Cfg_ClearConnectionPoolOnClose = true;
+
+                // Get how many connections are open to master...
+                var resm1 = ptadmin.GetConnectionCountforDatabase("master");
+                if(resm1.res != 1)
+                        Assert.Fail("Wrong Value");
+                int countbaseline = resm1.count;
+
+
+                // Now, create a second tool instance that we will test with...
+                pttest = Get_ToolInstance_forPostgres();
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase("master");
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+
+
+                // Attempt a test connection with the second tool instance...
+                var resconntest = pttest.TestConnection();
+                    if(resconntest != 1)
+                            Assert.Fail("Wrong Value");
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase("master");
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+
+
+                // Dispose the test tool instance...
+                pttest.Dispose();
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase("master");
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+            }
+            finally
+            {
+                ptadmin?.Dispose();
+                pttest?.Dispose();
+            }
+        }
+
+        //  Test_1_1_4  Verify that a call to TestConnection_toDatabase() closes and disposes its connection.
+        [TestMethod]
+        public async Task Test_1_1_4()
+        {
+            Postgres_Tools ptadmin = null;
+            Postgres_Tools pttest = null;
+
+            try
+            {
+                // Create the tools instance...
+                ptadmin = Get_ToolInstance_forPostgres();
+                //ptadmin.Cfg_ClearConnectionPoolOnClose = true;
+
+
+                // Create a test database...
+                string dbname = this.GenerateDatabaseName();
+                {
+                    // Create the test database...
+                    var res2 = ptadmin.Create_Database(dbname);
+                    if(res2 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Check that the database now exists...
+                    var res3 = ptadmin.Is_Database_Present(dbname);
+                    if(res3 != 1)
+                        Assert.Fail("Wrong Value");
+                }
+
+
+                // Get how many connections are open to the test database...
+                var resm1 = ptadmin.GetConnectionCountforDatabase(dbname);
+                if(resm1.res != 1)
+                        Assert.Fail("Wrong Value");
+                int countbaseline = resm1.count;
+
+
+                // Now, create a second tool instance that we will test with...
+                pttest = Get_ToolInstance_forPostgres();
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase(dbname);
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+
+
+                // Attempt a test connection with the test database...
+                var resconntest = pttest.TestConnection_toDatabase(dbname);
+                    if(resconntest != 1)
+                            Assert.Fail("Wrong Value");
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase(dbname);
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+
+
+                // Dispose the test tool instance...
+                pttest.Dispose();
+
+
+                // Verify the connection count hasn't changed...
+                {
+                    var resm2 = ptadmin.GetConnectionCountforDatabase(dbname);
+                    if(resm2.res != 1)
+                            Assert.Fail("Wrong Value");
+
+                    // Ensure the connection count hasn't changed...
+                    if(resm2.count != countbaseline)
+                            Assert.Fail("Wrong Value");
+                }
+
+                // Delete the test database...
+                {
+                    // Delete the database...
+                    var res4 = ptadmin.Drop_Database(dbname, true);
+                    if(res4 != 1)
+                        Assert.Fail("Wrong Value");
+
+                    // Check that the database is no longer present...
+                    var res5 = ptadmin.Is_Database_Present(dbname);
+                    if(res5 != 0)
+                        Assert.Fail("Wrong Value");
+                }
+            }
+            finally
+            {
+                ptadmin?.Dispose();
+                pttest?.Dispose();
             }
         }
 
