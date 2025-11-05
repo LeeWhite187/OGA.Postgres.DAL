@@ -2938,7 +2938,7 @@ namespace OGA.Postgres
                                 ALTER DEFAULT PRIVILEGES IN SCHEMA public
                                 GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO ""{login}"";";
 
-                if (dbdal.Execute_NonQuery(sql) != 1)
+                if (dbdal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to set database privileges.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
