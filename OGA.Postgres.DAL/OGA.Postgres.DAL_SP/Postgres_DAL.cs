@@ -41,6 +41,13 @@ namespace OGA.Postgres
         public string Username { get; set; }
         public string Password { get; set; }
 
+        /// <summary>
+        /// Set this flag if you want database connections to NOT pool in background.
+        /// Generally, this should be off (false) in production.
+        /// But, it is good to enable in testing, to ensure that connections properly close when expected, and are not pooled for reuse.
+        /// </summary>
+        public bool Cfg_ClearConnectionPoolOnClose { get; set; } = true;
+
         #endregion
 
 
@@ -166,8 +173,14 @@ namespace OGA.Postgres
                     "Attempting to open a connection to PostgreSQL server...");
 
                 // Attempt to create a connection...
-                var res = this.CreateConnection();
+                var res = this._CreateConnection();
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, we don't check that it was created.
                 if(res.res != 1 || res.conn == null)
+#else
+                if(res.res != 1 || res.conn == null || res.dsource == null)
+#endif
                 {
                     // Connection failed.
 
@@ -225,30 +238,15 @@ namespace OGA.Postgres
                 $"{_classname}:-:{nameof(Disconnect)} - " +
                 "Attempting to close and disposed database connection...");
 
-            // Cleanup the database connection.
-            try
-            {
-                this._dbConnection?.Close();
-            }
-            catch (Exception) { }
-            try
-            {
-                this._dbConnection?.Dispose();
-            }
-            catch (Exception) { }
-
-            this._dbConnection = null;
-
+            // Cleanup the sql connection.
 #if (NET5 || NET6)
     // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
     // So, this DAL leaves it out when compiled for NET5.
+            this.CloseandDisposeConnection(_dbConnection);
+            this._dbConnection = null;
 #else
-            try
-            {
-                this._dbDSource?.Dispose();
-            }
-            catch (Exception) { }
-
+            this.CloseandDisposeConnection(_dbConnection, this._dbDSource);
+            this._dbConnection = null;
             this._dbDSource = null;
 #endif
 
@@ -326,8 +324,7 @@ namespace OGA.Postgres
             try
             {
                 // Check if we already have an open connection...
-                if(this._explicit_ConnectionOpen_Called &&
-                    this._dbConnection != null &&
+                if(this._dbConnection != null &&
                     this._dbConnection.State == System.Data.ConnectionState.Open)
                 {
                     // The connection is already open.
@@ -335,16 +332,18 @@ namespace OGA.Postgres
 
                     return 1;
                 }
-                // No connection exists.
+                // No connection exists, or is not open.
 
                 // Attempt to create a connection...
-                var res = this.CreateConnection();
+                // This will create a local instance, not one for the class.
+                // We will decide to accept it, or not.
+                var res1 = this._CreateConnection();
 #if (NET5 || NET6)
     // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
     // So, we don't check that it was created.
-                if(res.res != 1 || res.conn == null)
+                if(res1.res != 1 || res1.conn == null)
 #else
-                if(res.res != 1 || res.conn == null || res.dsource == null)
+                if(res1.res != 1 || res1.conn == null || res1.dsource == null)
 #endif
                 {
                     // Connection failed.
@@ -356,9 +355,58 @@ namespace OGA.Postgres
                     return -1;
                 }
                 // If here, we were able to open a connection.
+                // This means we have tested the connection.
 
-                // Return success to the caller.
-                return 1;
+                // Check if the caller is managing connection lifetime...
+                if(this._explicit_ConnectionOpen_Called)
+                {
+                    // The caller called Connect() at some point.
+                    // And if we're here, then the existing connection is not open.
+                    // And, we created a new one.
+
+                    // So, we will close out any existing connection, and replace it with the one we just made.
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, we don't check that it was created.
+                    this.CloseandDisposeConnection(this._dbConnection);
+
+                    // Accept the new connection for the class...
+                    this._dbConnection = res1.conn;
+#else
+                    this.CloseandDisposeConnection(this._dbConnection, this._dbDSource);
+
+                    // Accept the new connection for the class...
+                    this._dbConnection = res1.conn;
+                    this._dbDSource = res1.dsource;
+#endif
+
+
+                    // Return success to the caller.
+                    return 1;
+                }
+                else
+                {
+                    // The caller did not call Connect().
+                    // So, the caller is not managing connection lifetime.
+                    // We will be doing so, here.
+
+                    // Close and dispose it...
+                    // And, we will assume the caller is wanting to simply test the connection, since they are not handling lifetime.
+                    // So, we will remove it from the pool.
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, we don't check that it was created.
+                    this.CloseandDisposeConnection(this._dbConnection);
+                    res1.conn = null;
+#else
+                    this.CloseandDisposeConnection(res1.conn, res1.dsource, true);
+                    res1.conn = null;
+                    res1.dsource = null;
+#endif
+
+                    // Return success to the caller.
+                    return 1;
+                }
             }
             catch(Exception e)
             {
@@ -368,11 +416,11 @@ namespace OGA.Postgres
 
                 return -2;
             }
-            finally
-            {
-                if(!this._explicit_ConnectionOpen_Called)
-                    this.Disconnect();
-            }
+            //finally
+            //{
+            //    if(!this._explicit_ConnectionOpen_Called)
+            //        this.Disconnect();
+            //}
         }
 
         /// <summary>
@@ -383,9 +431,9 @@ namespace OGA.Postgres
 #if (NET5 || NET6)
     // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
     // So, the return signature doesn't include it.
-        private (int res, Npgsql.NpgsqlConnection? conn) CreateConnection()
+        private (int res, Npgsql.NpgsqlConnection? conn) _CreateConnection()
 #else
-        private (int res, NpgsqlDataSource dsource, Npgsql.NpgsqlConnection? conn) CreateConnection()
+        private (int res, NpgsqlDataSource? dsource, Npgsql.NpgsqlConnection? conn) _CreateConnection()
 #endif
         {
             bool success = false;
@@ -400,7 +448,7 @@ namespace OGA.Postgres
             if (string.IsNullOrWhiteSpace(_connstring))
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
-                    $"{_classname}:-:{nameof(CreateConnection)} - " +
+                    $"{_classname}:-:{nameof(_CreateConnection)} - " +
                     "Attempting to setup Postgres connection string...");
 
                 // No connection string was defined.
@@ -409,7 +457,7 @@ namespace OGA.Postgres
                 {
                     // An error occurred while piecing together the connection string.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateConnection)} - " +
+                        $"{_classname}:-:{nameof(_CreateConnection)} - " +
                         "An error occurred while piecing together the connection string.");
 
 #if (NET5 || NET6)
@@ -425,13 +473,13 @@ namespace OGA.Postgres
             // If here, we have the connection string.
 
             OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
-                $"{_classname}:-:{nameof(CreateConnection)} - " +
+                $"{_classname}:-:{nameof(_CreateConnection)} - " +
                 "PostgreSQL connection string composed for use.");
 
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
-                    $"{_classname}:-:{nameof(CreateConnection)} - " +
+                    $"{_classname}:-:{nameof(_CreateConnection)} - " +
                     "Attempting to open a connection to Postgres server...");
 
 #if (NET5 || NET6)
@@ -456,7 +504,7 @@ namespace OGA.Postgres
                     // Timed out waiting for open state.
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:-:{nameof(CreateConnection)} - " +
+                        $"{_classname}:-:{nameof(_CreateConnection)} - " +
                         "Connection failed to reach Open state.");
 
 #if (NET5 || NET6)
@@ -470,7 +518,7 @@ namespace OGA.Postgres
                 // If here, the connection reads as Open.
 
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
-                    $"{_classname}:-:{nameof(CreateConnection)} - " +
+                    $"{_classname}:-:{nameof(_CreateConnection)} - " +
                     "Connection opened to Postgres server.");
 
                 success = true;
@@ -489,7 +537,7 @@ namespace OGA.Postgres
                 // Something went wrong while attempting to connect to the database.
 
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:-:{nameof(CreateConnection)} - " +
+                    $"{_classname}:-:{nameof(_CreateConnection)} - " +
                     "An exception was caught while connecting to the database.");
 
 #if (NET5 || NET6)
@@ -504,25 +552,15 @@ namespace OGA.Postgres
             {
                 if(!success)
                 {
-                    try
-                    {
-                        conn?.Close();
-                    } catch(Exception) { }
-                    try
-                    {
-                        conn?.Dispose();
-                    } catch(Exception) { }
-
-                    conn = null;
-
+                    // Cleanup the sql connection.
 #if (NET5 || NET6)
     // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+    // So, this DAL leaves it out when compiled for NET5.
+                    this.CloseandDisposeConnection(conn);
+                    conn = null;
 #else
-                    try
-                    {
-                        ds?.Dispose();
-                    } catch(Exception) { }
-
+                    this.CloseandDisposeConnection(conn, ds);
+                    conn = null;
                     ds = null;
 #endif
                 }
@@ -1178,6 +1216,53 @@ namespace OGA.Postgres
                 if(!this._explicit_ConnectionOpen_Called)
                     this.Disconnect();
             }
+        }
+
+        /// <summary>
+        /// Properly closes and disposes a given database connection.
+        /// </summary>
+#if (NET5 || NET6)
+        /// <param name="conn"></param>
+        /// <param name="clearpool"></param>
+        private void CloseandDisposeConnection(NpgsqlConnection? conn, bool clearpool = false)
+#else
+        /// <param name="conn"></param>
+        /// <param name="ds"></param>
+        /// <param name="clearpool"></param>
+        private void CloseandDisposeConnection(NpgsqlConnection? conn, NpgsqlDataSource? ds, bool clearpool = false)
+#endif
+        {
+            // Cleanup the sql connection.
+            try
+            {
+                conn?.Close();
+            } catch(Exception) { }
+
+            // Clear the connection from the pool if required...
+            if((this.Cfg_ClearConnectionPoolOnClose || clearpool) && conn != null)
+            {
+                try
+                {
+                    NpgsqlConnection.ClearPool(conn);
+                }
+                catch (Exception) { }
+            }
+            try
+            {
+                conn?.Dispose();
+            } catch(Exception) { }
+
+
+#if (NET5 || NET6)
+    // The NET5 and NET6 releases of NPGSQL doesn't include the NpgsqlDataSource type.
+#else
+            try
+            {
+                ds?.Dispose();
+            } catch(Exception) { }
+
+            ds = null;
+#endif
         }
 
         /// <summary>

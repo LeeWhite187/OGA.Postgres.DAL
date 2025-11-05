@@ -56,18 +56,6 @@ namespace OGA.MSSQL.DAL_Tests.Helpers
             pt.Username = dbcreds.User;
             pt.Hostname = dbcreds.Host;
             pt.Password = dbcreds.Password;
-            pt.Database = "postgres";
-
-            return pt;
-        }
-
-        protected Postgres_Tools Get_ToolInstance_forDatabase(string database)
-        {
-            var pt = new Postgres_Tools();
-            pt.Username = dbcreds.User;
-            pt.Hostname = dbcreds.Host;
-            pt.Password = dbcreds.Password;
-            pt.Database = database;
 
             return pt;
         }

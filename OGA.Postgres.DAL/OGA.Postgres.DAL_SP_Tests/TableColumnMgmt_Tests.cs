@@ -140,13 +140,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -159,19 +154,19 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(col4, 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
 
 
                 // Query for column names of the table...
-                var res4 = pt.Get_Columns_for_Table(tblname, out var collist);
+                var res4 = pt.Get_Columns_for_Table(dbname, tblname, out var collist);
                 if(res4 != 1 || collist == null || collist.Count == 0)
                     Assert.Fail("Wrong Value");
 
@@ -241,13 +236,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -260,19 +250,19 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(col4, 50, true);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
 
 
                 // Query for column info of the table...
-                var res4 = pt.Get_ColumnInfo_forTable(tblname, out var coldata);
+                var res4 = pt.Get_ColumnInfo_forTable(dbname, tblname, out var coldata);
                 if(res4 != 1 || coldata == null || coldata.Count == 0)
                     Assert.Fail("Wrong Value");
 

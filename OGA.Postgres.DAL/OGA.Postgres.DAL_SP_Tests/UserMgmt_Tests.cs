@@ -266,7 +266,6 @@ namespace OGA.Postgres_Tests
                 // Open a connection with the non-superuser...
                 pt2 = new Postgres_Tools();
                 pt2.Hostname = dbcreds.Host;
-                pt2.Database = dbcreds.Database;
                 pt2.Username = mortaluser;
                 pt2.Password = mortaluser_password;
 
@@ -423,7 +422,6 @@ namespace OGA.Postgres_Tests
                     // Open a connection as test user 1...
                     var pt1 = new Postgres_Tools();
                     pt1.Hostname = dbcreds.Host;
-                    pt1.Database = dbcreds.Database;
                     pt1.Username = mortaluser1;
                     pt1.Password = mortaluser1_password;
 
@@ -490,17 +488,16 @@ namespace OGA.Postgres_Tests
         [TestMethod]
         public async Task Test_1_4_3()
         {
-            Postgres_Tools pt = null;
-            Postgres_Tools pt2 = null;
+            Postgres_Tools ptadmin = null;
 
             try
             {
-                pt = Get_ToolInstance_forPostgres();
+                ptadmin = Get_ToolInstance_forPostgres();
 
                 // Create test user 1...
                 string mortaluser1 = this.GenerateTestUser();
                 string mortaluser1_password = this.GenerateUserPassword();
-                var res1 = pt.CreateUser(mortaluser1, mortaluser1_password);
+                var res1 = ptadmin.CreateUser(mortaluser1, mortaluser1_password);
                 if(res1 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -527,7 +524,6 @@ namespace OGA.Postgres_Tests
                     // Open a connection as test user 1...
                     var pt1 = new Postgres_Tools();
                     pt1.Hostname  = dbcreds.Host;
-                    pt1.Database = dbcreds.Database;
                     pt1.Username = mortaluser1;
                     pt1.Password = mortaluser1_password;
 
@@ -598,7 +594,7 @@ namespace OGA.Postgres_Tests
 // See this bugreport for details: https://github.com/npgsql/npgsql/issues/5720
                     // Have the mortal user attempt to connect...
                     var res = d.Test_Connection();
-                    if(res != 1)
+                    if(res != -1)
                         Assert.Fail("Wrong Value");
 #else
 // Here, we are using the version of NPGSQL used by NET7, which uses a NpgsqlDataSource instance.
@@ -616,14 +612,13 @@ namespace OGA.Postgres_Tests
                 System.Threading.Thread.Sleep(500);
 
                 // Delete test user 1...
-                var res4 = pt.DeleteUser(mortaluser1);
+                var res4 = ptadmin.DeleteUser(mortaluser1);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
             }
             finally
             {
-                pt?.Dispose();
-                pt2?.Dispose();
+                ptadmin?.Dispose();
             }
         }
 

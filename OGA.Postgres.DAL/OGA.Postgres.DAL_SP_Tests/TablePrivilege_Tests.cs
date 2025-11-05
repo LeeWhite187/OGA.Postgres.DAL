@@ -19,7 +19,7 @@ namespace OGA.Postgres_Tests
         //  Test_1_1_1  Verify that we can query user privileges for a table.
         //  Test_1_1_2  Verify that a query of user privileges for a table fails if the table is not present.
         //  Test_1_1_3  Verify that a query of user privileges for a table fails if the user does not exist.
-        //  Test_1_1_4  Verify that a query of user privileges for a table fails if the table is not in the connected database.
+        //  Test_1_1_4  Verify that a query of user privileges for a table fails if the table is not known in the database.
         //  Test_1_1_5  Verify that a query of user privileges for a table returns all privileges for a user granted ALL on a table.
         //  Test_1_1_6  Verify that a query of user privileges for a table returns no privileges for a user revoked ALL on a table.
 
@@ -152,13 +152,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -168,12 +163,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -186,7 +181,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -196,13 +191,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add SELECT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -257,13 +252,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -292,22 +282,22 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != -1)
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -344,13 +334,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -360,12 +345,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -373,22 +358,22 @@ namespace OGA.Postgres_Tests
 
                 // Check table privileges for a bogus user...
                 string bogususer = this.GenerateTestUser();
-                var res4 = pt.GetTablePrivilegesforUser(tblname, bogususer , out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, bogususer , out var privs);
                 if(res4 != -1)
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -406,7 +391,7 @@ namespace OGA.Postgres_Tests
             }
         }
 
-        //  Test_1_1_4  Verify that a query of user privileges for a table fails if the table is not in the connected database.
+        //  Test_1_1_4  Verify that a query of user privileges for a table fails if the table is not known in the database.
         [TestMethod]
         public async Task Test_1_1_4()
         {
@@ -425,13 +410,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -441,12 +421,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -459,20 +439,23 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // Swap connection back to the system catalog...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// Swap connection back to the system catalog...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the system catalog...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the system catalog...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
-                // Attempt to check table privileges for the test user on the table, while not connected to its parent database...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                // Create the unknown table name...
+                var tblname3 = this.GenerateTableName();
+
+                // Attempt to check table privileges for the test user on the unknown table...
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname3, mortaluser1, out var privs);
                 if(res4 != -1)
                     Assert.Fail("Wrong Value");
 
@@ -512,13 +495,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -528,12 +506,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -546,7 +524,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -563,13 +541,13 @@ namespace OGA.Postgres_Tests
                                               eTablePrivileges.TRIGGER |
                                               eTablePrivileges.TRUNCATE |
                                               eTablePrivileges.UPDATE;
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, privstoset, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, privstoset, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -583,17 +561,17 @@ namespace OGA.Postgres_Tests
                               eTablePrivileges.UPDATE))
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -630,13 +608,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -646,12 +619,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -664,7 +637,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -674,13 +647,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add SELECT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -690,12 +663,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Revoke all privileges of the test user on the test table...
-                var res6a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.NONE, tblname);
+                var res6a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.NONE, tblname);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6b = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6b = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6b != 1)
                     Assert.Fail("Wrong Value");
 
@@ -704,17 +677,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -752,13 +725,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -768,12 +736,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -786,7 +754,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -796,13 +764,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add SELECT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -810,17 +778,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.SELECT)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -857,14 +825,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = new Postgres_Tools();
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -874,12 +836,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -892,7 +854,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -902,13 +864,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including SELECT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -918,12 +880,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the SELECT privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -932,17 +894,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -979,13 +941,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -995,12 +952,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1013,7 +970,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1023,13 +980,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add INSERT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1037,17 +994,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.INSERT)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1084,13 +1041,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1100,12 +1052,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1118,7 +1070,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1128,13 +1080,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including INSERT privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1144,12 +1096,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the INSERT privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1158,17 +1110,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1205,13 +1157,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1221,12 +1168,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1239,7 +1186,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1249,13 +1196,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add UPDATE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.UPDATE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.UPDATE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1263,17 +1210,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.UPDATE)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1310,13 +1257,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1326,12 +1268,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1344,7 +1286,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1354,13 +1296,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including UPDATE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.UPDATE | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.UPDATE | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1370,12 +1312,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the UPDATE privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1384,17 +1326,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1431,13 +1373,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1447,12 +1384,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1465,7 +1402,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1475,13 +1412,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add DELETE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1489,17 +1426,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.DELETE)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1536,13 +1473,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1552,12 +1484,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1570,7 +1502,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1580,13 +1512,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including DELETE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.SELECT | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1596,12 +1528,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the DELETE privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.SELECT, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.SELECT, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1610,17 +1542,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1657,13 +1589,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1673,12 +1600,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1691,7 +1618,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1701,13 +1628,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add TRUNCATE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.TRUNCATE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.TRUNCATE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1715,17 +1642,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.TRUNCATE)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1762,13 +1689,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1778,12 +1700,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1796,7 +1718,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1806,13 +1728,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including TRUNCATE privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.TRUNCATE | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.TRUNCATE | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1822,12 +1744,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the TRUNCATE privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1836,17 +1758,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1883,13 +1805,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1899,12 +1816,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1917,7 +1834,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1927,13 +1844,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add REFERENCES privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.REFERENCES, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.REFERENCES, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -1941,17 +1858,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.REFERENCES)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -1988,13 +1905,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -2004,12 +1916,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -2022,7 +1934,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2032,13 +1944,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including REFERENCES privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.REFERENCES | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.REFERENCES | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2048,12 +1960,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the REFERENCES privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2062,17 +1974,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -2109,13 +2021,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -2125,12 +2032,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -2143,7 +2050,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2153,13 +2060,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add TRIGGER privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.TRIGGER, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.TRIGGER, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2167,17 +2074,17 @@ namespace OGA.Postgres_Tests
                 if(privs2 != eTablePrivileges.TRIGGER)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);
@@ -2214,13 +2121,8 @@ namespace OGA.Postgres_Tests
                     if(res1 != 1)
                         Assert.Fail("Wrong Value");
 
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res2 = pt.TestConnection();
+                    var res2 = pt.TestConnection_toDatabase(dbname);
                     if(res2 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -2230,12 +2132,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res3 = pt.Create_Table(tch);
+                    var res3 = pt.Create_Table(dbname, tch);
                     if(res3 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res3a = pt.DoesTableExist(tblname);
+                    var res3a = pt.DoesTableExist(dbname, tblname);
                     if(res3a != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -2248,7 +2150,7 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
                 // Check table privileges for the test user...
-                var res4 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs);
+                var res4 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs);
                 if(res4 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2258,13 +2160,13 @@ namespace OGA.Postgres_Tests
 
 
                 // Add a few privileges, including TRIGGER privilege for the test user...
-                var res5 = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.TRIGGER | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5 = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.TRIGGER | eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5 != 1)
                     Assert.Fail("Wrong Value");
 
 
                 // Check updated privileges for the test user...
-                var res6 = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs2);
+                var res6 = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs2);
                 if(res6 != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2274,12 +2176,12 @@ namespace OGA.Postgres_Tests
 
 
                 // Remove the TRIGGER privilege for the test user...
-                var res5a = pt.SetTablePrivilegesforUser(mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
+                var res5a = pt.SetTablePrivilegesforUser(dbname, mortaluser1, eTablePrivileges.INSERT | eTablePrivileges.DELETE, tblname);
                 if(res5a != 1)
                     Assert.Fail("Wrong Value");
 
                 // Check updated privileges for the test user...
-                var res6a = pt.GetTablePrivilegesforUser(tblname, mortaluser1, out var privs3);
+                var res6a = pt.GetTablePrivilegesforUser(dbname, tblname, mortaluser1, out var privs3);
                 if(res6a != 1)
                     Assert.Fail("Wrong Value");
 
@@ -2288,17 +2190,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres databaes...
-                    var res2 = pt.TestConnection();
-                    if(res2 != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres databaes...
+                //    var res2 = pt.TestConnection();
+                //    if(res2 != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res7 = pt.Drop_Database(dbname, true);

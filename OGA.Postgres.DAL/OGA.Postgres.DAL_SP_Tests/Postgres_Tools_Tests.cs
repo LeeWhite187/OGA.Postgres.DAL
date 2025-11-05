@@ -112,7 +112,6 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Hostname = dbcreds.Host;
                 pt.Password = dbcreds.Password;
-                pt.Database = dbcreds.Database;
 
                 var res = pt.TestConnection();
                 if (res != 1)
@@ -136,7 +135,6 @@ namespace OGA.Postgres_Tests
                 pt.Username = dbcreds.User;
                 pt.Hostname = dbcreds.Host;
                 pt.Password = dbcreds.Password + "f";
-                pt.Database = dbcreds.Database;
 
                 var res = pt.TestConnection();
                 if (res != -1)
@@ -318,13 +316,8 @@ namespace OGA.Postgres_Tests
                 // Create a test table in our test database that has a primary key...
                 string tblname = this.GenerateTableName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -334,18 +327,18 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column("IconName", 50, false);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
 
                 // Query for the primary keys of the table...
-                var respk = pt.Get_PrimaryKeyConstraints_forTable(tblname, out var pklist);
+                var respk = pt.Get_PrimaryKeyConstraints_forTable(dbname, tblname, out var pklist);
                 if(respk != 1 || pklist == null)
                     Assert.Fail("Wrong Value");
 
@@ -624,7 +617,6 @@ namespace OGA.Postgres_Tests
                     // Open a connection as test user 1...
                     var pt1 = new Postgres_Tools();
                     pt1.Hostname = dbcreds.Host;
-                    pt1.Database = dbcreds.Database;
                     pt1.Username = mortaluser1;
                     pt1.Password = mortaluser1_password;
 
@@ -714,8 +706,7 @@ namespace OGA.Postgres_Tests
 
             try
             {
-                pt = Get_ToolInstance_forDatabase("dbProjectControls"); //dbcreds.Database;
-
+                pt = Get_ToolInstance_forPostgres();
 
                 // Get the data folder path...
                 var res = pt.Get_TableList_forDatabase("dbProjectControls", out var tablelist);

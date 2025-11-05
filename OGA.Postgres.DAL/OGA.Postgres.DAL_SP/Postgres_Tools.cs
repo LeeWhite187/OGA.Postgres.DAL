@@ -30,7 +30,9 @@ namespace OGA.Postgres
 
         static private volatile int _instancecounter;
 
-        private OGA.Postgres.Postgres_DAL _admin_dal;
+        private OGA.Postgres.Postgres_DAL _master_dal;
+
+        private Dictionary<string, Postgres_DAL> _dbdals;
 
         private bool disposedValue;
 
@@ -42,7 +44,6 @@ namespace OGA.Postgres
         public int InstanceId { get; private set; }
 
         public string Hostname { get; set; }
-        public string Database { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
 
@@ -55,6 +56,8 @@ namespace OGA.Postgres
         {
             _instancecounter++;
             InstanceId = _instancecounter;
+
+            this._dbdals = new Dictionary<string, Postgres_DAL>();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -66,7 +69,9 @@ namespace OGA.Postgres
                     // TODO: dispose managed state (managed objects)
                 }
 
-                this.Close_AdminDAL();
+                this.Close_MasterDAL();
+                this.Close_DatabaseDALs();
+                this._dbdals.Clear();
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
@@ -102,13 +107,50 @@ namespace OGA.Postgres
             using(var dal = new Postgres_DAL())
             {
                 dal.Hostname = Hostname;
-                dal.Database = Database;
+                dal.Database = "postgres";
                 dal.Username = Username;
                 dal.Password = Password;
 
                 return dal.Test_Connection();
             }
         }
+
+        /// <summary>
+        /// Provides a quick ability to test credentials to a specific SQL Server database, without creating a persistent connection.
+        /// </summary>
+        /// <returns></returns>
+        public int TestConnection_toDatabase(string database)
+        {
+            var result = 0;
+
+            Postgres_DAL? dal = null;
+            try
+            {
+                dal = new Postgres_DAL();
+                dal.Hostname = Hostname;
+                dal.Database = database;
+                dal.Username = Username;
+                dal.Password = Password;
+
+                result = dal.Test_Connection();
+            }
+            finally
+            {
+                try
+                {
+                    dal?.Disconnect();
+                }
+                catch (Exception) { }
+                try
+                {
+                    dal?.Dispose();
+                }
+                catch (Exception) { }
+            }
+
+            return result;
+        }
+
 
         #endregion
 
@@ -226,15 +268,6 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = "postgres";
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -260,10 +293,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{parentmethodname} - " +
                         $"Failed to connect to server.");
@@ -272,7 +305,7 @@ namespace OGA.Postgres
                 }
 
                 // Run the tabular query...
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (_master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get result data.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -328,15 +361,6 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -353,10 +377,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
                         $"Failed to connect to server.");
@@ -370,7 +394,7 @@ namespace OGA.Postgres
                              $"WHERE datistemplate = 'false' " +
                              $"AND datname = '{database}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get database list.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -418,15 +442,6 @@ namespace OGA.Postgres
         {
             string sql = "";
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -443,17 +458,16 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
                 }
-                // Database name is set.
 
                 // See if the database doesn't already exist.
                 if (this.Is_Database_Present(database) == 1)
@@ -470,7 +484,7 @@ namespace OGA.Postgres
                       $"CONNECTION LIMIT = -1;";
 
                 // Execute it on the postgres instance.
-                int res123 = _admin_dal.Execute_NonQuery(sql);
+                int res123 = this._master_dal.Execute_NonQuery(sql);
                 if (res123 != -1)
                 {
                     // Error occurred while adding the database.
@@ -510,15 +524,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Drop_Database(string database, bool force = false)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -535,17 +540,16 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
                 }
-                // Database name is set.
 
                 // See if the database exists...
                 int res = this.Is_Database_Present(database);
@@ -570,7 +574,7 @@ namespace OGA.Postgres
                     sql = sql + $";";
 
                 // Execute it on the Postgres instance...
-                int resdrop = _admin_dal.Execute_NonQuery(sql);
+                int resdrop = this._master_dal.Execute_NonQuery(sql);
                 if (resdrop != -1)
                 {
                     // Error occurred while dropping the database.
@@ -612,28 +616,19 @@ namespace OGA.Postgres
             System.Data.DataTable dt = null;
             dblist = new List<string>();
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = "postgres";
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                     $"Attempting to get database names...");
 
-                // Connect to the catalog...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // Connect to the database...
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -642,7 +637,7 @@ namespace OGA.Postgres
                 // Compose the sql query we will perform...
                 string sql = "SELECT datname FROM pg_database;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get database names from the host.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -705,15 +700,6 @@ namespace OGA.Postgres
             owner = "";
             System.Data.DataTable dt = null;
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = "postgres";
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -730,10 +716,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
                         $"Failed to connect to server.");
@@ -747,7 +733,7 @@ namespace OGA.Postgres
                              $"WHERE datistemplate = false " +
                              $"AND datname = '{database}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -797,15 +783,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int ChangeDatabaseOwner(string database, string newowner)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = "postgres";
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -830,10 +807,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
                         $"Failed to connect to server.");
@@ -863,7 +840,7 @@ namespace OGA.Postgres
                 // Transfer ownership to the new user...
                 string sql = $"ALTER DATABASE {database} " +
                              $"OWNER TO \"{newowner}\";";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change database owner.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -921,15 +898,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Backup_Database(string databaseName, string filePath)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1006,11 +974,6 @@ namespace OGA.Postgres
             }
             finally
             {
-                try
-                {
-                    _admin_dal.Disconnect();
-                }
-                catch (Exception e) { }
             }
         }
         /// <summary>
@@ -1023,15 +986,6 @@ namespace OGA.Postgres
         public int Restore_Database(string databaseName, string filePath)
         {
             string sql = "";
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -1111,11 +1065,6 @@ namespace OGA.Postgres
             }
             finally
             {
-                try
-                {
-                    _admin_dal.Disconnect();
-                }
-                catch (Exception e) { }
             }
         }
 
@@ -1128,15 +1077,6 @@ namespace OGA.Postgres
         public (int res, long size) Get_DatabaseSize(string databaseName)
         {
             System.Data.DataTable dt = null;
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = databaseName;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -1154,10 +1094,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
                         $"Failed to connect to server.");
@@ -1167,7 +1107,7 @@ namespace OGA.Postgres
 
                 // Compose the sql query we will perform.
                 string sql = $"SELECT pg_database_size('{databaseName}');";
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get database size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1223,15 +1163,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int CreateUser(string username, string password = "")
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1249,10 +1180,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
                         $"Failed to connect to server.");
@@ -1266,7 +1197,7 @@ namespace OGA.Postgres
                     sql = $"CREATE USER {username};";
                 else
                     sql = $"CREATE USER {username} WITH PASSWORD '{password}';";
-                if (this._admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Create user command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1293,7 +1224,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
-                    $"Exception occurred to database: {(Database ?? "")}");
+                    $"Exception occurred.");
 
                 return -20;
             }
@@ -1311,28 +1242,19 @@ namespace OGA.Postgres
         {
             userlist = new List<string>();
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             System.Data.DataTable dt = null;
 
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
-                    $"Attempting to get user list on database: {(Database ?? "")}...");
+                    $"Attempting to get user list...");
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
                         $"Failed to connect to server.");
@@ -1345,7 +1267,7 @@ namespace OGA.Postgres
                              $"FROM pg_catalog.pg_user " +
                              $"ORDER BY usename ASC;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1394,22 +1316,13 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Does_Login_Exist(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             System.Data.DataTable dt = null;
 
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
-                    $"Attempting to check for login to database: {(Database ?? "")}...");
+                    $"Attempting to check for login...");
 
                 if(string.IsNullOrWhiteSpace(login))
                 {
@@ -1421,10 +1334,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
                         $"Failed to connect to server.");
@@ -1438,7 +1351,7 @@ namespace OGA.Postgres
                              $"WHERE usename = '{login}'" +
                              $"ORDER BY role_name desc;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1479,7 +1392,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
-                    $"Exception occurred to database: {(Database ?? "")}");
+                    $"Exception occurred.");
 
                 return -20;
             }
@@ -1502,15 +1415,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DeleteUser(string username)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1528,10 +1432,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
                         $"Failed to connect to server.");
@@ -1541,7 +1445,7 @@ namespace OGA.Postgres
 
                 // Delete the user...
                 string sql = $"DROP USER IF EXISTS {username};";
-                if (this._admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Delete user command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1568,7 +1472,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
-                    $"Exception occurred to database: {(Database ?? "")}");
+                    $"Exception occurred.");
 
                 return -20;
             }
@@ -1586,15 +1490,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int ChangeUserPassword(string username, string password = "")
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1612,10 +1507,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
                         $"Failed to connect to server.");
@@ -1626,7 +1521,7 @@ namespace OGA.Postgres
                 // Change the user password...
                 string sql = $"ALTER USER {username} PASSWORD '{password}';";
                 //string sql = $"ALTER USER {username} WITH PASSWORD '{password}';";
-                if (this._admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Change user password command failed.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1642,7 +1537,7 @@ namespace OGA.Postgres
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
-                    $"Exception occurred to database: {(Database ?? "")}");
+                    $"Exception occurred.");
 
                 return -20;
             }
@@ -1663,15 +1558,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantSuperUser(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1688,10 +1574,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
                         $"Failed to connect to server.");
@@ -1701,7 +1587,7 @@ namespace OGA.Postgres
 
                 // Compose the sql query to change user to superuser...
                 string sql = $"ALTER USER {login} WITH SUPERUSER;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1732,15 +1618,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenySuperUser(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1757,10 +1634,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
                         $"Failed to connect to server.");
@@ -1770,7 +1647,7 @@ namespace OGA.Postgres
 
                 // Compose the sql query to change user to non-superuser...
                 string sql = $"ALTER USER {login} WITH NOSUPERUSER;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1802,15 +1679,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int IsSuperUser(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             System.Data.DataTable dt = null;
 
             try
@@ -1829,10 +1697,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
                         $"Failed to connect to server.");
@@ -1845,7 +1713,7 @@ namespace OGA.Postgres
                              $"FROM pg_catalog.pg_user " +
                              $"WHERE usename = '{login}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1895,15 +1763,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantDBCreate(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1920,10 +1779,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
                         $"Failed to connect to server.");
@@ -1933,7 +1792,7 @@ namespace OGA.Postgres
 
                 // Compose the sql query grant user CREATEDB...
                 string sql = $"ALTER USER {login} CREATEDB;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1964,15 +1823,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenyDBCreate(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1989,10 +1839,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
                         $"Failed to connect to server.");
@@ -2000,9 +1850,9 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Compose the sql query to deny CreateDB...
+                // Compose the sql query to deny CreatSeDB...
                 string sql = $"ALTER USER {login} NOCREATEDB;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2034,15 +1884,6 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int HasDBCreate(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             System.Data.DataTable dt = null;
 
             try
@@ -2061,10 +1902,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
                         $"Failed to connect to server.");
@@ -2077,7 +1918,7 @@ namespace OGA.Postgres
                              $"FROM pg_catalog.pg_user " +
                              $"WHERE usename = '{login}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2127,37 +1968,28 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantCreateRole(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
                         $"Empty login name.");
 
                     return -1;
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2165,11 +1997,11 @@ namespace OGA.Postgres
 
                 // Compose the sql query grant user CreateRole...
                 string sql = $"ALTER USER {login} CREATEROLE;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -2180,7 +2012,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2196,37 +2028,28 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenyCreateRole(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
                     $"Attempting to check for login...");
 
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
                         $"Empty login name.");
 
                     return -1;
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2234,11 +2057,11 @@ namespace OGA.Postgres
 
                 // Compose the sql query to deny CreateRole...
                 string sql = $"ALTER USER {login} NOCREATEROLE;";
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (this._master_dal.Execute_NonQuery(sql) != -1)
                 {
                     // Failed to change user.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
                         "Failed to change user.");
 
                     return -2;
@@ -2249,7 +2072,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2266,39 +2089,30 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int HasCreateRole(string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             System.Data.DataTable dt = null;
 
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
                     $"Attempting to check CreateRole role...");
 
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
                         $"Empty login name.");
 
                     return -1;
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
                         $"Failed to connect to server.");
 
                     return -1;
@@ -2309,11 +2123,11 @@ namespace OGA.Postgres
                              $"FROM pg_catalog.pg_roles " +
                              $"WHERE rolname = '{login}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (this._master_dal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get users.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
                         "Failed to get users.");
 
                     return -2;
@@ -2337,7 +2151,7 @@ namespace OGA.Postgres
             catch(Exception e)
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
-                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
                     $"Exception occurred.");
 
                 return -20;
@@ -2359,17 +2173,8 @@ namespace OGA.Postgres
         /// <param name="login"></param>
         /// <param name="databaseName"></param>
         /// <returns></returns>
-        public int GrantAllforUserOnDatabase(string login, string databaseName)
+        public int GrantAllforUserOnDatabase(string databaseName, string login)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = databaseName;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2394,10 +2199,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
                         $"Failed to connect to server.");
@@ -2431,7 +2236,7 @@ namespace OGA.Postgres
 
                 // Compose the sql...
                 string sql = $"GRANT ALL PRIVILEGES ON DATABASE '{databaseName}' TO '{login}';";
-                if (_admin_dal.Execute_NonQuery(sql) != 1)
+                if (this._master_dal.Execute_NonQuery(sql) != 1)
                 {
                     // Failed to get database size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2460,26 +2265,26 @@ namespace OGA.Postgres
         /// Grants all privileges to a given user account for a given table.
         /// Returns 1 if found, 0 if not found, negatives for errors.
         /// </summary>
+        /// <param name="database"></param>
         /// <param name="login"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public int GrantAllforUserOnTable(string login, string tableName)
+        public int GrantAllforUserOnTable(string database, string login, string tableName)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                     $"Attempting to grant privileges on table, {tableName ?? ""}...");
 
+                if(string.IsNullOrWhiteSpace(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2498,10 +2303,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
                         $"Failed to connect to server.");
@@ -2519,8 +2324,9 @@ namespace OGA.Postgres
 
                     return 0;
                 }
-
-                var res2 = this.DoesTableExist(tableName);
+                
+                // See if the table exists...
+                var res2 = this.DoesTableExist(database, tableName);
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2531,10 +2337,22 @@ namespace OGA.Postgres
                 }
                 // Both the login and table exist.
 
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(database);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
+                        "Failed to connect to target database.");
+
+                    return -1;
+                }
 
                 // Compose the sql...
                 string sql = $"GRANT ALL PRIVILEGES ON '{tableName}' TO '{login}';";
-                if (_admin_dal.Execute_NonQuery(sql) != 1)
+                if (dbdal.Execute_NonQuery(sql) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
@@ -2563,27 +2381,27 @@ namespace OGA.Postgres
         /// This is used to grant and revoke privileges for a user, depending on the bitwise enumerated privileges parameter.
         /// Returns 1 if found, 0 if not found, negatives for errors.
         /// </summary>
+        /// <param name="database"></param>
         /// <param name="login"></param>
         /// <param name="privileges"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public int SetTablePrivilegesforUser(string login, eTablePrivileges privileges, string tableName)
+        public int SetTablePrivilegesforUser(string database, string login, eTablePrivileges privileges, string tableName)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                     $"Attempting to grant privilege ({privileges.ToString()}) on table, {(tableName ?? "")}...");
 
+                if(string.IsNullOrWhiteSpace(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2602,10 +2420,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
                         $"Failed to connect to server.");
@@ -2625,7 +2443,7 @@ namespace OGA.Postgres
                 }
 
                 // Ensure the table exist...
-                var res2 = this.DoesTableExist(tableName);
+                var res2 = this.DoesTableExist(database, tableName);
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2635,6 +2453,19 @@ namespace OGA.Postgres
                     return -1;
                 }
                 // Both the login and table exist.
+
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(database);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
+                        "Failed to connect to target database.");
+
+                    return -1;
+                }
 
                 // We need to iterate the privilege set, and compose the necessary sql command...
                 string sql = "";
@@ -2651,7 +2482,7 @@ namespace OGA.Postgres
                     // To know for sure, we will need to get the current list of table privileges for the user.
 
                     // Get current privileges for the user...
-                    var respriv = this.GetTablePrivilegesforUser(tableName, login, out var existingprivs);
+                    var respriv = this.GetTablePrivilegesforUser(database, tableName, login, out var existingprivs);
                     if(respriv != 1)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2705,7 +2536,7 @@ namespace OGA.Postgres
                 // We have a sql command to run.
 
                 // Execute the composite privilege change command...
-                if (_admin_dal.Execute_NonQuery(sql) != -1)
+                if (dbdal.Execute_NonQuery(sql) != -1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
@@ -2715,7 +2546,7 @@ namespace OGA.Postgres
                 }
 
                 // Get updated privileges for the user...
-                var respriv2 = this.GetTablePrivilegesforUser(tableName, login, out var updatedprivs);
+                var respriv2 = this.GetTablePrivilegesforUser(database, tableName, login, out var updatedprivs);
                 if(respriv2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2754,24 +2585,16 @@ namespace OGA.Postgres
         /// Queries for table privileges of a given user.
         /// NOTE: The table must be in the connected database.
         /// </summary>
+        /// <param name="database"></param>
         /// <param name="tableName"></param>
         /// <param name="login"></param>
         /// <param name="privileges"></param>
         /// <returns></returns>
-        public int GetTablePrivilegesforUser(string tableName, string login, out eTablePrivileges privileges)
+        public int GetTablePrivilegesforUser(string database, string tableName, string login, out eTablePrivileges privileges)
         {
             privileges = eTablePrivileges.NONE;
 
             System.Data.DataTable dt = null;
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -2779,6 +2602,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                     $"Attempting to query privileges on table, {(tableName ?? "")} for user ({(login ?? "")})...");
 
+                if(string.IsNullOrWhiteSpace(database))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(login))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2797,10 +2628,10 @@ namespace OGA.Postgres
                 }
 
                 // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if (!this.ConnectMasterDAL())
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to master.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
                         $"Failed to connect to server.");
@@ -2820,7 +2651,7 @@ namespace OGA.Postgres
                 }
 
                 // Ensure the table exist...
-                var res2 = this.DoesTableExist(tableName);
+                var res2 = this.DoesTableExist(database, tableName);
                 if(res2 != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -2831,12 +2662,25 @@ namespace OGA.Postgres
                 }
                 // Both the login and table exist.
 
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(database);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
+                        "Failed to connect to target database.");
+
+                    return -1;
+                }
+
                 // Query user privileges...
                 string sql = $"SELECT grantor, grantee, table_catalog, table_schema, table_name, privilege_type " +
                              $"FROM information_schema.table_privileges " +
                              $"where grantee = '{login}' " +
                              $"AND table_name = '{tableName}';";
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
@@ -2902,6 +2746,122 @@ namespace OGA.Postgres
             }
         }
 
+        /// <summary>
+        /// Grants all privileges to a given user account for a given database.
+        /// Returns 1 if found, 0 if not found, negatives for errors.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        public int GrantEverythingforUserOnDatabase(string databaseName, string login)
+        {
+            try
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                    $"Attempting to grant privileges on database, {databaseName ?? ""}...");
+
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
+                if(string.IsNullOrWhiteSpace(login))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        "Empty login.");
+
+                    return -1;
+                }
+
+                // Connect to the database...
+                if (!this.ConnectMasterDAL())
+                {
+                    // Failed to connect to master.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        $"Failed to connect to server.");
+
+                    return -1;
+                }
+
+                // Ensure the user exists...
+                var res1 = this.Does_Login_Exist(login);
+                if(res1 != 1)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        $"Login Not Found.");
+
+                    return -1;
+                }
+
+                // Ensure the database exist...
+                var res2 = this.Is_Database_Present(databaseName);
+                if(res2 != 1)
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        $"Database Not Found.");
+
+                    return -1;
+                }
+                // Both the login and database exist.
+
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        "Failed to connect to target database.");
+
+                    return -1;
+                }
+
+                // Compose the sql...
+                string sql = $@"GRANT USAGE ON SCHEMA public TO {login};
+                                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {login};
+                                GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {login};
+
+                                ALTER DEFAULT PRIVILEGES IN SCHEMA public
+                                GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {login};
+
+                                ALTER DEFAULT PRIVILEGES IN SCHEMA public
+                                GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO {login};";
+
+                if (dbdal.Execute_NonQuery(sql) != 1)
+                {
+                    // Failed to set database privileges.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                        $"Failed to grant privileges on database, {databaseName ?? ""}.");
+
+                    return -2;
+                }
+
+                return 1;
+            }
+            catch (Exception e)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                    "Exception occurred");
+
+                return -20;
+            }
+            finally
+            {
+            }
+        }
+
         #endregion
 
 
@@ -2920,29 +2880,30 @@ namespace OGA.Postgres
             System.Data.DataTable dt = null;
             tablelist = new List<string>();
 
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = databaseName;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
                     $"Attempting to get table names for database {databaseName ?? ""}...");
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
-                    // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
-                        $"Failed to connect to server.");
+                        "Empty database.");
+
+                    return -1;
+                }
+
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
@@ -2953,7 +2914,7 @@ namespace OGA.Postgres
                              $"WHERE table_schema not in ('pg_catalog', 'information_schema') " +
                              $"AND table_catalog = '{databaseName}';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get table names from the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3004,36 +2965,38 @@ namespace OGA.Postgres
         /// <summary>
         /// Gets the row count for each table in the database the user connects to.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="rowdata"></param>
         /// <returns></returns>
-        public int Get_RowCount_for_Tables(out List<KeyValuePair<string, long>> rowdata)
+        public int Get_RowCount_for_Tables(string databaseName, out List<KeyValuePair<string, long>> rowdata)
         {
             System.Data.DataTable dt = null;
             rowdata = null;
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
-                    $"Attempting to get table row counts for database {Database}...");
+                    $"Attempting to get table row counts for database {databaseName}...");
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                if(string.IsNullOrWhiteSpace(databaseName))
                 {
-                    // Failed to connect to server.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
-                        $"Failed to connect to server.");
+                        "Empty database.");
+
+                    return -1;
+                }
+
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
+                {
+                    // Failed to connect to target database.
+
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
@@ -3043,7 +3006,7 @@ namespace OGA.Postgres
                              $"FROM information_schema.tables " +
                              $"WHERE table_schema = 'public';";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get row counts from the database.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3062,7 +3025,7 @@ namespace OGA.Postgres
 
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
-                        $"Did not get any row counts for database {Database}. Database name might be wrong.");
+                        $"Did not get any row counts for database {databaseName}. Database name might be wrong.");
 
                     return -3;
                 }
@@ -3087,7 +3050,7 @@ namespace OGA.Postgres
                         // An exception occurred while parsing in table row size data.
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(e,
                             $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
-                            $"An exception occurred while parsing in table row size data for database {Database}.");
+                            $"An exception occurred while parsing in table row size data for database {databaseName}.");
 
                         return -4;
                     }
@@ -3120,20 +3083,12 @@ namespace OGA.Postgres
         /// Gets the table size of the given table in the current database.
         /// Returns 1 if found, 0 if not, negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tablename"></param>
         /// <returns></returns>
-        public (int res, long size) Get_TableSize(string tablename)
+        public (int res, long size) Get_TableSize(string databaseName, string tablename)
         {
             System.Data.DataTable dt = null;
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -3141,6 +3096,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
                     $"Attempting to get table size for table, {tablename ?? ""}...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                        "Empty database.");
+
+                    return (-1, 0);
+                }
                 if(string.IsNullOrWhiteSpace(tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3150,21 +3113,22 @@ namespace OGA.Postgres
                     return (-1, 0);
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return (-1, 0);
                 }
 
                 // Compose the sql query we will perform.
                 string sql = $"SELECT pg_total_relation_size((SELECT oid FROM pg_class WHERE relname = '{tablename}'));";
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get table size.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3209,25 +3173,25 @@ namespace OGA.Postgres
         /// Checks if the given table exists in the connected database.
         /// Returns 1 if exists, 0 if not. Negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public int DoesTableExist(string tableName)
+        public int DoesTableExist(string databaseName, string tableName)
         {
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
-
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
                     $"Attempting to query if table ({(tableName ?? "")}) exists...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3237,20 +3201,21 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
 
                 // Get the table list...
-                var res2 = this.Get_TableList_forDatabase(Database, out var tl);
+                var res2 = this.Get_TableList_forDatabase(databaseName, out var tl);
                 if(res2 != 1 || tl == null)
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3285,20 +3250,12 @@ namespace OGA.Postgres
         /// Creates a table in the connected database.
         /// Returns 1 for success. Negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tabledef"></param>
         /// <returns></returns>
-        public int Create_Table(TableDefinition tabledef)
+        public int Create_Table(string databaseName, TableDefinition tabledef)
         {
             string sql = "";
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             if(tabledef == null)
             {
@@ -3315,6 +3272,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
                     $"Attempting to create table ({(tabledef.tablename ?? "")})...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tabledef.tablename))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3333,21 +3298,21 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
-                // Table name is set.
 
                 // Check if the table exists or not...
-                var res2 = this.DoesTableExist(tabledef.tablename);
+                var res2 = this.DoesTableExist(databaseName, tabledef.tablename);
                 if (res2 == 1)
                 {
                     // Already present.
@@ -3369,7 +3334,7 @@ namespace OGA.Postgres
                 sql = tabledef.CreateSQLCmd();
 
                 // Execute it on the postgres instance.
-                int res123 = _admin_dal.Execute_NonQuery(sql);
+                int res123 = dbdal.Execute_NonQuery(sql);
                 if (res123 != -1)
                 {
                     // Error occurred while adding the table.
@@ -3381,7 +3346,7 @@ namespace OGA.Postgres
                 }
 
                 // Check if the table is now present on the server.
-                if (this.DoesTableExist(tabledef.tablename) != 1)
+                if (this.DoesTableExist(databaseName, tabledef.tablename) != 1)
                 {
                     // The table was not created successfully.
                     return -5;
@@ -3404,20 +3369,12 @@ namespace OGA.Postgres
         /// Drops a table from the connected database.
         /// Returns 1 for success. Negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public int Drop_Table(string tableName)
+        public int Drop_Table(string databaseName, string tableName)
         {
             string sql = "";
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -3425,6 +3382,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
                     $"Attempting to drop table ({(tableName ?? "")})...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3434,20 +3399,21 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
 
                 // Check if the table exists or not...
-                var res2 = this.DoesTableExist(tableName);
+                var res2 = this.DoesTableExist(databaseName, tableName);
                 if (res2 == 0)
                 {
                     // Already deleted.
@@ -3469,7 +3435,7 @@ namespace OGA.Postgres
                 sql = $"DROP TABLE IF EXISTS {tableName};";
 
                 // Execute it on the postgres instance.
-                int res123 = _admin_dal.Execute_NonQuery(sql);
+                int res123 = dbdal.Execute_NonQuery(sql);
                 if (res123 != -1)
                 {
                     // Error occurred while dropping the table.
@@ -3481,7 +3447,7 @@ namespace OGA.Postgres
                 }
 
                 // Check if the table is still present on the server.
-                if (this.DoesTableExist(tableName) != 1)
+                if (this.DoesTableExist(databaseName, tableName) != 1)
                 {
                     // The table was not dropped as expected.
 
@@ -3510,22 +3476,14 @@ namespace OGA.Postgres
         /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
         /// Returns 1 if found, 0 if not, negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tableName"></param>
         /// <param name="pklist"></param>
         /// <returns></returns>
-        public int Get_PrimaryKeyConstraints_forTable(string tableName, out List<PriKeyConstraint> pklist)
+        public int Get_PrimaryKeyConstraints_forTable(string databaseName, string tableName, out List<PriKeyConstraint> pklist)
         {
             System.Data.DataTable dt = null;
             pklist = new List<PriKeyConstraint>();
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -3533,6 +3491,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
                     $"Attempting to get primary key constraints for table {tableName ?? ""}...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3542,14 +3508,15 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
@@ -3569,7 +3536,7 @@ namespace OGA.Postgres
                              $"AND kcu.table_name = '{tableName}' " +
                              $"ORDER BY kcu.table_schema, kcu.table_name, position;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get primary keys from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3587,7 +3554,7 @@ namespace OGA.Postgres
                     // Or, the table doesn't exist.
 
                     // Verify the table exists...
-                    var restable = this.DoesTableExist(tableName);
+                    var restable = this.DoesTableExist(databaseName, tableName);
                     if(restable != 1)
                     {
                         // Table doesn't exist.
@@ -3650,22 +3617,14 @@ namespace OGA.Postgres
         /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
         /// Returns 1 if found, 0 if not, negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tableName"></param>
         /// <param name="columnlist"></param>
         /// <returns></returns>
-        public int Get_Columns_for_Table(string tableName, out List<string> columnlist)
+        public int Get_Columns_for_Table(string databaseName, string tableName, out List<string> columnlist)
         {
             System.Data.DataTable dt = null;
             columnlist = new List<string>();
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -3673,6 +3632,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
                     $"Attempting to get table names for table {tableName ?? ""}...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3682,14 +3649,15 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
@@ -3701,7 +3669,7 @@ namespace OGA.Postgres
                              $"AND table_name   = '{tableName}' " +
                              $"ORDER BY ordinal_position;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get column names from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3719,7 +3687,7 @@ namespace OGA.Postgres
                     // Or, the table doesn't exist.
 
                     // Verify the table exists...
-                    var restable = this.DoesTableExist(tableName);
+                    var restable = this.DoesTableExist(databaseName, tableName);
                     if(restable != 1)
                     {
                         // Table doesn't exist.
@@ -3763,22 +3731,14 @@ namespace OGA.Postgres
         /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
         /// Returns 1 if found, 0 if not, negatives for errors.
         /// </summary>
+        /// <param name="databaseName"></param>
         /// <param name="tableName"></param>
         /// <param name="columnlist"></param>
         /// <returns></returns>
-        public int Get_ColumnInfo_forTable(string tableName, out List<ColumnInfo> columnlist)
+        public int Get_ColumnInfo_forTable(string databaseName, string tableName, out List<ColumnInfo> columnlist)
         {
             System.Data.DataTable dt = null;
             columnlist = new List<ColumnInfo>();
-
-            if (_admin_dal == null)
-            {
-                _admin_dal = new Postgres_DAL();
-                _admin_dal.Hostname = Hostname;
-                _admin_dal.Database = Database;
-                _admin_dal.Username = Username;
-                _admin_dal.Password = Password;
-            }
 
             try
             {
@@ -3786,6 +3746,14 @@ namespace OGA.Postgres
                     $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
                     $"Attempting to get column info for table {tableName ?? ""}...");
 
+                if(string.IsNullOrWhiteSpace(databaseName))
+                {
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
+                        "Empty database.");
+
+                    return -1;
+                }
                 if(string.IsNullOrWhiteSpace(tableName))
                 {
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3795,14 +3763,15 @@ namespace OGA.Postgres
                     return -1;
                 }
 
-                // Connect to the database...
-                var resconn = this._admin_dal.Connect();
-                if(resconn != 1)
+                // This action requires a connection to the target database.
+                var dbdal = this.GetDatabaseDAL(databaseName);
+                if(dbdal == null)
                 {
-                    // Failed to connect to server.
+                    // Failed to connect to target database.
+
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                         $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
-                        $"Failed to connect to server.");
+                        "Failed to connect to target database.");
 
                     return -1;
                 }
@@ -3815,7 +3784,7 @@ namespace OGA.Postgres
                                 $"AND table_name = '{tableName}' " +
                                 $"ORDER BY ordinal_position;";
 
-                if (_admin_dal.Execute_Table_Query(sql, out dt) != 1)
+                if (dbdal.Execute_Table_Query(sql, out dt) != 1)
                 {
                     // Failed to get column names from the table.
                     OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -3833,7 +3802,7 @@ namespace OGA.Postgres
                     // Or, the table doesn't exist.
 
                     // Verify the table exists...
-                    var restable = this.DoesTableExist(tableName);
+                    var restable = this.DoesTableExist(databaseName, tableName);
                     if(restable != 1)
                     {
                         // Table doesn't exist.
@@ -4471,21 +4440,6 @@ namespace OGA.Postgres
             return false;
         }
 
-        private void Close_AdminDAL()
-        {
-            try
-            {
-                _admin_dal?.Disconnect();
-            }
-            catch (Exception) { }
-            try
-            {
-                _admin_dal?.Dispose();
-            }
-            catch (Exception) { }
-            _admin_dal = null;
-        }
-
         /// <summary>
         /// Small helper method that composes a filesystem path, while respecting the separator type of the existing path.
         /// This is used when receiving folders from a linux host during testing, and composing paths with the appropriate separator for the linux host.
@@ -4508,6 +4462,157 @@ namespace OGA.Postgres
             // Create the path, respecting the separator of the existing path...
             var combined = string.Join(sep, new[] { existing.TrimEnd(sep) }.Concat(segments));
             return combined;
+        }
+
+
+        private void Close_MasterDAL()
+        {
+            try
+            {
+                _master_dal?.Disconnect();
+            }
+            catch (Exception) { }
+            try
+            {
+                _master_dal?.Dispose();
+            }
+            catch (Exception) { }
+            _master_dal = null;
+        }
+
+        /// <summary>
+        /// Call this to stand up the admin connection to the SQL host.
+        /// This is used for server and engine level actions, such as managing logins (not users, but logins), adding databases, etc.
+        /// </summary>
+        private void SetupDALtoCatalog()
+        {
+            if (_master_dal == null)
+            {
+                _master_dal = new Postgres_DAL();
+                _master_dal.Hostname = Hostname;
+                _master_dal.Database = "postgres";
+                _master_dal.Username = Username;
+                _master_dal.Password = Password;
+            }
+        }
+
+        /// <summary>
+        /// Iterates each database DAL and closes and dereferences it.
+        /// </summary>
+        private void Close_DatabaseDALs()
+        {
+            while(this._dbdals.Count > 0)
+            {
+                // Get the current entry...
+                var entry = this._dbdals.First();
+                if (entry.Value == null)
+                    continue;
+
+                // Remove it...
+                this._dbdals.Remove(entry.Key);
+
+                var dal = entry.Value;
+
+                try
+                {
+                    dal?.Dispose();
+                }catch(Exception e) { }
+            }
+        }
+        
+        /// <summary>
+        /// Creates and connects the admin DAL to master.
+        /// </summary>
+        /// <returns></returns>
+        private bool ConnectMasterDAL()
+        {
+            SetupDALtoCatalog();
+
+            // Connect to master...
+            var resconn = this._master_dal.Connect();
+            if(resconn != 1)
+            {
+                // Failed to connect to master.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ConnectMasterDAL)} - " +
+                    $"Failed to connect to master.");
+
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates and connects the a database DAL to a target database.
+        /// </summary>
+        /// <returns></returns>
+        private Postgres_DAL? GetDatabaseDAL(string database)
+        {
+            bool success = false;
+            Postgres_DAL? dal = null;
+
+            try
+            {
+                // Check if we have a dal already...
+                if(!this._dbdals.TryGetValue(database, out dal) || dal == null)
+                {
+                    // Database dal not found.
+
+                    // Make one...
+                    if (dal == null)
+                    {
+                        dal = new Postgres_DAL();
+                        dal.Hostname = this.Hostname;
+                        dal.Database = database;
+                        dal.Username = Username;
+                        dal.Password = Password;
+                    }
+
+                    // Ensure it's connected before we add it...
+                    if(dal.Connect() != 1)
+                    {
+                        // Failed to connect to target database.
+                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseDAL)} - " +
+                            $"Failed to connect to target database ({(database ?? "")}).");
+
+                        return null;
+                    }
+
+                    // Add it to the list...
+                    this._dbdals.Add(database, dal);
+                }
+
+                // Ensure the cached entry is connected before we use it...
+                if(dal.Connect() != 1)
+                {
+                    // Failed to connect to target database.
+                    OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                        $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseDAL)} - " +
+                        $"Failed to connect to target database ({(database ?? "")}).");
+
+                    return null;
+                }
+
+                success = true;
+                return dal;
+            }
+            catch(Exception)
+            {
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseDAL)} - " +
+                    $"Exception occurred connecting to target database ({(database ?? "")}).");
+
+                return null;
+            }
+            finally
+            {
+                if(!success)
+                {
+                    dal?.Dispose();
+                }
+            }
         }
 
         #endregion

@@ -778,13 +778,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -794,12 +789,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_Numeric_Column(colname, Postgres.DAL.Model.eNumericColTypes.integer, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -841,17 +836,17 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -902,13 +897,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -918,12 +908,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_Numeric_Column(colname, Postgres.DAL.Model.eNumericColTypes.integer, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -975,18 +965,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1038,13 +1028,8 @@ namespace OGA.Postgres_Tests
                 string colname2 = this.GenerateColumnName();
                 string colname3 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1055,12 +1040,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_Numeric_Column(colname3, Postgres.DAL.Model.eNumericColTypes.integer, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1106,18 +1091,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1168,13 +1153,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1184,12 +1164,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(colname2, 47, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1236,18 +1216,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1298,13 +1278,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1314,12 +1289,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(colname2, 47, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1357,18 +1332,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1419,13 +1394,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1435,12 +1405,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(colname2, 47, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1487,18 +1457,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1549,13 +1519,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1565,12 +1530,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_String_Column(colname2, 47, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1617,18 +1582,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1679,13 +1644,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1695,12 +1655,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_Numeric_Column(colname2, Postgres.DAL.Model.eNumericColTypes.integer, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1750,18 +1710,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1812,13 +1772,8 @@ namespace OGA.Postgres_Tests
                 string tblname = this.GenerateTableName();
                 string colname2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1828,12 +1783,12 @@ namespace OGA.Postgres_Tests
                     tch.Add_Numeric_Column(colname2, Postgres.DAL.Model.eNumericColTypes.integer, true);
 
                     // Make the call to create the table...
-                    var res6 = pt.Create_Table(tch);
+                    var res6 = pt.Create_Table(dbname, tch);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname);
+                    var res7 = pt.DoesTableExist(dbname, tblname);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -1878,18 +1833,18 @@ namespace OGA.Postgres_Tests
                 if (res1.errs[0].ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.Different)
                     Assert.Fail("Wrong Value");
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -1947,13 +1902,8 @@ namespace OGA.Postgres_Tests
                 string colnamet2c1 = this.GenerateColumnName();
                 string colnamet2c2 = this.GenerateColumnName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
                     // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
+                    var res5 = pt.TestConnection_toDatabase(dbname);
                     if(res5 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1964,12 +1914,12 @@ namespace OGA.Postgres_Tests
                     tch1.Add_Guid_Column(colnamet1c3, true);
 
                     // Make the call to create table1...
-                    var res6 = pt.Create_Table(tch1);
+                    var res6 = pt.Create_Table(dbname, tch1);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(tblname1);
+                    var res7 = pt.DoesTableExist(dbname, tblname1);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
 
@@ -1979,12 +1929,12 @@ namespace OGA.Postgres_Tests
                     tch2.Add_String_Column(colnamet2c2, 0, true);
 
                     // Make the call to create table2...
-                    var res6a = pt.Create_Table(tch2);
+                    var res6a = pt.Create_Table(dbname, tch2);
                     if(res6a != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7b = pt.DoesTableExist(tblname2);
+                    var res7b = pt.DoesTableExist(dbname, tblname2);
                     if(res7b != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -2062,18 +2012,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -2103,8 +2053,6 @@ namespace OGA.Postgres_Tests
 
                 // Create a test database with a table we will verify...
                 string dbname = this.GenerateDatabaseName();
-                string testtable1 = this.GenerateTableName();
-                string testtable2 = this.GenerateTableName();
                 {
                     // Check that the database doesn't exist...
                     var res1a = pt.Is_Database_Present(dbname);
@@ -2123,47 +2071,46 @@ namespace OGA.Postgres_Tests
                 }
 
 
+                // Verify we can access the new database...
+                var res5 = pt.TestConnection_toDatabase(dbname);
+                if(res5 != 1)
+                    Assert.Fail("Wrong Value");
+
+
                 // Create one of the test tables in our test database...
-                string colnamet2c1 = this.GenerateColumnName();
-                string colnamet2c2 = this.GenerateColumnName();
+                string testtable1 = this.GenerateTableName();
                 {
-                    // Swap our connection to the created database...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forDatabase(dbname);
-
-                    // Verify we can access the new database...
-                    var res5 = pt.TestConnection();
-                    if(res5 != 1)
-                        Assert.Fail("Wrong Value");
-
-
                     // Create a table definition without any columns...
                     var tch1 = new TableDefinition(testtable1, pt.Username);
 
                     // Make the call to create table1...
-                    var res6a = pt.Create_Table(tch1);
-                    if(res6a != 1)
+                    var res6a = pt.Create_Table(dbname, tch1);
+                    if(res6a != -1)
                         Assert.Fail("Wrong Value");
 
-                    // Confirm the table was created...
-                    var res7a = pt.DoesTableExist(testtable1);
-                    if(res7a != 1)
+                    // Confirm the table was not created...
+                    var res7a = pt.DoesTableExist(dbname, testtable1);
+                    if(res7a != 0)
                         Assert.Fail("Wrong Value");
+                }
 
-
+                // Create the other test table in our test database...
+                string testtable2 = this.GenerateTableName();
+                string colnamet2c1 = this.GenerateColumnName();
+                string colnamet2c2 = this.GenerateColumnName();
+                {
                     // Create the table definition, but leave out one column...
                     var tch2 = new TableDefinition(testtable2, pt.Username);
                     tch2.Add_Pk_Column(colnamet2c1, Postgres.DAL.Model.ePkColTypes.integer);
                     //tch2.Add_String_Column(colnamet2c2, 0, true);
 
                     // Make the call to create table2...
-                    var res6 = pt.Create_Table(tch2);
+                    var res6 = pt.Create_Table(dbname, tch2);
                     if(res6 != 1)
                         Assert.Fail("Wrong Value");
 
                     // Confirm the table was created...
-                    var res7 = pt.DoesTableExist(testtable2);
+                    var res7 = pt.DoesTableExist(dbname, testtable2);
                     if(res7 != 1)
                         Assert.Fail("Wrong Value");
                 }
@@ -2174,10 +2121,13 @@ namespace OGA.Postgres_Tests
                 dlt.Username = dbcreds.User;
                 dlt.Password = dbcreds.Password;
 
-                // Create layout with some tables and columns...
+                // Create the layout...
                 DbLayout_Database layout = new DbLayout_Database();
                 layout.name = dbname;
                 layout.owner = "";
+
+
+                // Create the first table...
                 DbLayout_Table tbl1 = new DbLayout_Table();
                 layout.tables.Add(tbl1);
                 tbl1.name = testtable1;
@@ -2197,6 +2147,7 @@ namespace OGA.Postgres_Tests
                 colt1c2.isNullable = true;
                 tbl1.columns.Add(colt1c2);
 
+
                 DbLayout_Column colt1c3 = new DbLayout_Column();
                 colt1c3.name = this.GenerateColumnName();
                 colt1c3.ordinal = 3;
@@ -2204,6 +2155,8 @@ namespace OGA.Postgres_Tests
                 colt1c3.isNullable = true;
                 tbl1.columns.Add(colt1c3);
 
+
+                // Create the other table layout...
                 DbLayout_Table tbl2 = new DbLayout_Table();
                 layout.tables.Add(tbl2);
                 tbl2.name = testtable2;
@@ -2227,63 +2180,54 @@ namespace OGA.Postgres_Tests
                 if(res1.res != 0)
                     Assert.Fail("Wrong Value");
 
-                // Should be three missing columns from one table, and one missing column from another...
-                if(res1.errs.Count != 4)
+                // Should be one missing table, and one missing column from the other table...
+                if(res1.errs.Count != 2)
                     Assert.Fail("Wrong Value");
 
-                var mt1c1 = res1.errs.FirstOrDefault(n => n.ParentName == tbl1.name && n.ObjName == colt1c1.name);
-                if(mt1c1 == null)
-                    Assert.Fail("Failed to report missing column");
-                if(mt1c1.ObjType != Postgres.DAL.CreateVerify.Model.eObjType.Column)
+                // Check that the first table is reported as missing...
+                var mt1 = res1.errs.FirstOrDefault(n => n.ParentName == dbname && n.ObjType == Postgres.DAL.CreateVerify.Model.eObjType.Table && n.ObjName == tbl1.name);
+                if(mt1 == null)
+                    Assert.Fail("Failed to report missing table");
+                if(mt1.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
                     Assert.Fail("Wrong Value");
-                if(mt1c1.ParentName != tbl1.name)
+                if(!mt1.ErrText.Contains("Table Not Found"))
                     Assert.Fail("Wrong Value");
-                if(mt1c1.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
+                if(mt1.ObjName != tbl1.name)
                     Assert.Fail("Wrong Value");
-
-                var mt1c2 = res1.errs.FirstOrDefault(n => n.ParentName == tbl1.name && n.ObjName == colt1c2.name);
-                if(mt1c2 == null)
-                    Assert.Fail("Failed to report missing column");
-                if(mt1c2.ObjType != Postgres.DAL.CreateVerify.Model.eObjType.Column)
+                if(mt1.ObjType != Postgres.DAL.CreateVerify.Model.eObjType.Table)
                     Assert.Fail("Wrong Value");
-                if(mt1c2.ParentName != tbl1.name)
-                    Assert.Fail("Wrong Value");
-                if(mt1c2.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
+                if(mt1.ParentName != dbname)
                     Assert.Fail("Wrong Value");
 
-                var mt1c3 = res1.errs.FirstOrDefault(n => n.ParentName == tbl1.name && n.ObjName == colt1c3.name);
-                if(mt1c3 == null)
-                    Assert.Fail("Failed to report missing column");
-                if(mt1c3.ObjType != Postgres.DAL.CreateVerify.Model.eObjType.Column)
-                    Assert.Fail("Wrong Value");
-                if(mt1c3.ParentName != tbl1.name)
-                    Assert.Fail("Wrong Value");
-                if(mt1c3.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
-                    Assert.Fail("Wrong Value");
 
+                // Check that the second column of the second table is reported as missing...
                 var mt2c2 = res1.errs.FirstOrDefault(n => n.ParentName == tbl2.name && n.ObjName == colt2c2.name);
                 if(mt2c2 == null)
                     Assert.Fail("Failed to report missing column");
+                if(mt2c2.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
+                    Assert.Fail("Wrong Value");
+                if(!mt2c2.ErrText.Contains("Table column missing from live table"))
+                    Assert.Fail("Wrong Value");
+                if(mt2c2.ObjName != colt2c2.name)
+                    Assert.Fail("Wrong Value");
                 if(mt2c2.ObjType != Postgres.DAL.CreateVerify.Model.eObjType.Column)
                     Assert.Fail("Wrong Value");
                 if(mt2c2.ParentName != tbl2.name)
                     Assert.Fail("Wrong Value");
-                if(mt2c2.ErrorType != Postgres.DAL.CreateVerify.Model.eErrorType.NotFound)
-                    Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -2346,18 +2290,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -2532,18 +2476,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Layout Mismatch");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -2720,18 +2664,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Wrong Value");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -2909,18 +2853,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Layout Mismatch");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);
@@ -3114,18 +3058,18 @@ namespace OGA.Postgres_Tests
                     Assert.Fail("Failed to create second database");
 
 
-                // To drop the database, we must switch back to the postgres database...
-                {
-                    // Swap our connection back to the catalog...
-                    pt.Dispose();
-                    await Task.Delay(500);
-                    pt = Get_ToolInstance_forPostgres();
+                //// To drop the database, we must switch back to the postgres database...
+                //{
+                //    // Swap our connection back to the catalog...
+                //    pt.Dispose();
+                //    await Task.Delay(500);
+                //    pt = Get_ToolInstance_forPostgres();
 
-                    // Verify we can access the postgres database...
-                    var res6a = pt.TestConnection();
-                    if(res6a != 1)
-                        Assert.Fail("Wrong Value");
-                }
+                //    // Verify we can access the postgres database...
+                //    var res6a = pt.TestConnection();
+                //    if(res6a != 1)
+                //        Assert.Fail("Wrong Value");
+                //}
 
                 // Delete the database...
                 var res8 = pt.Drop_Database(dbname, true);

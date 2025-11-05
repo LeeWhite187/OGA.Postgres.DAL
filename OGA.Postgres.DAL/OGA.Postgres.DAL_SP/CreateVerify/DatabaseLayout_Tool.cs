@@ -163,7 +163,6 @@ namespace OGA.Postgres.CreateVerify
                     // Create an instance...
                     ptool = new Postgres_Tools();
                     ptool.Hostname = this.Hostname;
-                    ptool.Database = "postgres";
                     ptool.Username = this.Username;
                     ptool.Password = this.Password;
                 }
@@ -251,39 +250,6 @@ namespace OGA.Postgres.CreateVerify
                     }
                 }
 
-                // In order to access database table info, we have to be on a connection with the containing database.
-                // Currently, we are connected to the postgres database.
-                // So, we will switch to the actual database for the rest of these calls.
-                {
-                    ptool.Dispose();
-                    ptool = new Postgres_Tools();
-                    ptool.Hostname = this.Hostname;
-                    // Use the database in the layout...
-                    ptool.Database = layout.name ?? "";
-                    ptool.Username = this.Username;
-                    ptool.Password = this.Password;
-
-                    // Verify we can connect...
-                    if(ptool.TestConnection() != 1)
-                    {
-                        // Failed to connect with database in layout.
-
-                        OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
-                            $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
-                            $"Failed to connect with Database ({(layout.name)}).");
-
-                        var err = new VerificationDelta();
-                        err.ObjType = eObjType.Server;
-                        err.ObjName = layout.name ?? "";
-                        err.ParentName = "";
-                        err.ErrText = "Cannot Connect to Database";
-                        err.ErrorType = eErrorType.DatabaseAccessError;
-                        errs.Add(err);
-
-                        return (-1, errs);
-                    }
-                }
-
                 // Verify that each layout table exists...
                 // The caller can give us an options instance that allows us to ignore extra tables in the live database.
                 foreach(var t in layout.tables)
@@ -306,7 +272,7 @@ namespace OGA.Postgres.CreateVerify
                     }
 
                     // Verify the current table exists...
-                    var restexists = ptool.DoesTableExist(t.name);
+                    var restexists = ptool.DoesTableExist(layout.name, t.name);
                     if(restexists != 1)
                     {
                         // Table, from layout, is not in the live database.
@@ -328,7 +294,7 @@ namespace OGA.Postgres.CreateVerify
                     // Table was found in live database.
 
                     // Get table column info...
-                    var resci = ptool.Get_ColumnInfo_forTable(t.name, out var livetablecolumnlist);
+                    var resci = ptool.Get_ColumnInfo_forTable(layout.name, t.name, out var livetablecolumnlist);
                     if(resci != 1)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -351,7 +317,7 @@ namespace OGA.Postgres.CreateVerify
                         livetablecolumnlist = new List<ColumnInfo>();
 
                     // Get primary keys for the table...
-                    var respk = ptool.Get_PrimaryKeyConstraints_forTable(t.name, out var pklist);
+                    var respk = ptool.Get_PrimaryKeyConstraints_forTable(layout.name, t.name, out var pklist);
                     if(respk != 1 || pklist == null)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -727,7 +693,6 @@ namespace OGA.Postgres.CreateVerify
                     // Create an instance...
                     ptool = new Postgres_Tools();
                     ptool.Hostname = this.Hostname;
-                    ptool.Database = "postgres";
                     ptool.Username = this.Username;
                     ptool.Password = this.Password;
                 }
@@ -770,16 +735,6 @@ namespace OGA.Postgres.CreateVerify
                 }
                 layout.owner = dbowner;
 
-                // Change connection to the database, so we can query its structure...
-                {
-                    ptool.Dispose();
-                    ptool = new Postgres_Tools();
-                    ptool.Hostname = this.Hostname;
-                    ptool.Database = layout.name;
-                    ptool.Username = this.Username;
-                    ptool.Password = this.Password;
-                }
-
                 // Get a list of tables in the database...
                 var res2= ptool.Get_TableList_forDatabase(databaseName, out var tbllist);
                 if(res2 != 1 || tbllist == null)
@@ -806,7 +761,7 @@ namespace OGA.Postgres.CreateVerify
                     tlayout.ordinal = ordinalindex;
 
                     // Get column data for the current table...
-                    var rescol = ptool.Get_ColumnInfo_forTable(t, out var collist);
+                    var rescol = ptool.Get_ColumnInfo_forTable(databaseName, t, out var collist);
                     if(rescol != 1 || collist == null)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -817,7 +772,7 @@ namespace OGA.Postgres.CreateVerify
                     }
 
                     // We need to know what table columns are primary keys...
-                    var respk = ptool.Get_PrimaryKeyConstraints_forTable(t, out var pklist);
+                    var respk = ptool.Get_PrimaryKeyConstraints_forTable(databaseName, t, out var pklist);
                     if(respk != 1 || pklist == null)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1006,7 +961,6 @@ namespace OGA.Postgres.CreateVerify
                     // Create an instance...
                     ptool = new Postgres_Tools();
                     ptool.Hostname = this.Hostname;
-                    ptool.Database = "postgres";
                     ptool.Username = this.Username;
                     ptool.Password = this.Password;
                 }
@@ -1168,7 +1122,6 @@ namespace OGA.Postgres.CreateVerify
                     ptool.Dispose();
                     ptool = new Postgres_Tools();
                     ptool.Hostname = this.Hostname;
-                    ptool.Database = layout.name;
                     ptool.Username = this.Username;
                     ptool.Password = this.Password;
                 }
@@ -1261,7 +1214,7 @@ namespace OGA.Postgres.CreateVerify
                     // We have the table creation script.
 
                     // Create the table...
-                    var rescreatetable = ptool.Create_Table(tch);
+                    var rescreatetable = ptool.Create_Table(layout.name, tch);
                     if(rescreatetable != 1)
                     {
                         OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
@@ -1333,7 +1286,6 @@ namespace OGA.Postgres.CreateVerify
                     // Create an instance...
                     ptool = new Postgres_Tools();
                     ptool.Hostname = this.Hostname;
-                    ptool.Database = "postgres";
                     ptool.Username = this.Username;
                     ptool.Password = this.Password;
                 }
