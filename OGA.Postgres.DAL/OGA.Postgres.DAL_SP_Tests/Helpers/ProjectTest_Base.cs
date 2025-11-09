@@ -1,12 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OGA.Common.Config.structs;
-using OGA.Postgres;
-using OGA.Testing.Lib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OGA.Common.Config.structs;
+using OGA.Testing.Lib;
 
-namespace OGA.MSSQL.DAL_Tests.Helpers
+namespace OGA.Postgres.DAL_Tests.Helpers
 {
     [TestCategory(Test_Types.Unit_Tests)]
     [TestClass]

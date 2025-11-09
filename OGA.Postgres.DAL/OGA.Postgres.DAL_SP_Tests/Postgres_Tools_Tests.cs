@@ -1,16 +1,13 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OGA.Postgres;
-using OGA.SharedKernel.Process;
-using OGA.SharedKernel;
-using OGA.Testing.Lib;
 using System;
 using System.Collections.Generic;
 using System.Web;
-using OGA.Common.Config.structs;
-using System.Threading.Tasks;
-using OGA.Postgres.DAL;
 using System.Linq;
-using OGA.MSSQL.DAL_Tests.Helpers;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OGA.Postgres;
+using OGA.Testing.Lib;
+using OGA.Postgres.DAL;
+using OGA.Postgres.DAL_Tests.Helpers;
 
 namespace OGA.Postgres_Tests
 {
