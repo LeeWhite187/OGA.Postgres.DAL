@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OGA.Common.Config.structs;
@@ -39,11 +40,59 @@ namespace OGA.Postgres.DAL_Tests.Helpers
             return name;
         }
 
+        /// <summary>
+        /// This method creates passwords of sufficient complexity to usually pass the standard Postgres password policy requirements.
+        /// </summary>
+        /// <returns></returns>
         protected string GenerateUserPassword()
         {
-            var name = Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
-            return name;
+            const string alphabet =
+                "abcdefghijklmnopqrstuvwxyz" +
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                "0123456789" +
+                "!@#$%^&*()_+-=[]{}";
+
+            // Loop until we have a viable password...
+            while(true)
+            {
+                // Create a candidate password...
+                //string password = Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
+                string password = Nanoid.Nanoid.Generate(size: 12, alphabet: alphabet);
+
+                // Is it viable...
+                if(IsValidPostgresPassword(password))
+                    return password;
+            }
         }
+
+        /// <summary>
+        /// Validates a password against typical PostgreSQL 'passwordcheck' defaults.
+        /// Requires: 8+ chars, at least one lowercase, one uppercase, one digit, one symbol.
+        /// </summary>
+        public static bool IsValidPostgresPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                return false;
+
+            if (password.Length < 8)
+                return false;
+
+            // Must include at least one lowercase, one uppercase, one digit, and one symbol
+            if (!password.Any(char.IsLower))
+                return false;
+
+            if (!password.Any(char.IsUpper))
+                return false;
+
+            if (!password.Any(char.IsDigit))
+                return false;
+
+            if (!password.Any(c => "!@#$%^&*()_+-=[]{}".Contains(c)))
+                return false;
+
+            return true;
+        }
+
 
         /// <summary>
         /// Gets a tool instance that can interact with the postgres management database.
