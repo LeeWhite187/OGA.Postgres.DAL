@@ -232,6 +232,10 @@ namespace OGA.Postgres
             }
         }
 
+        /// <summary>
+        /// Public disconnect method.
+        /// </summary>
+        /// <returns></returns>
         public int Disconnect()
         {
             OGA.SharedKernel.Logging_Base.Logger_Ref?.Trace(
@@ -299,6 +303,10 @@ namespace OGA.Postgres
             return 1;
         }
 
+        /// <summary>
+        /// Composes a connection string from contained host info.
+        /// </summary>
+        /// <returns></returns>
         public string Get_ConnectionString()
         {
             return _connstring;
@@ -1217,6 +1225,11 @@ namespace OGA.Postgres
                     this.Disconnect();
             }
         }
+
+        #endregion
+
+
+        #region Private Methods
 
         /// <summary>
         /// Properly closes and disposes a given database connection.

@@ -173,6 +173,18 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Get_DataDirectory(out string folderpath)
         {
+            folderpath = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DataDirectory)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             // Compose the sql query for the file locations...
             string sql = $"SELECT name AS parmname, setting, category " +
                             $"FROM pg_settings " +
@@ -198,6 +210,18 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Get_Database_FolderPath(string databaseName, out string folderpath)
         {
+            folderpath = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Database_FolderPath)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 // Get the base data folder path...
@@ -272,6 +296,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public (int res, int count) GetConnectionCountforDatabase(string database)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetConnectionCountforDatabase)} - " +
+                    "Already disposed.");
+
+                return (-100, -1);
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -462,6 +496,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Is_Database_Present)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -533,6 +577,7 @@ namespace OGA.Postgres
                 catch (Exception) { }
             }
         }
+
         /// <summary>
         /// Creates a database with the given name.
         /// Returns 1 for success. Negatives for errors.
@@ -542,6 +587,16 @@ namespace OGA.Postgres
         public int Create_Database(string database)
         {
             string sql = "";
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Database)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -615,6 +670,7 @@ namespace OGA.Postgres
                 return -20;
             }
         }
+
         /// <summary>
         /// Drops the given database from the Postgres instance.
         /// Returns 1 for success. Negatives for errors.
@@ -625,6 +681,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Drop_Database(string database, bool force = false)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Database)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -717,6 +783,16 @@ namespace OGA.Postgres
             System.Data.DataTable dt = null;
             dblist = new List<string>();
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseList)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -801,6 +877,16 @@ namespace OGA.Postgres
             owner = "";
             System.Data.DataTable dt = null;
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetDatabaseOwner)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -884,6 +970,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int ChangeDatabaseOwner(string database, string newowner)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeDatabaseOwner)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -999,6 +1095,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int Backup_Database(string databaseName, string filePath)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Backup_Database)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1077,6 +1183,7 @@ namespace OGA.Postgres
             {
             }
         }
+
         /// <summary>
         /// Restores a database backup, given by filepath, to a target database.
         /// Returns 1 for success. Negatives for errors.
@@ -1087,6 +1194,16 @@ namespace OGA.Postgres
         public int Restore_Database(string databaseName, string filePath)
         {
             string sql = "";
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Restore_Database)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -1179,6 +1296,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_DatabaseSize)} - " +
+                    "Already disposed.");
+
+                return (-100, 0);
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1264,6 +1391,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int CreateUser(string username, string password = "")
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(CreateUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1342,8 +1479,17 @@ namespace OGA.Postgres
         public int GetUserList(out List<string> userlist)
         {
             userlist = new List<string>();
-
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetUserList)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -1418,6 +1564,16 @@ namespace OGA.Postgres
         public int Does_Login_Exist(string login)
         {
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Does_Login_Exist)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -1516,6 +1672,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DeleteUser(string username)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DeleteUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1591,6 +1757,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int ChangeUserPassword(string username, string password = "")
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(ChangeUserPassword)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1659,6 +1835,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantSuperUser(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantSuperUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1712,6 +1898,7 @@ namespace OGA.Postgres
             {
             }
         }
+
         /// <summary>
         /// Returns 1 if successful, 0 if not found, negatives for errors.
         /// </summary>
@@ -1719,6 +1906,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenySuperUser(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenySuperUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1772,6 +1969,7 @@ namespace OGA.Postgres
             {
             }
         }
+
         /// <summary>
         /// Check if the given user is a superuser or not.
         /// Returns 1 if true, 0 if false, -1 if not found, other negatives for errors.
@@ -1781,6 +1979,16 @@ namespace OGA.Postgres
         public int IsSuperUser(string login)
         {
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(IsSuperUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -1864,6 +2072,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantDBCreate(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantDBCreate)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1917,6 +2135,7 @@ namespace OGA.Postgres
             {
             }
         }
+
         /// <summary>
         /// Returns 1 if successful, 0 if not found, negatives for errors.
         /// </summary>
@@ -1924,6 +2143,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenyDBCreate(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyDBCreate)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -1986,6 +2215,16 @@ namespace OGA.Postgres
         public int HasDBCreate(string login)
         {
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasDBCreate)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -2069,6 +2308,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantCreateRole(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantCreateRole)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2129,6 +2378,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DenyCreateRole(string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DenyCreateRole)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2191,6 +2450,16 @@ namespace OGA.Postgres
         public int HasCreateRole(string login)
         {
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(HasCreateRole)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -2276,6 +2545,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantAllforUserOnDatabase(string databaseName, string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnDatabase)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2372,6 +2651,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantAllforUserOnTable(string database, string login, string tableName)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantAllforUserOnTable)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2489,6 +2778,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int SetTablePrivilegesforUser(string database, string login, eTablePrivileges privileges, string tableName)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(SetTablePrivilegesforUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2694,8 +2993,17 @@ namespace OGA.Postgres
         public int GetTablePrivilegesforUser(string database, string tableName, string login, out eTablePrivileges privileges)
         {
             privileges = eTablePrivileges.NONE;
-
             System.Data.DataTable dt = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GetTablePrivilegesforUser)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -2856,6 +3164,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int GrantEverythingforUserOnDatabase(string databaseName, string login)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(GrantEverythingforUserOnDatabase)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -2980,6 +3298,16 @@ namespace OGA.Postgres
             System.Data.DataTable dt = null;
             tablelist = new List<string>();
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableList_forDatabase)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -3072,6 +3400,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
             rowdata = null;
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_RowCount_for_Tables)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -3190,6 +3528,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_TableSize)} - " +
+                    "Already disposed.");
+
+                return (-100, 0);
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -3278,6 +3626,16 @@ namespace OGA.Postgres
         /// <returns></returns>
         public int DoesTableExist(string databaseName, string tableName)
         {
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(DoesTableExist)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -3356,6 +3714,16 @@ namespace OGA.Postgres
         public int Create_Table(string databaseName, TableDefinition tabledef)
         {
             string sql = "";
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Create_Table)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             if(tabledef == null)
             {
@@ -3476,6 +3844,16 @@ namespace OGA.Postgres
         {
             string sql = "";
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Drop_Table)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -3584,6 +3962,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
             pklist = new List<PriKeyConstraint>();
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_PrimaryKeyConstraints_forTable)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
@@ -3726,6 +4114,16 @@ namespace OGA.Postgres
             System.Data.DataTable dt = null;
             columnlist = new List<string>();
 
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_Columns_for_Table)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
+
             try
             {
                 OGA.SharedKernel.Logging_Base.Logger_Ref?.Info(
@@ -3839,6 +4237,16 @@ namespace OGA.Postgres
         {
             System.Data.DataTable dt = null;
             columnlist = new List<ColumnInfo>();
+
+            if(this.disposedValue)
+            {
+                // Already disposed.
+                OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
+                    $"{_classname}:{this.InstanceId.ToString()}:{nameof(Get_ColumnInfo_forTable)} - " +
+                    "Already disposed.");
+
+                return -100;
+            }
 
             try
             {
