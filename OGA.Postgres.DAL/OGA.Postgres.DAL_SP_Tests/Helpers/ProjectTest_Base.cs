@@ -56,7 +56,6 @@ namespace OGA.Postgres.DAL_Tests.Helpers
             while(true)
             {
                 // Create a candidate password...
-                //string password = Nanoid.Nanoid.Generate(size: 10, alphabet: "abcdefghijklmnopqrstuvwxyz01234567890");
                 string password = Nanoid.Nanoid.Generate(size: 12, alphabet: alphabet);
 
                 // Is it viable...
