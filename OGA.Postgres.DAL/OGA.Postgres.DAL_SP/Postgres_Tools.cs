@@ -2970,7 +2970,6 @@ namespace OGA.Postgres
 
         /// <summary>
         /// Retrieves the list of tables for the given database.
-        /// NOTE: This command must be executed on a connection with the given database, not to the system database, postgres.
         /// Returns 1 if found, 0 if not, negatives for errors.
         /// </summary>
         /// <param name="databaseName"></param>
