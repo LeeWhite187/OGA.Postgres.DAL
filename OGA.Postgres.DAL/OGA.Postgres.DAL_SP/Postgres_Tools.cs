@@ -3925,7 +3925,7 @@ namespace OGA.Postgres
                 }
 
                 // Check if the table is still present on the server.
-                if (this.DoesTableExist(databaseName, tableName) != 1)
+                if (this.DoesTableExist(databaseName, tableName) != 0)
                 {
                     // The table was not dropped as expected.
 
