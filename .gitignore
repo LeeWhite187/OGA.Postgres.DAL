@@ -1,15 +1,21 @@
-/OGA.Postgres.DAL/.vs
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET5/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET5/obj
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET5_Tests/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET5_Tests/obj
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET6/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET6/obj
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET6_Tests/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET6_Tests/obj
-/OGA.Postgres.DAL/Publish
-/OGA.Postgres.DAL/TestResults
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET7/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET7/obj
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET7_Tests/bin
-/OGA.Postgres.DAL/OGA.Postgres.DAL_NET7_Tests/obj
+# This works in Visual Studio projects
+#   to ignore most VS generated output.
+# NOTE: It does not work for VSCode.
+
+# Ignore build results (recursive, case-insensitive)
+**/[Bb]in/
+**/[Oo]bj/
+**/[Ll]og/
+**/[Ll]ogs/
+**/[Tt]emp/
+**/[Tt]mp/
+
+# Ignore Visual Studio-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore publish folders
+**/[Pp]ublish/
