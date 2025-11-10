@@ -1,7 +1,7 @@
-﻿using OGA.Postgres.DAL.CreateVerify.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OGA.Postgres.DAL.CreateVerify.Model;
 
 namespace OGA.Postgres.DAL.Model
 {

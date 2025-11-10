@@ -4369,12 +4369,12 @@ namespace OGA.Postgres
                         string val = ((string)r["is_identity"]) ?? "";
                         if(val == "NO")
                         {
-                            ct.isIdentity = false;
+                            ct.isPk = false;
                             ct.identityBehavior = DAL.CreateVerify.Model.eIdentityBehavior.UNSET;
                         }
                         else if(val == "YES")
                         {
-                            ct.isIdentity = true;
+                            ct.isPk = true;
 
                             // Get the identity behavior...
                             try
@@ -4397,11 +4397,11 @@ namespace OGA.Postgres
                             }
                         }
                         else
-                            ct.isIdentity = false;
+                            ct.isPk = false;
                     }
                     catch (Exception e)
                     {
-                        ct.isIdentity = false;
+                        ct.isPk = false;
                     }
 
                     columnlist.Add(ct);

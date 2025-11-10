@@ -1,7 +1,7 @@
-﻿using OGA.Postgres.DAL.CreateVerify.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OGA.Postgres.DAL.CreateVerify.Model;
 
 namespace OGA.Postgres.DAL.Model
 {
@@ -19,11 +19,11 @@ namespace OGA.Postgres.DAL.Model
 
         public int? maxlength { get; set; }
 
-        public bool isIdentity { get; set; } = false;
+        public bool isPk { get; set; } = false;
 
         /// <summary>
-        /// When isIdentity is true, this column defines when the column is auto-generated.
-        /// This property is UNSET when isIdentity is false.
+        /// When isPk is true, this column defines when the column is auto-generated.
+        /// This property is UNSET when isPk is false.
         /// </summary>
         public eIdentityBehavior identityBehavior { get; set; } = eIdentityBehavior.UNSET;
 

@@ -494,7 +494,7 @@ namespace OGA.Postgres.CreateVerify
                         }
 
                         // Verify its identity state...
-                        if(c.isIdentity != cli.isIdentity)
+                        if(c.isPk != cli.isIdentity)
                         {
                             OGA.SharedKernel.Logging_Base.Logger_Ref?.Error(
                                 $"{_classname}:{this.InstanceId.ToString()}:{nameof(Verify_Database_Layout)} - " +
@@ -790,7 +790,7 @@ namespace OGA.Postgres.CreateVerify
                         clayout.name = cdef.name;
                         clayout.ordinal = cdef.ordinal;
                         clayout.isNullable = cdef.isNullable;
-                        clayout.isIdentity = cdef.isIdentity;
+                        clayout.isIdentity = cdef.isPk;
 
                         if(clayout.isIdentity)
                         {

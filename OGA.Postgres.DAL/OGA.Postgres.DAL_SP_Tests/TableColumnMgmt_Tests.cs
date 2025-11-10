@@ -271,7 +271,7 @@ namespace OGA.Postgres_Tests
                 var c1 = coldata.FirstOrDefault(m => m.name == "Id");
                 if(c1 == null)
                     Assert.Fail("Wrong Value");
-                if(c1.isIdentity != false)
+                if(c1.isPk != false)
                     Assert.Fail("Wrong Value");
                 if(c1.dataType != SQL_Datatype_Names.CONST_SQL_integer)
                     Assert.Fail("Wrong Value");
@@ -285,7 +285,7 @@ namespace OGA.Postgres_Tests
                 var c2 = coldata.FirstOrDefault(m => m.name == col1);
                 if(c2 == null)
                     Assert.Fail("Wrong Value");
-                if(c2.isIdentity != false)
+                if(c2.isPk != false)
                     Assert.Fail("Wrong Value");
                 if(c2.dataType != SQL_Datatype_Names.CONST_SQL_uuid)
                     Assert.Fail("Wrong Value");
@@ -299,7 +299,7 @@ namespace OGA.Postgres_Tests
                 var c3 = coldata.FirstOrDefault(m => m.name == col2);
                 if(c3 == null)
                     Assert.Fail("Wrong Value");
-                if(c3.isIdentity != false)
+                if(c3.isPk != false)
                     Assert.Fail("Wrong Value");
                 if(c3.dataType != SQL_Datatype_Names.CONST_SQL_timestamp_with_time_zone)
                     Assert.Fail("Wrong Value");
@@ -313,7 +313,7 @@ namespace OGA.Postgres_Tests
                 var c4 = coldata.FirstOrDefault(m => m.name == col3);
                 if(c4 == null)
                     Assert.Fail("Wrong Value");
-                if(c4.isIdentity != false)
+                if(c4.isPk != false)
                     Assert.Fail("Wrong Value");
                 if(c4.dataType != SQL_Datatype_Names.CONST_SQL_bigint)
                     Assert.Fail("Wrong Value");
@@ -327,7 +327,7 @@ namespace OGA.Postgres_Tests
                 var c5 = coldata.FirstOrDefault(m => m.name == col4);
                 if(c5 == null)
                     Assert.Fail("Wrong Value");
-                if(c5.isIdentity != false)
+                if(c5.isPk != false)
                     Assert.Fail("Wrong Value");
                 if(c5.dataType != SQL_Datatype_Names.CONST_SQL_character_varying)
                     Assert.Fail("Wrong Value");
