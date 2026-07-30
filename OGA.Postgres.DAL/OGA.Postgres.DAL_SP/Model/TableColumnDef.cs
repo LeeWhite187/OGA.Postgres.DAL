@@ -26,7 +26,6 @@ namespace OGA.Postgres.DAL.Model
 
         public TableColumnDef()
         {
-
         }
 
 
